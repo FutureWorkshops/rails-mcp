@@ -17,7 +17,7 @@ module RailsMcp
     def require_sign_in
       return if signed_in?
 
-      session[:return_to] = request.fullpath if request.get?
+      session[:return_to] = request.fullpath if request.get? || request.head?
       target = RailsMcp.config.sign_in_path.call(request)
       redirect_to target, alert: "Sign in to continue."
     end
