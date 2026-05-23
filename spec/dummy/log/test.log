@@ -5789,3 +5789,1339 @@ Processing by RailsMcp::WellKnownController#oauth_protected_resource as HTML
   Parameters: {"resource_path" => "mcp"}
 Completed 200 OK in 0ms (Views: 0.0ms | ActiveRecord: 0.0ms (0 queries, 0 cached) | GC: 0.0ms)
   [1m[36mTRANSACTION (0.0ms)[0m  [1m[31mROLLBACK[0m
+  [1m[36mTRANSACTION (0.0ms)[0m  [1m[35mBEGIN[0m
+  [1m[36mTRANSACTION (0.0ms)[0m  [1m[35mSAVEPOINT active_record_1[0m
+  [1m[36mRailsMcp::Account Create (0.5ms)[0m  [1m[32mINSERT INTO "accounts" ("name", "onboarded_at", "created_at", "updated_at") VALUES ($1, $2, $3, $4) RETURNING "id"[0m  [["name", "Acme"], ["onboarded_at", nil], ["created_at", "2026-05-23 09:55:29.952762"], ["updated_at", "2026-05-23 09:55:29.952762"]]
+  [1m[36mTRANSACTION (0.0ms)[0m  [1m[35mRELEASE SAVEPOINT active_record_1[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mSAVEPOINT active_record_1[0m
+  [1m[36mRailsMcp::User Exists? (0.9ms)[0m  [1m[34mSELECT 1 AS one FROM "users" WHERE "users"."identity_id" = $1 LIMIT $2[0m  [["identity_id", "host"], ["LIMIT", 1]]
+  [1m[36mRailsMcp::User Exists? (0.3ms)[0m  [1m[34mSELECT 1 AS one FROM "users" WHERE LOWER("users"."email") = LOWER($1) LIMIT $2[0m  [["email", "host@example.com"], ["LIMIT", 1]]
+  [1m[36mRailsMcp::User Create (0.7ms)[0m  [1m[32mINSERT INTO "users" ("account_id", "email", "name", "identity_id", "created_at", "updated_at") VALUES ($1, $2, $3, $4, $5, $6) RETURNING "id"[0m  [["account_id", 222], ["email", "host@example.com"], ["name", "Host Person"], ["identity_id", "host"], ["created_at", "2026-05-23 09:55:29.969990"], ["updated_at", "2026-05-23 09:55:29.969990"]]
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mRELEASE SAVEPOINT active_record_1[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mSAVEPOINT active_record_1[0m
+  [1m[36mRailsMcp::Invitation Exists? (1.1ms)[0m  [1m[34mSELECT 1 AS one FROM "invitations" WHERE "invitations"."token" = $1 LIMIT $2[0m  [["token", "hneluy34GMURHSIOYsp-9rRaUIyS23IU7Z7-xXsHuZM"], ["LIMIT", 1]]
+  [1m[36mRailsMcp::Invitation Create (0.7ms)[0m  [1m[32mINSERT INTO "invitations" ("account_id", "invited_by_id", "email", "token", "expires_at", "accepted_at", "revoked_at", "created_at", "updated_at") VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING "id"[0m  [["account_id", 222], ["invited_by_id", 211], ["email", "guest@example.com"], ["token", "hneluy34GMURHSIOYsp-9rRaUIyS23IU7Z7-xXsHuZM"], ["expires_at", "2026-06-06 09:55:29.973756"], ["accepted_at", nil], ["revoked_at", nil], ["created_at", "2026-05-23 09:55:29.975102"], ["updated_at", "2026-05-23 09:55:29.975102"]]
+  [1m[36mTRANSACTION (0.0ms)[0m  [1m[35mRELEASE SAVEPOINT active_record_1[0m
+  [1m[36mRailsMcp::Invitation Load (0.3ms)[0m  [1m[34mSELECT "invitations".* FROM "invitations" WHERE "invitations"."id" = $1 LIMIT $2[0m  [["id", 102], ["LIMIT", 1]]
+  [1m[36mRailsMcp::User Load (0.2ms)[0m  [1m[34mSELECT "users".* FROM "users" WHERE "users"."id" = $1 LIMIT $2[0m  [["id", 211], ["LIMIT", 1]]
+  [1m[36mRailsMcp::Account Load (0.1ms)[0m  [1m[34mSELECT "accounts".* FROM "accounts" WHERE "accounts"."id" = $1 LIMIT $2[0m  [["id", 222], ["LIMIT", 1]]
+  Rendering layout /Users/matt/Development/basecamp-mcp-rails/engines/rails_mcp/app/views/layouts/rails_mcp/mailer.html.erb
+  Rendering /Users/matt/Development/basecamp-mcp-rails/engines/rails_mcp/app/views/rails_mcp/user_mailer/invite_email.html.erb within layouts/rails_mcp/mailer
+  Rendered /Users/matt/Development/basecamp-mcp-rails/engines/rails_mcp/app/views/rails_mcp/user_mailer/invite_email.html.erb within layouts/rails_mcp/mailer (Duration: 0.3ms | GC: 0.0ms)
+  Rendered layout /Users/matt/Development/basecamp-mcp-rails/engines/rails_mcp/app/views/layouts/rails_mcp/mailer.html.erb (Duration: 0.4ms | GC: 0.0ms)
+  Rendering layout /Users/matt/Development/basecamp-mcp-rails/engines/rails_mcp/app/views/layouts/rails_mcp/mailer.text.erb
+  Rendering /Users/matt/Development/basecamp-mcp-rails/engines/rails_mcp/app/views/rails_mcp/user_mailer/invite_email.text.erb within layouts/rails_mcp/mailer
+  Rendered /Users/matt/Development/basecamp-mcp-rails/engines/rails_mcp/app/views/rails_mcp/user_mailer/invite_email.text.erb within layouts/rails_mcp/mailer (Duration: 0.1ms | GC: 0.0ms)
+  Rendered layout /Users/matt/Development/basecamp-mcp-rails/engines/rails_mcp/app/views/layouts/rails_mcp/mailer.text.erb (Duration: 0.2ms | GC: 0.0ms)
+RailsMcp::UserMailer#invite_email: processed outbound mail in 47.6ms
+  [1m[36mTRANSACTION (0.6ms)[0m  [1m[31mROLLBACK[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mBEGIN[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mSAVEPOINT active_record_1[0m
+  [1m[36mRailsMcp::Account Create (0.5ms)[0m  [1m[32mINSERT INTO "accounts" ("name", "onboarded_at", "created_at", "updated_at") VALUES ($1, $2, $3, $4) RETURNING "id"[0m  [["name", "Acme"], ["onboarded_at", nil], ["created_at", "2026-05-23 09:55:30.025924"], ["updated_at", "2026-05-23 09:55:30.025924"]]
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mRELEASE SAVEPOINT active_record_1[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mSAVEPOINT active_record_1[0m
+  [1m[36mRailsMcp::User Exists? (0.4ms)[0m  [1m[34mSELECT 1 AS one FROM "users" WHERE "users"."identity_id" = $1 LIMIT $2[0m  [["identity_id", "host"], ["LIMIT", 1]]
+  [1m[36mRailsMcp::User Exists? (0.2ms)[0m  [1m[34mSELECT 1 AS one FROM "users" WHERE LOWER("users"."email") = LOWER($1) LIMIT $2[0m  [["email", "host@example.com"], ["LIMIT", 1]]
+  [1m[36mRailsMcp::User Create (0.4ms)[0m  [1m[32mINSERT INTO "users" ("account_id", "email", "name", "identity_id", "created_at", "updated_at") VALUES ($1, $2, $3, $4, $5, $6) RETURNING "id"[0m  [["account_id", 223], ["email", "host@example.com"], ["name", "Host Person"], ["identity_id", "host"], ["created_at", "2026-05-23 09:55:30.027860"], ["updated_at", "2026-05-23 09:55:30.027860"]]
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mRELEASE SAVEPOINT active_record_1[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mSAVEPOINT active_record_1[0m
+  [1m[36mRailsMcp::Invitation Exists? (0.3ms)[0m  [1m[34mSELECT 1 AS one FROM "invitations" WHERE "invitations"."token" = $1 LIMIT $2[0m  [["token", "C4Xpoml_piGdeY4R_K9D9SSDf6aShaG7RkANd0XUut4"], ["LIMIT", 1]]
+  [1m[36mRailsMcp::Invitation Create (0.6ms)[0m  [1m[32mINSERT INTO "invitations" ("account_id", "invited_by_id", "email", "token", "expires_at", "accepted_at", "revoked_at", "created_at", "updated_at") VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING "id"[0m  [["account_id", 223], ["invited_by_id", 212], ["email", "guest@example.com"], ["token", "C4Xpoml_piGdeY4R_K9D9SSDf6aShaG7RkANd0XUut4"], ["expires_at", "2026-06-06 09:55:30.028690"], ["accepted_at", nil], ["revoked_at", nil], ["created_at", "2026-05-23 09:55:30.029143"], ["updated_at", "2026-05-23 09:55:30.029143"]]
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mRELEASE SAVEPOINT active_record_1[0m
+  [1m[36mRailsMcp::Invitation Load (0.2ms)[0m  [1m[34mSELECT "invitations".* FROM "invitations" WHERE "invitations"."id" = $1 LIMIT $2[0m  [["id", 103], ["LIMIT", 1]]
+  [1m[36mRailsMcp::User Load (0.1ms)[0m  [1m[34mSELECT "users".* FROM "users" WHERE "users"."id" = $1 LIMIT $2[0m  [["id", 212], ["LIMIT", 1]]
+  [1m[36mRailsMcp::Account Load (0.1ms)[0m  [1m[34mSELECT "accounts".* FROM "accounts" WHERE "accounts"."id" = $1 LIMIT $2[0m  [["id", 223], ["LIMIT", 1]]
+  Rendering layout /Users/matt/Development/basecamp-mcp-rails/engines/rails_mcp/app/views/layouts/rails_mcp/mailer.html.erb
+  Rendering /Users/matt/Development/basecamp-mcp-rails/engines/rails_mcp/app/views/rails_mcp/user_mailer/invite_email.html.erb within layouts/rails_mcp/mailer
+  Rendered /Users/matt/Development/basecamp-mcp-rails/engines/rails_mcp/app/views/rails_mcp/user_mailer/invite_email.html.erb within layouts/rails_mcp/mailer (Duration: 0.0ms | GC: 0.0ms)
+  Rendered layout /Users/matt/Development/basecamp-mcp-rails/engines/rails_mcp/app/views/layouts/rails_mcp/mailer.html.erb (Duration: 0.1ms | GC: 0.0ms)
+  Rendering layout /Users/matt/Development/basecamp-mcp-rails/engines/rails_mcp/app/views/layouts/rails_mcp/mailer.text.erb
+  Rendering /Users/matt/Development/basecamp-mcp-rails/engines/rails_mcp/app/views/rails_mcp/user_mailer/invite_email.text.erb within layouts/rails_mcp/mailer
+  Rendered /Users/matt/Development/basecamp-mcp-rails/engines/rails_mcp/app/views/rails_mcp/user_mailer/invite_email.text.erb within layouts/rails_mcp/mailer (Duration: 0.0ms | GC: 0.0ms)
+  Rendered layout /Users/matt/Development/basecamp-mcp-rails/engines/rails_mcp/app/views/layouts/rails_mcp/mailer.text.erb (Duration: 0.0ms | GC: 0.0ms)
+RailsMcp::UserMailer#invite_email: processed outbound mail in 1.5ms
+  [1m[36mTRANSACTION (0.3ms)[0m  [1m[31mROLLBACK[0m
+  [1m[36mTRANSACTION (0.0ms)[0m  [1m[35mBEGIN[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mSAVEPOINT active_record_1[0m
+  [1m[36mRailsMcp::Account Create (0.4ms)[0m  [1m[32mINSERT INTO "accounts" ("name", "onboarded_at", "created_at", "updated_at") VALUES ($1, $2, $3, $4) RETURNING "id"[0m  [["name", "Acme"], ["onboarded_at", nil], ["created_at", "2026-05-23 09:55:30.033393"], ["updated_at", "2026-05-23 09:55:30.033393"]]
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mRELEASE SAVEPOINT active_record_1[0m
+  [1m[36mTRANSACTION (0.0ms)[0m  [1m[35mSAVEPOINT active_record_1[0m
+  [1m[36mRailsMcp::User Exists? (0.3ms)[0m  [1m[34mSELECT 1 AS one FROM "users" WHERE "users"."identity_id" = $1 LIMIT $2[0m  [["identity_id", "host"], ["LIMIT", 1]]
+  [1m[36mRailsMcp::User Exists? (0.2ms)[0m  [1m[34mSELECT 1 AS one FROM "users" WHERE LOWER("users"."email") = LOWER($1) LIMIT $2[0m  [["email", "host@example.com"], ["LIMIT", 1]]
+  [1m[36mRailsMcp::User Create (0.3ms)[0m  [1m[32mINSERT INTO "users" ("account_id", "email", "name", "identity_id", "created_at", "updated_at") VALUES ($1, $2, $3, $4, $5, $6) RETURNING "id"[0m  [["account_id", 224], ["email", "host@example.com"], ["name", "Host Person"], ["identity_id", "host"], ["created_at", "2026-05-23 09:55:30.034811"], ["updated_at", "2026-05-23 09:55:30.034811"]]
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mRELEASE SAVEPOINT active_record_1[0m
+  [1m[36mTRANSACTION (0.0ms)[0m  [1m[35mSAVEPOINT active_record_1[0m
+  [1m[36mRailsMcp::User Exists? (0.4ms)[0m  [1m[34mSELECT 1 AS one FROM "users" WHERE LOWER("users"."email") = LOWER($1) AND "users"."id" != $2 LIMIT $3[0m  [["email", "host@example.com"], ["id", 213], ["LIMIT", 1]]
+  [1m[36mRailsMcp::User Update (0.7ms)[0m  [1m[33mUPDATE "users" SET "name" = $1, "updated_at" = $2 WHERE "users"."id" = $3[0m  [["name", nil], ["updated_at", "2026-05-23 09:55:30.040843"], ["id", 213]]
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mRELEASE SAVEPOINT active_record_1[0m
+  [1m[36mTRANSACTION (0.0ms)[0m  [1m[35mSAVEPOINT active_record_1[0m
+  [1m[36mRailsMcp::Invitation Exists? (0.3ms)[0m  [1m[34mSELECT 1 AS one FROM "invitations" WHERE "invitations"."token" = $1 LIMIT $2[0m  [["token", "C0DifkDhjnxBKS-TXNOaMdGGRw7nem_DKGIJskys1N4"], ["LIMIT", 1]]
+  [1m[36mRailsMcp::Invitation Create (0.6ms)[0m  [1m[32mINSERT INTO "invitations" ("account_id", "invited_by_id", "email", "token", "expires_at", "accepted_at", "revoked_at", "created_at", "updated_at") VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING "id"[0m  [["account_id", 224], ["invited_by_id", 213], ["email", "guest@example.com"], ["token", "C0DifkDhjnxBKS-TXNOaMdGGRw7nem_DKGIJskys1N4"], ["expires_at", "2026-06-06 09:55:30.041989"], ["accepted_at", nil], ["revoked_at", nil], ["created_at", "2026-05-23 09:55:30.042383"], ["updated_at", "2026-05-23 09:55:30.042383"]]
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mRELEASE SAVEPOINT active_record_1[0m
+  [1m[36mRailsMcp::Invitation Load (0.2ms)[0m  [1m[34mSELECT "invitations".* FROM "invitations" WHERE "invitations"."id" = $1 LIMIT $2[0m  [["id", 104], ["LIMIT", 1]]
+  [1m[36mRailsMcp::User Load (0.2ms)[0m  [1m[34mSELECT "users".* FROM "users" WHERE "users"."id" = $1 LIMIT $2[0m  [["id", 213], ["LIMIT", 1]]
+  [1m[36mRailsMcp::Account Load (0.2ms)[0m  [1m[34mSELECT "accounts".* FROM "accounts" WHERE "accounts"."id" = $1 LIMIT $2[0m  [["id", 224], ["LIMIT", 1]]
+  Rendering layout /Users/matt/Development/basecamp-mcp-rails/engines/rails_mcp/app/views/layouts/rails_mcp/mailer.html.erb
+  Rendering /Users/matt/Development/basecamp-mcp-rails/engines/rails_mcp/app/views/rails_mcp/user_mailer/invite_email.html.erb within layouts/rails_mcp/mailer
+  Rendered /Users/matt/Development/basecamp-mcp-rails/engines/rails_mcp/app/views/rails_mcp/user_mailer/invite_email.html.erb within layouts/rails_mcp/mailer (Duration: 0.0ms | GC: 0.0ms)
+  Rendered layout /Users/matt/Development/basecamp-mcp-rails/engines/rails_mcp/app/views/layouts/rails_mcp/mailer.html.erb (Duration: 0.1ms | GC: 0.0ms)
+  Rendering layout /Users/matt/Development/basecamp-mcp-rails/engines/rails_mcp/app/views/layouts/rails_mcp/mailer.text.erb
+  Rendering /Users/matt/Development/basecamp-mcp-rails/engines/rails_mcp/app/views/rails_mcp/user_mailer/invite_email.text.erb within layouts/rails_mcp/mailer
+  Rendered /Users/matt/Development/basecamp-mcp-rails/engines/rails_mcp/app/views/rails_mcp/user_mailer/invite_email.text.erb within layouts/rails_mcp/mailer (Duration: 0.1ms | GC: 0.0ms)
+  Rendered layout /Users/matt/Development/basecamp-mcp-rails/engines/rails_mcp/app/views/layouts/rails_mcp/mailer.text.erb (Duration: 0.1ms | GC: 0.0ms)
+RailsMcp::UserMailer#invite_email: processed outbound mail in 1.6ms
+  [1m[36mTRANSACTION (0.4ms)[0m  [1m[31mROLLBACK[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mBEGIN[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[31mROLLBACK[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mBEGIN[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mSAVEPOINT active_record_1[0m
+  [1m[36mRailsMcp::Account Create (0.4ms)[0m  [1m[32mINSERT INTO "accounts" ("name", "onboarded_at", "created_at", "updated_at") VALUES ($1, $2, $3, $4) RETURNING "id"[0m  [["name", "Acme"], ["onboarded_at", nil], ["created_at", "2026-05-23 09:55:30.046423"], ["updated_at", "2026-05-23 09:55:30.046423"]]
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mRELEASE SAVEPOINT active_record_1[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mSAVEPOINT active_record_1[0m
+  [1m[36mRailsMcp::Account Update (0.4ms)[0m  [1m[33mUPDATE "accounts" SET "onboarded_at" = $1, "updated_at" = $2 WHERE "accounts"."id" = $3[0m  [["onboarded_at", "2026-05-23 09:55:30.047548"], ["updated_at", "2026-05-23 09:55:30.047615"], ["id", 225]]
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mRELEASE SAVEPOINT active_record_1[0m
+  [1m[36mRailsMcp::Account Load (0.2ms)[0m  [1m[34mSELECT "accounts".* FROM "accounts" WHERE "accounts"."id" = $1 LIMIT $2[0m  [["id", 225], ["LIMIT", 1]]
+  [1m[36mTRANSACTION (0.3ms)[0m  [1m[31mROLLBACK[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mBEGIN[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mSAVEPOINT active_record_1[0m
+  [1m[36mRailsMcp::Account Create (0.3ms)[0m  [1m[32mINSERT INTO "accounts" ("name", "onboarded_at", "created_at", "updated_at") VALUES ($1, $2, $3, $4) RETURNING "id"[0m  [["name", "Acme"], ["onboarded_at", nil], ["created_at", "2026-05-23 09:55:30.049666"], ["updated_at", "2026-05-23 09:55:30.049666"]]
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mRELEASE SAVEPOINT active_record_1[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mSAVEPOINT active_record_1[0m
+  [1m[36mRailsMcp::Account Update (0.3ms)[0m  [1m[33mUPDATE "accounts" SET "onboarded_at" = $1, "updated_at" = $2 WHERE "accounts"."id" = $3[0m  [["onboarded_at", "2026-05-23 09:55:30.050231"], ["updated_at", "2026-05-23 09:55:30.050289"], ["id", 226]]
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mRELEASE SAVEPOINT active_record_1[0m
+  [1m[36mRailsMcp::Account Load (0.4ms)[0m  [1m[34mSELECT "accounts".* FROM "accounts" WHERE "accounts"."id" = $1 LIMIT $2[0m  [["id", 226], ["LIMIT", 1]]
+  [1m[36mTRANSACTION (0.2ms)[0m  [1m[31mROLLBACK[0m
+  [1m[36mTRANSACTION (0.0ms)[0m  [1m[35mBEGIN[0m
+  [1m[36mTRANSACTION (0.0ms)[0m  [1m[35mSAVEPOINT active_record_1[0m
+  [1m[36mRailsMcp::Account Create (0.3ms)[0m  [1m[32mINSERT INTO "accounts" ("name", "onboarded_at", "created_at", "updated_at") VALUES ($1, $2, $3, $4) RETURNING "id"[0m  [["name", "Acme"], ["onboarded_at", nil], ["created_at", "2026-05-23 09:55:30.052057"], ["updated_at", "2026-05-23 09:55:30.052057"]]
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mRELEASE SAVEPOINT active_record_1[0m
+  [1m[36mTRANSACTION (0.0ms)[0m  [1m[35mSAVEPOINT active_record_1[0m
+  [1m[36mRailsMcp::User Exists? (0.3ms)[0m  [1m[34mSELECT 1 AS one FROM "users" WHERE "users"."identity_id" = $1 LIMIT $2[0m  [["identity_id", "id-1"], ["LIMIT", 1]]
+  [1m[36mRailsMcp::User Exists? (0.2ms)[0m  [1m[34mSELECT 1 AS one FROM "users" WHERE LOWER("users"."email") = LOWER($1) LIMIT $2[0m  [["email", "u@example.com"], ["LIMIT", 1]]
+  [1m[36mRailsMcp::User Create (0.2ms)[0m  [1m[32mINSERT INTO "users" ("account_id", "email", "name", "identity_id", "created_at", "updated_at") VALUES ($1, $2, $3, $4, $5, $6) RETURNING "id"[0m  [["account_id", 227], ["email", "u@example.com"], ["name", nil], ["identity_id", "id-1"], ["created_at", "2026-05-23 09:55:30.053392"], ["updated_at", "2026-05-23 09:55:30.053392"]]
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mRELEASE SAVEPOINT active_record_1[0m
+  [1m[36mRailsMcp::User Count (0.3ms)[0m  [1m[34mSELECT COUNT(*) FROM "users"[0m
+  [1m[36mTRANSACTION (0.0ms)[0m  [1m[35mSAVEPOINT active_record_1[0m
+  [1m[36mRailsMcp::User Load (0.2ms)[0m  [1m[34mSELECT "users".* FROM "users" WHERE "users"."account_id" = $1[0m  [["account_id", 227]]
+  [1m[36mRailsMcp::Connection Load (0.9ms)[0m  [1m[34mSELECT "connections".* FROM "connections" WHERE "connections"."user_id" = $1[0m  [["user_id", 214]]
+  [1m[36mRailsMcp::Invitation Update All (0.4ms)[0m  [1m[33mUPDATE "invitations" SET "invited_by_id" = $1 WHERE "invitations"."invited_by_id" = $2[0m  [["invited_by_id", nil], ["invited_by_id", 214]]
+  [1m[36mRailsMcp::User Destroy (0.4ms)[0m  [1m[31mDELETE FROM "users" WHERE "users"."id" = $1[0m  [["id", 214]]
+  [1m[36mRailsMcp::Invitation Load (0.2ms)[0m  [1m[34mSELECT "invitations".* FROM "invitations" WHERE "invitations"."account_id" = $1[0m  [["account_id", 227]]
+  [1m[36mRailsMcp::Account Destroy (0.4ms)[0m  [1m[31mDELETE FROM "accounts" WHERE "accounts"."id" = $1[0m  [["id", 227]]
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mRELEASE SAVEPOINT active_record_1[0m
+  [1m[36mRailsMcp::User Count (0.1ms)[0m  [1m[34mSELECT COUNT(*) FROM "users"[0m
+  [1m[36mTRANSACTION (0.2ms)[0m  [1m[31mROLLBACK[0m
+  [1m[36mTRANSACTION (0.0ms)[0m  [1m[35mBEGIN[0m
+  [1m[36mTRANSACTION (0.0ms)[0m  [1m[31mROLLBACK[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mBEGIN[0m
+  [1m[36mTRANSACTION (0.0ms)[0m  [1m[31mROLLBACK[0m
+  [1m[36mTRANSACTION (0.0ms)[0m  [1m[35mBEGIN[0m
+  [1m[36mTRANSACTION (0.0ms)[0m  [1m[31mROLLBACK[0m
+  [1m[36mTRANSACTION (0.0ms)[0m  [1m[35mBEGIN[0m
+  [1m[36mTRANSACTION (0.0ms)[0m  [1m[31mROLLBACK[0m
+  [1m[36mTRANSACTION (0.0ms)[0m  [1m[35mBEGIN[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[31mROLLBACK[0m
+  [1m[36mTRANSACTION (0.0ms)[0m  [1m[35mBEGIN[0m
+  [1m[36mTRANSACTION (0.0ms)[0m  [1m[31mROLLBACK[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mBEGIN[0m
+  [1m[36mTRANSACTION (0.0ms)[0m  [1m[35mSAVEPOINT active_record_1[0m
+  [1m[36mRailsMcp::Account Create (0.2ms)[0m  [1m[32mINSERT INTO "accounts" ("name", "onboarded_at", "created_at", "updated_at") VALUES ($1, $2, $3, $4) RETURNING "id"[0m  [["name", "Acme"], ["onboarded_at", nil], ["created_at", "2026-05-23 09:55:30.065882"], ["updated_at", "2026-05-23 09:55:30.065882"]]
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mRELEASE SAVEPOINT active_record_1[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mSAVEPOINT active_record_1[0m
+  [1m[36mRailsMcp::User Exists? (0.2ms)[0m  [1m[34mSELECT 1 AS one FROM "users" WHERE "users"."identity_id" = $1 LIMIT $2[0m  [["identity_id", "id-1"], ["LIMIT", 1]]
+  [1m[36mRailsMcp::User Exists? (0.1ms)[0m  [1m[34mSELECT 1 AS one FROM "users" WHERE LOWER("users"."email") = LOWER($1) LIMIT $2[0m  [["email", "u@example.com"], ["LIMIT", 1]]
+  [1m[36mRailsMcp::User Create (0.2ms)[0m  [1m[32mINSERT INTO "users" ("account_id", "email", "name", "identity_id", "created_at", "updated_at") VALUES ($1, $2, $3, $4, $5, $6) RETURNING "id"[0m  [["account_id", 228], ["email", "u@example.com"], ["name", nil], ["identity_id", "id-1"], ["created_at", "2026-05-23 09:55:30.067294"], ["updated_at", "2026-05-23 09:55:30.067294"]]
+  [1m[36mTRANSACTION (0.0ms)[0m  [1m[35mRELEASE SAVEPOINT active_record_1[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mSAVEPOINT active_record_1[0m
+  [1m[36mRailsMcp::Connection Exists? (0.6ms)[0m  [1m[34mSELECT 1 AS one FROM "connections" WHERE "connections"."external_id" = $1 AND "connections"."user_id" = $2 LIMIT $3[0m  [["external_id", "ext-1"], ["user_id", 215], ["LIMIT", 1]]
+  [1m[36mFakeConnection Create (0.8ms)[0m  [1m[32mINSERT INTO "connections" ("user_id", "type", "name", "external_id", "access_token", "refresh_token", "token_expires_at", "token_active", "token_refresh_failed_at", "token_refresh_error", "created_at", "updated_at") VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12) RETURNING "id"[0m  [["user_id", 215], ["type", "FakeConnection"], ["name", "Workspace"], ["external_id", "ext-1"], ["access_token", "[FILTERED]"], ["refresh_token", "[FILTERED]"], ["token_expires_at", "2026-05-23 10:55:30.067709"], ["token_active", true], ["token_refresh_failed_at", nil], ["token_refresh_error", nil], ["created_at", "2026-05-23 09:55:30.082932"], ["updated_at", "2026-05-23 09:55:30.082932"]]
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mRELEASE SAVEPOINT active_record_1[0m
+  [1m[35m (0.3ms)[0m  [1m[34mSELECT access_token FROM connections WHERE id = 29[0m
+  [1m[36mFakeConnection Load (0.4ms)[0m  [1m[34mSELECT "connections".* FROM "connections" WHERE "connections"."type" = $1 AND "connections"."id" = $2 LIMIT $3[0m  [["type", "FakeConnection"], ["id", 29], ["LIMIT", 1]]
+  [1m[36mTRANSACTION (0.4ms)[0m  [1m[31mROLLBACK[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mBEGIN[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mSAVEPOINT active_record_1[0m
+  [1m[36mRailsMcp::Account Create (0.3ms)[0m  [1m[32mINSERT INTO "accounts" ("name", "onboarded_at", "created_at", "updated_at") VALUES ($1, $2, $3, $4) RETURNING "id"[0m  [["name", "Acme"], ["onboarded_at", nil], ["created_at", "2026-05-23 09:55:30.096401"], ["updated_at", "2026-05-23 09:55:30.096401"]]
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mRELEASE SAVEPOINT active_record_1[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mSAVEPOINT active_record_1[0m
+  [1m[36mRailsMcp::User Exists? (0.3ms)[0m  [1m[34mSELECT 1 AS one FROM "users" WHERE "users"."identity_id" = $1 LIMIT $2[0m  [["identity_id", "id-1"], ["LIMIT", 1]]
+  [1m[36mRailsMcp::User Exists? (0.2ms)[0m  [1m[34mSELECT 1 AS one FROM "users" WHERE LOWER("users"."email") = LOWER($1) LIMIT $2[0m  [["email", "u@example.com"], ["LIMIT", 1]]
+  [1m[36mRailsMcp::User Create (0.3ms)[0m  [1m[32mINSERT INTO "users" ("account_id", "email", "name", "identity_id", "created_at", "updated_at") VALUES ($1, $2, $3, $4, $5, $6) RETURNING "id"[0m  [["account_id", 229], ["email", "u@example.com"], ["name", nil], ["identity_id", "id-1"], ["created_at", "2026-05-23 09:55:30.097934"], ["updated_at", "2026-05-23 09:55:30.097934"]]
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mRELEASE SAVEPOINT active_record_1[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mSAVEPOINT active_record_1[0m
+  [1m[36mRailsMcp::Connection Exists? (0.3ms)[0m  [1m[34mSELECT 1 AS one FROM "connections" WHERE "connections"."external_id" = $1 AND "connections"."user_id" = $2 LIMIT $3[0m  [["external_id", "ext-X"], ["user_id", 216], ["LIMIT", 1]]
+  [1m[36mFakeConnection Create (0.4ms)[0m  [1m[32mINSERT INTO "connections" ("user_id", "type", "name", "external_id", "access_token", "refresh_token", "token_expires_at", "token_active", "token_refresh_failed_at", "token_refresh_error", "created_at", "updated_at") VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12) RETURNING "id"[0m  [["user_id", 216], ["type", "FakeConnection"], ["name", "Workspace"], ["external_id", "ext-X"], ["access_token", "[FILTERED]"], ["refresh_token", "[FILTERED]"], ["token_expires_at", "2026-05-23 10:55:30.098572"], ["token_active", true], ["token_refresh_failed_at", nil], ["token_refresh_error", nil], ["created_at", "2026-05-23 09:55:30.099109"], ["updated_at", "2026-05-23 09:55:30.099109"]]
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mRELEASE SAVEPOINT active_record_1[0m
+  [1m[36mRailsMcp::Connection Exists? (0.3ms)[0m  [1m[34mSELECT 1 AS one FROM "connections" WHERE "connections"."external_id" = $1 AND "connections"."user_id" = $2 LIMIT $3[0m  [["external_id", "ext-X"], ["user_id", 216], ["LIMIT", 1]]
+  [1m[36mTRANSACTION (0.3ms)[0m  [1m[31mROLLBACK[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mBEGIN[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mSAVEPOINT active_record_1[0m
+  [1m[36mRailsMcp::Account Create (0.3ms)[0m  [1m[32mINSERT INTO "accounts" ("name", "onboarded_at", "created_at", "updated_at") VALUES ($1, $2, $3, $4) RETURNING "id"[0m  [["name", "Acme"], ["onboarded_at", nil], ["created_at", "2026-05-23 09:55:30.101144"], ["updated_at", "2026-05-23 09:55:30.101144"]]
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mRELEASE SAVEPOINT active_record_1[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mSAVEPOINT active_record_1[0m
+  [1m[36mRailsMcp::User Exists? (0.3ms)[0m  [1m[34mSELECT 1 AS one FROM "users" WHERE "users"."identity_id" = $1 LIMIT $2[0m  [["identity_id", "id-1"], ["LIMIT", 1]]
+  [1m[36mRailsMcp::User Exists? (0.2ms)[0m  [1m[34mSELECT 1 AS one FROM "users" WHERE LOWER("users"."email") = LOWER($1) LIMIT $2[0m  [["email", "u@example.com"], ["LIMIT", 1]]
+  [1m[36mRailsMcp::User Create (0.3ms)[0m  [1m[32mINSERT INTO "users" ("account_id", "email", "name", "identity_id", "created_at", "updated_at") VALUES ($1, $2, $3, $4, $5, $6) RETURNING "id"[0m  [["account_id", 230], ["email", "u@example.com"], ["name", nil], ["identity_id", "id-1"], ["created_at", "2026-05-23 09:55:30.102876"], ["updated_at", "2026-05-23 09:55:30.102876"]]
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mRELEASE SAVEPOINT active_record_1[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mSAVEPOINT active_record_1[0m
+  [1m[36mRailsMcp::Connection Exists? (0.3ms)[0m  [1m[34mSELECT 1 AS one FROM "connections" WHERE "connections"."external_id" = $1 AND "connections"."user_id" = $2 LIMIT $3[0m  [["external_id", "ext-1"], ["user_id", 217], ["LIMIT", 1]]
+  [1m[36mFakeConnection Create (0.4ms)[0m  [1m[32mINSERT INTO "connections" ("user_id", "type", "name", "external_id", "access_token", "refresh_token", "token_expires_at", "token_active", "token_refresh_failed_at", "token_refresh_error", "created_at", "updated_at") VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12) RETURNING "id"[0m  [["user_id", 217], ["type", "FakeConnection"], ["name", "Workspace"], ["external_id", "ext-1"], ["access_token", "[FILTERED]"], ["refresh_token", "[FILTERED]"], ["token_expires_at", nil], ["token_active", true], ["token_refresh_failed_at", nil], ["token_refresh_error", nil], ["created_at", "2026-05-23 09:55:30.103950"], ["updated_at", "2026-05-23 09:55:30.103950"]]
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mRELEASE SAVEPOINT active_record_1[0m
+  [1m[36mTRANSACTION (0.3ms)[0m  [1m[31mROLLBACK[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mBEGIN[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mSAVEPOINT active_record_1[0m
+  [1m[36mRailsMcp::Account Create (0.3ms)[0m  [1m[32mINSERT INTO "accounts" ("name", "onboarded_at", "created_at", "updated_at") VALUES ($1, $2, $3, $4) RETURNING "id"[0m  [["name", "Acme"], ["onboarded_at", nil], ["created_at", "2026-05-23 09:55:30.105395"], ["updated_at", "2026-05-23 09:55:30.105395"]]
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mRELEASE SAVEPOINT active_record_1[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mSAVEPOINT active_record_1[0m
+  [1m[36mRailsMcp::User Exists? (0.3ms)[0m  [1m[34mSELECT 1 AS one FROM "users" WHERE "users"."identity_id" = $1 LIMIT $2[0m  [["identity_id", "id-1"], ["LIMIT", 1]]
+  [1m[36mRailsMcp::User Exists? (0.2ms)[0m  [1m[34mSELECT 1 AS one FROM "users" WHERE LOWER("users"."email") = LOWER($1) LIMIT $2[0m  [["email", "u@example.com"], ["LIMIT", 1]]
+  [1m[36mRailsMcp::User Create (0.3ms)[0m  [1m[32mINSERT INTO "users" ("account_id", "email", "name", "identity_id", "created_at", "updated_at") VALUES ($1, $2, $3, $4, $5, $6) RETURNING "id"[0m  [["account_id", 231], ["email", "u@example.com"], ["name", nil], ["identity_id", "id-1"], ["created_at", "2026-05-23 09:55:30.106722"], ["updated_at", "2026-05-23 09:55:30.106722"]]
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mRELEASE SAVEPOINT active_record_1[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mSAVEPOINT active_record_1[0m
+  [1m[36mRailsMcp::Connection Exists? (0.4ms)[0m  [1m[34mSELECT 1 AS one FROM "connections" WHERE "connections"."external_id" = $1 AND "connections"."user_id" = $2 LIMIT $3[0m  [["external_id", "ext-1"], ["user_id", 218], ["LIMIT", 1]]
+  [1m[36mFakeConnection Create (0.4ms)[0m  [1m[32mINSERT INTO "connections" ("user_id", "type", "name", "external_id", "access_token", "refresh_token", "token_expires_at", "token_active", "token_refresh_failed_at", "token_refresh_error", "created_at", "updated_at") VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12) RETURNING "id"[0m  [["user_id", 218], ["type", "FakeConnection"], ["name", "Workspace"], ["external_id", "ext-1"], ["access_token", "[FILTERED]"], ["refresh_token", "[FILTERED]"], ["token_expires_at", "2026-05-23 09:55:40.105337"], ["token_active", true], ["token_refresh_failed_at", nil], ["token_refresh_error", nil], ["created_at", "2026-05-23 09:55:30.107833"], ["updated_at", "2026-05-23 09:55:30.107833"]]
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mRELEASE SAVEPOINT active_record_1[0m
+  [1m[36mTRANSACTION (0.3ms)[0m  [1m[31mROLLBACK[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mBEGIN[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mSAVEPOINT active_record_1[0m
+  [1m[36mRailsMcp::Account Create (0.3ms)[0m  [1m[32mINSERT INTO "accounts" ("name", "onboarded_at", "created_at", "updated_at") VALUES ($1, $2, $3, $4) RETURNING "id"[0m  [["name", "Acme"], ["onboarded_at", nil], ["created_at", "2026-05-23 09:55:30.109627"], ["updated_at", "2026-05-23 09:55:30.109627"]]
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mRELEASE SAVEPOINT active_record_1[0m
+  [1m[36mTRANSACTION (0.0ms)[0m  [1m[35mSAVEPOINT active_record_1[0m
+  [1m[36mRailsMcp::User Exists? (0.2ms)[0m  [1m[34mSELECT 1 AS one FROM "users" WHERE "users"."identity_id" = $1 LIMIT $2[0m  [["identity_id", "id-1"], ["LIMIT", 1]]
+  [1m[36mRailsMcp::User Exists? (0.1ms)[0m  [1m[34mSELECT 1 AS one FROM "users" WHERE LOWER("users"."email") = LOWER($1) LIMIT $2[0m  [["email", "u@example.com"], ["LIMIT", 1]]
+  [1m[36mRailsMcp::User Create (0.2ms)[0m  [1m[32mINSERT INTO "users" ("account_id", "email", "name", "identity_id", "created_at", "updated_at") VALUES ($1, $2, $3, $4, $5, $6) RETURNING "id"[0m  [["account_id", 232], ["email", "u@example.com"], ["name", nil], ["identity_id", "id-1"], ["created_at", "2026-05-23 09:55:30.110914"], ["updated_at", "2026-05-23 09:55:30.110914"]]
+  [1m[36mTRANSACTION (0.0ms)[0m  [1m[35mRELEASE SAVEPOINT active_record_1[0m
+  [1m[36mTRANSACTION (0.0ms)[0m  [1m[35mSAVEPOINT active_record_1[0m
+  [1m[36mRailsMcp::Connection Exists? (0.2ms)[0m  [1m[34mSELECT 1 AS one FROM "connections" WHERE "connections"."external_id" = $1 AND "connections"."user_id" = $2 LIMIT $3[0m  [["external_id", "ext-1"], ["user_id", 219], ["LIMIT", 1]]
+  [1m[36mFakeConnection Create (0.2ms)[0m  [1m[32mINSERT INTO "connections" ("user_id", "type", "name", "external_id", "access_token", "refresh_token", "token_expires_at", "token_active", "token_refresh_failed_at", "token_refresh_error", "created_at", "updated_at") VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12) RETURNING "id"[0m  [["user_id", 219], ["type", "FakeConnection"], ["name", "Workspace"], ["external_id", "ext-1"], ["access_token", "[FILTERED]"], ["refresh_token", "[FILTERED]"], ["token_expires_at", "2026-05-23 10:55:30.109359"], ["token_active", true], ["token_refresh_failed_at", nil], ["token_refresh_error", nil], ["created_at", "2026-05-23 09:55:30.111719"], ["updated_at", "2026-05-23 09:55:30.111719"]]
+  [1m[36mTRANSACTION (0.0ms)[0m  [1m[35mRELEASE SAVEPOINT active_record_1[0m
+  [1m[36mTRANSACTION (0.2ms)[0m  [1m[31mROLLBACK[0m
+  [1m[36mTRANSACTION (0.0ms)[0m  [1m[35mBEGIN[0m
+  [1m[36mTRANSACTION (0.0ms)[0m  [1m[35mSAVEPOINT active_record_1[0m
+  [1m[36mRailsMcp::Account Create (0.2ms)[0m  [1m[32mINSERT INTO "accounts" ("name", "onboarded_at", "created_at", "updated_at") VALUES ($1, $2, $3, $4) RETURNING "id"[0m  [["name", "Acme"], ["onboarded_at", nil], ["created_at", "2026-05-23 09:55:30.112960"], ["updated_at", "2026-05-23 09:55:30.112960"]]
+  [1m[36mTRANSACTION (0.0ms)[0m  [1m[35mRELEASE SAVEPOINT active_record_1[0m
+  [1m[36mTRANSACTION (0.0ms)[0m  [1m[35mSAVEPOINT active_record_1[0m
+  [1m[36mRailsMcp::User Exists? (0.2ms)[0m  [1m[34mSELECT 1 AS one FROM "users" WHERE "users"."identity_id" = $1 LIMIT $2[0m  [["identity_id", "id-1"], ["LIMIT", 1]]
+  [1m[36mRailsMcp::User Exists? (0.1ms)[0m  [1m[34mSELECT 1 AS one FROM "users" WHERE LOWER("users"."email") = LOWER($1) LIMIT $2[0m  [["email", "u@example.com"], ["LIMIT", 1]]
+  [1m[36mRailsMcp::User Create (0.1ms)[0m  [1m[32mINSERT INTO "users" ("account_id", "email", "name", "identity_id", "created_at", "updated_at") VALUES ($1, $2, $3, $4, $5, $6) RETURNING "id"[0m  [["account_id", 233], ["email", "u@example.com"], ["name", nil], ["identity_id", "id-1"], ["created_at", "2026-05-23 09:55:30.113963"], ["updated_at", "2026-05-23 09:55:30.113963"]]
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mRELEASE SAVEPOINT active_record_1[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mSAVEPOINT active_record_1[0m
+  [1m[36mRailsMcp::Connection Exists? (0.2ms)[0m  [1m[34mSELECT 1 AS one FROM "connections" WHERE "connections"."external_id" = $1 AND "connections"."user_id" = $2 LIMIT $3[0m  [["external_id", "ext-1"], ["user_id", 220], ["LIMIT", 1]]
+  [1m[36mFakeConnection Create (0.2ms)[0m  [1m[32mINSERT INTO "connections" ("user_id", "type", "name", "external_id", "access_token", "refresh_token", "token_expires_at", "token_active", "token_refresh_failed_at", "token_refresh_error", "created_at", "updated_at") VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12) RETURNING "id"[0m  [["user_id", 220], ["type", "FakeConnection"], ["name", "Workspace"], ["external_id", "ext-1"], ["access_token", "[FILTERED]"], ["refresh_token", "[FILTERED]"], ["token_expires_at", "2026-05-23 10:55:30.114319"], ["token_active", true], ["token_refresh_failed_at", nil], ["token_refresh_error", nil], ["created_at", "2026-05-23 09:55:30.114863"], ["updated_at", "2026-05-23 09:55:30.114863"]]
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mRELEASE SAVEPOINT active_record_1[0m
+  [1m[36mTRANSACTION (0.0ms)[0m  [1m[35mSAVEPOINT active_record_1[0m
+  [1m[36mFakeConnection Update (1.1ms)[0m  [1m[33mUPDATE "connections" SET "token_active" = $1, "token_refresh_failed_at" = $2, "token_refresh_error" = $3, "updated_at" = $4 WHERE "connections"."id" = $5[0m  [["token_active", false], ["token_refresh_failed_at", "2026-05-23 09:55:30.115417"], ["token_refresh_error", "invalid_grant"], ["updated_at", "2026-05-23 09:55:30.116795"], ["id", 34]]
+  [1m[36mTRANSACTION (0.3ms)[0m  [1m[35mRELEASE SAVEPOINT active_record_1[0m
+  [1m[36mFakeConnection Load (0.4ms)[0m  [1m[34mSELECT "connections".* FROM "connections" WHERE "connections"."type" = $1 AND "connections"."id" = $2 LIMIT $3[0m  [["type", "FakeConnection"], ["id", 34], ["LIMIT", 1]]
+  [1m[36mTRANSACTION (0.6ms)[0m  [1m[31mROLLBACK[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mBEGIN[0m
+  [1m[36mTRANSACTION (0.0ms)[0m  [1m[35mSAVEPOINT active_record_1[0m
+  [1m[36mRailsMcp::Account Create (0.3ms)[0m  [1m[32mINSERT INTO "accounts" ("name", "onboarded_at", "created_at", "updated_at") VALUES ($1, $2, $3, $4) RETURNING "id"[0m  [["name", "Acme"], ["onboarded_at", nil], ["created_at", "2026-05-23 09:55:30.120135"], ["updated_at", "2026-05-23 09:55:30.120135"]]
+  [1m[36mTRANSACTION (0.0ms)[0m  [1m[35mRELEASE SAVEPOINT active_record_1[0m
+  [1m[36mTRANSACTION (0.0ms)[0m  [1m[35mSAVEPOINT active_record_1[0m
+  [1m[36mRailsMcp::User Exists? (0.2ms)[0m  [1m[34mSELECT 1 AS one FROM "users" WHERE "users"."identity_id" = $1 LIMIT $2[0m  [["identity_id", "id-1"], ["LIMIT", 1]]
+  [1m[36mRailsMcp::User Exists? (0.1ms)[0m  [1m[34mSELECT 1 AS one FROM "users" WHERE LOWER("users"."email") = LOWER($1) LIMIT $2[0m  [["email", "u@example.com"], ["LIMIT", 1]]
+  [1m[36mRailsMcp::User Create (0.3ms)[0m  [1m[32mINSERT INTO "users" ("account_id", "email", "name", "identity_id", "created_at", "updated_at") VALUES ($1, $2, $3, $4, $5, $6) RETURNING "id"[0m  [["account_id", 234], ["email", "u@example.com"], ["name", nil], ["identity_id", "id-1"], ["created_at", "2026-05-23 09:55:30.121320"], ["updated_at", "2026-05-23 09:55:30.121320"]]
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mRELEASE SAVEPOINT active_record_1[0m
+  [1m[36mTRANSACTION (0.0ms)[0m  [1m[35mSAVEPOINT active_record_1[0m
+  [1m[36mRailsMcp::Connection Exists? (0.3ms)[0m  [1m[34mSELECT 1 AS one FROM "connections" WHERE "connections"."external_id" = $1 AND "connections"."user_id" = $2 LIMIT $3[0m  [["external_id", "ext-1"], ["user_id", 221], ["LIMIT", 1]]
+  [1m[36mFakeConnection Create (0.3ms)[0m  [1m[32mINSERT INTO "connections" ("user_id", "type", "name", "external_id", "access_token", "refresh_token", "token_expires_at", "token_active", "token_refresh_failed_at", "token_refresh_error", "created_at", "updated_at") VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12) RETURNING "id"[0m  [["user_id", 221], ["type", "FakeConnection"], ["name", "Workspace"], ["external_id", "ext-1"], ["access_token", "[FILTERED]"], ["refresh_token", "[FILTERED]"], ["token_expires_at", "2026-05-23 10:55:30.121828"], ["token_active", true], ["token_refresh_failed_at", nil], ["token_refresh_error", nil], ["created_at", "2026-05-23 09:55:30.122337"], ["updated_at", "2026-05-23 09:55:30.122337"]]
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mRELEASE SAVEPOINT active_record_1[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mSAVEPOINT active_record_1[0m
+  [1m[36mFakeConnection Update (0.4ms)[0m  [1m[33mUPDATE "connections" SET "token_active" = $1, "token_refresh_failed_at" = $2, "token_refresh_error" = $3, "updated_at" = $4 WHERE "connections"."id" = $5[0m  [["token_active", false], ["token_refresh_failed_at", "2026-05-23 09:55:30.123062"], ["token_refresh_error", "invalid_grant"], ["updated_at", "2026-05-23 09:55:30.123138"], ["id", 35]]
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mRELEASE SAVEPOINT active_record_1[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mSAVEPOINT active_record_1[0m
+  [1m[36mFakeConnection Update (0.4ms)[0m  [1m[33mUPDATE "connections" SET "access_token" = $1, "refresh_token" = $2, "token_expires_at" = $3, "token_active" = $4, "token_refresh_failed_at" = $5, "token_refresh_error" = $6, "updated_at" = $7 WHERE "connections"."id" = $8[0m  [["access_token", "[FILTERED]"], ["refresh_token", "[FILTERED]"], ["token_expires_at", "2026-05-23 10:55:30.123783"], ["token_active", true], ["token_refresh_failed_at", nil], ["token_refresh_error", nil], ["updated_at", "2026-05-23 09:55:30.123880"], ["id", 35]]
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mRELEASE SAVEPOINT active_record_1[0m
+  [1m[36mFakeConnection Load (0.2ms)[0m  [1m[34mSELECT "connections".* FROM "connections" WHERE "connections"."type" = $1 AND "connections"."id" = $2 LIMIT $3[0m  [["type", "FakeConnection"], ["id", 35], ["LIMIT", 1]]
+  [1m[36mTRANSACTION (0.3ms)[0m  [1m[31mROLLBACK[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mBEGIN[0m
+  [1m[36mTRANSACTION (0.0ms)[0m  [1m[35mSAVEPOINT active_record_1[0m
+  [1m[36mRailsMcp::Account Create (0.2ms)[0m  [1m[32mINSERT INTO "accounts" ("name", "onboarded_at", "created_at", "updated_at") VALUES ($1, $2, $3, $4) RETURNING "id"[0m  [["name", "Acme"], ["onboarded_at", nil], ["created_at", "2026-05-23 09:55:30.125959"], ["updated_at", "2026-05-23 09:55:30.125959"]]
+  [1m[36mTRANSACTION (0.0ms)[0m  [1m[35mRELEASE SAVEPOINT active_record_1[0m
+  [1m[36mTRANSACTION (0.0ms)[0m  [1m[35mSAVEPOINT active_record_1[0m
+  [1m[36mRailsMcp::User Exists? (0.2ms)[0m  [1m[34mSELECT 1 AS one FROM "users" WHERE "users"."identity_id" = $1 LIMIT $2[0m  [["identity_id", "host"], ["LIMIT", 1]]
+  [1m[36mRailsMcp::User Exists? (0.1ms)[0m  [1m[34mSELECT 1 AS one FROM "users" WHERE LOWER("users"."email") = LOWER($1) LIMIT $2[0m  [["email", "host@example.com"], ["LIMIT", 1]]
+  [1m[36mRailsMcp::User Create (0.2ms)[0m  [1m[32mINSERT INTO "users" ("account_id", "email", "name", "identity_id", "created_at", "updated_at") VALUES ($1, $2, $3, $4, $5, $6) RETURNING "id"[0m  [["account_id", 235], ["email", "host@example.com"], ["name", nil], ["identity_id", "host"], ["created_at", "2026-05-23 09:55:30.127069"], ["updated_at", "2026-05-23 09:55:30.127069"]]
+  [1m[36mTRANSACTION (0.0ms)[0m  [1m[35mRELEASE SAVEPOINT active_record_1[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mSAVEPOINT active_record_1[0m
+  [1m[36mRailsMcp::Invitation Exists? (0.2ms)[0m  [1m[34mSELECT 1 AS one FROM "invitations" WHERE "invitations"."token" = $1 LIMIT $2[0m  [["token", "6DIDG9Y0HEeP4unCqiXuaBKJnmlW6TwEtXF_0DOL8TQ"], ["LIMIT", 1]]
+  [1m[36mRailsMcp::Invitation Create (0.3ms)[0m  [1m[32mINSERT INTO "invitations" ("account_id", "invited_by_id", "email", "token", "expires_at", "accepted_at", "revoked_at", "created_at", "updated_at") VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING "id"[0m  [["account_id", 235], ["invited_by_id", 222], ["email", "guest@example.com"], ["token", "6DIDG9Y0HEeP4unCqiXuaBKJnmlW6TwEtXF_0DOL8TQ"], ["expires_at", "2026-06-06 09:55:30.127654"], ["accepted_at", nil], ["revoked_at", nil], ["created_at", "2026-05-23 09:55:30.128201"], ["updated_at", "2026-05-23 09:55:30.128201"]]
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mRELEASE SAVEPOINT active_record_1[0m
+  [1m[36mTRANSACTION (0.2ms)[0m  [1m[31mROLLBACK[0m
+  [1m[36mTRANSACTION (0.0ms)[0m  [1m[35mBEGIN[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mSAVEPOINT active_record_1[0m
+  [1m[36mRailsMcp::Account Create (0.3ms)[0m  [1m[32mINSERT INTO "accounts" ("name", "onboarded_at", "created_at", "updated_at") VALUES ($1, $2, $3, $4) RETURNING "id"[0m  [["name", "Acme"], ["onboarded_at", nil], ["created_at", "2026-05-23 09:55:30.130071"], ["updated_at", "2026-05-23 09:55:30.130071"]]
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mRELEASE SAVEPOINT active_record_1[0m
+  [1m[36mTRANSACTION (0.0ms)[0m  [1m[35mSAVEPOINT active_record_1[0m
+  [1m[36mRailsMcp::User Exists? (0.2ms)[0m  [1m[34mSELECT 1 AS one FROM "users" WHERE "users"."identity_id" = $1 LIMIT $2[0m  [["identity_id", "host"], ["LIMIT", 1]]
+  [1m[36mRailsMcp::User Exists? (0.2ms)[0m  [1m[34mSELECT 1 AS one FROM "users" WHERE LOWER("users"."email") = LOWER($1) LIMIT $2[0m  [["email", "host@example.com"], ["LIMIT", 1]]
+  [1m[36mRailsMcp::User Create (0.2ms)[0m  [1m[32mINSERT INTO "users" ("account_id", "email", "name", "identity_id", "created_at", "updated_at") VALUES ($1, $2, $3, $4, $5, $6) RETURNING "id"[0m  [["account_id", 236], ["email", "host@example.com"], ["name", nil], ["identity_id", "host"], ["created_at", "2026-05-23 09:55:30.131310"], ["updated_at", "2026-05-23 09:55:30.131310"]]
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mRELEASE SAVEPOINT active_record_1[0m
+  [1m[36mTRANSACTION (0.0ms)[0m  [1m[35mSAVEPOINT active_record_1[0m
+  [1m[36mRailsMcp::Invitation Exists? (0.2ms)[0m  [1m[34mSELECT 1 AS one FROM "invitations" WHERE "invitations"."token" = $1 LIMIT $2[0m  [["token", "sN-qOK7bhlOXYCr8iGEirWYX5zFTlSdiG_NBaHRLdGU"], ["LIMIT", 1]]
+  [1m[36mRailsMcp::Invitation Create (0.3ms)[0m  [1m[32mINSERT INTO "invitations" ("account_id", "invited_by_id", "email", "token", "expires_at", "accepted_at", "revoked_at", "created_at", "updated_at") VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING "id"[0m  [["account_id", 236], ["invited_by_id", 223], ["email", "foo@example.com"], ["token", "sN-qOK7bhlOXYCr8iGEirWYX5zFTlSdiG_NBaHRLdGU"], ["expires_at", "2026-06-06 09:55:30.131913"], ["accepted_at", nil], ["revoked_at", nil], ["created_at", "2026-05-23 09:55:30.132297"], ["updated_at", "2026-05-23 09:55:30.132297"]]
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mRELEASE SAVEPOINT active_record_1[0m
+  [1m[36mRailsMcp::Invitation Load (0.4ms)[0m  [1m[34mSELECT "invitations".* FROM "invitations" WHERE "invitations"."account_id" = $1 ORDER BY "invitations"."id" DESC LIMIT $2[0m  [["account_id", 236], ["LIMIT", 1]]
+  [1m[36mRailsMcp::Invitation Exists? (0.1ms)[0m  [1m[34mSELECT 1 AS one FROM "invitations" WHERE "invitations"."token" = $1 LIMIT $2[0m  [["token", "J7m6Rhlv3HJ6GGyL5BIzkNiYlrioq0i_mb6Jf62BxcI"], ["LIMIT", 1]]
+  [1m[36mTRANSACTION (0.2ms)[0m  [1m[31mROLLBACK[0m
+  [1m[36mTRANSACTION (0.0ms)[0m  [1m[35mBEGIN[0m
+  [1m[36mTRANSACTION (0.0ms)[0m  [1m[35mSAVEPOINT active_record_1[0m
+  [1m[36mRailsMcp::Account Create (0.2ms)[0m  [1m[32mINSERT INTO "accounts" ("name", "onboarded_at", "created_at", "updated_at") VALUES ($1, $2, $3, $4) RETURNING "id"[0m  [["name", "Acme"], ["onboarded_at", nil], ["created_at", "2026-05-23 09:55:30.134578"], ["updated_at", "2026-05-23 09:55:30.134578"]]
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mRELEASE SAVEPOINT active_record_1[0m
+  [1m[36mTRANSACTION (0.3ms)[0m  [1m[35mSAVEPOINT active_record_1[0m
+  [1m[36mRailsMcp::User Exists? (0.5ms)[0m  [1m[34mSELECT 1 AS one FROM "users" WHERE "users"."identity_id" = $1 LIMIT $2[0m  [["identity_id", "host"], ["LIMIT", 1]]
+  [1m[36mRailsMcp::User Exists? (0.1ms)[0m  [1m[34mSELECT 1 AS one FROM "users" WHERE LOWER("users"."email") = LOWER($1) LIMIT $2[0m  [["email", "host@example.com"], ["LIMIT", 1]]
+  [1m[36mRailsMcp::User Create (0.2ms)[0m  [1m[32mINSERT INTO "users" ("account_id", "email", "name", "identity_id", "created_at", "updated_at") VALUES ($1, $2, $3, $4, $5, $6) RETURNING "id"[0m  [["account_id", 237], ["email", "host@example.com"], ["name", nil], ["identity_id", "host"], ["created_at", "2026-05-23 09:55:30.136008"], ["updated_at", "2026-05-23 09:55:30.136008"]]
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mRELEASE SAVEPOINT active_record_1[0m
+  [1m[36mTRANSACTION (0.0ms)[0m  [1m[35mSAVEPOINT active_record_1[0m
+  [1m[36mRailsMcp::Invitation Exists? (0.2ms)[0m  [1m[34mSELECT 1 AS one FROM "invitations" WHERE "invitations"."token" = $1 LIMIT $2[0m  [["token", "Lmi0VEsS9Nq2C7k1TrUZC0vd-fIR4HNQsHzj-ZAcFvc"], ["LIMIT", 1]]
+  [1m[36mRailsMcp::Invitation Create (0.3ms)[0m  [1m[32mINSERT INTO "invitations" ("account_id", "invited_by_id", "email", "token", "expires_at", "accepted_at", "revoked_at", "created_at", "updated_at") VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING "id"[0m  [["account_id", 237], ["invited_by_id", 224], ["email", "guest@example.com"], ["token", "Lmi0VEsS9Nq2C7k1TrUZC0vd-fIR4HNQsHzj-ZAcFvc"], ["expires_at", "2026-06-06 09:55:30.136567"], ["accepted_at", nil], ["revoked_at", nil], ["created_at", "2026-05-23 09:55:30.136902"], ["updated_at", "2026-05-23 09:55:30.136902"]]
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mRELEASE SAVEPOINT active_record_1[0m
+  [1m[36mTRANSACTION (0.0ms)[0m  [1m[35mSAVEPOINT active_record_1[0m
+  [1m[36mRailsMcp::Invitation Update (0.3ms)[0m  [1m[33mUPDATE "invitations" SET "accepted_at" = $1, "updated_at" = $2 WHERE "invitations"."id" = $3[0m  [["accepted_at", "2026-05-23 09:55:30.137471"], ["updated_at", "2026-05-23 09:55:30.139531"], ["id", 107]]
+  [1m[36mTRANSACTION (0.2ms)[0m  [1m[35mRELEASE SAVEPOINT active_record_1[0m
+  [1m[36mTRANSACTION (0.3ms)[0m  [1m[31mROLLBACK[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mBEGIN[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mSAVEPOINT active_record_1[0m
+  [1m[36mRailsMcp::Account Create (0.3ms)[0m  [1m[32mINSERT INTO "accounts" ("name", "onboarded_at", "created_at", "updated_at") VALUES ($1, $2, $3, $4) RETURNING "id"[0m  [["name", "Acme"], ["onboarded_at", nil], ["created_at", "2026-05-23 09:55:30.140921"], ["updated_at", "2026-05-23 09:55:30.140921"]]
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mRELEASE SAVEPOINT active_record_1[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mSAVEPOINT active_record_1[0m
+  [1m[36mRailsMcp::User Exists? (0.3ms)[0m  [1m[34mSELECT 1 AS one FROM "users" WHERE "users"."identity_id" = $1 LIMIT $2[0m  [["identity_id", "host"], ["LIMIT", 1]]
+  [1m[36mRailsMcp::User Exists? (0.2ms)[0m  [1m[34mSELECT 1 AS one FROM "users" WHERE LOWER("users"."email") = LOWER($1) LIMIT $2[0m  [["email", "host@example.com"], ["LIMIT", 1]]
+  [1m[36mRailsMcp::User Create (0.2ms)[0m  [1m[32mINSERT INTO "users" ("account_id", "email", "name", "identity_id", "created_at", "updated_at") VALUES ($1, $2, $3, $4, $5, $6) RETURNING "id"[0m  [["account_id", 238], ["email", "host@example.com"], ["name", nil], ["identity_id", "host"], ["created_at", "2026-05-23 09:55:30.142402"], ["updated_at", "2026-05-23 09:55:30.142402"]]
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mRELEASE SAVEPOINT active_record_1[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mSAVEPOINT active_record_1[0m
+  [1m[36mRailsMcp::Invitation Exists? (0.2ms)[0m  [1m[34mSELECT 1 AS one FROM "invitations" WHERE "invitations"."token" = $1 LIMIT $2[0m  [["token", "GG4prFgA3xrndIm1nX2sc4wnvDcYIdZnlmI0Gbhl-co"], ["LIMIT", 1]]
+  [1m[36mRailsMcp::Invitation Create (0.2ms)[0m  [1m[32mINSERT INTO "invitations" ("account_id", "invited_by_id", "email", "token", "expires_at", "accepted_at", "revoked_at", "created_at", "updated_at") VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING "id"[0m  [["account_id", 238], ["invited_by_id", 225], ["email", "guest@example.com"], ["token", "GG4prFgA3xrndIm1nX2sc4wnvDcYIdZnlmI0Gbhl-co"], ["expires_at", "2026-06-06 09:55:30.142991"], ["accepted_at", nil], ["revoked_at", nil], ["created_at", "2026-05-23 09:55:30.143349"], ["updated_at", "2026-05-23 09:55:30.143349"]]
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mRELEASE SAVEPOINT active_record_1[0m
+  [1m[36mTRANSACTION (0.0ms)[0m  [1m[35mSAVEPOINT active_record_1[0m
+  [1m[36mRailsMcp::Invitation Update (0.3ms)[0m  [1m[33mUPDATE "invitations" SET "revoked_at" = $1, "updated_at" = $2 WHERE "invitations"."id" = $3[0m  [["revoked_at", "2026-05-23 09:55:30.143795"], ["updated_at", "2026-05-23 09:55:30.143889"], ["id", 108]]
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mRELEASE SAVEPOINT active_record_1[0m
+  [1m[36mRailsMcp::Invitation Load (0.1ms)[0m  [1m[34mSELECT "invitations".* FROM "invitations" WHERE "invitations"."id" = $1 LIMIT $2[0m  [["id", 108], ["LIMIT", 1]]
+  [1m[36mTRANSACTION (0.2ms)[0m  [1m[31mROLLBACK[0m
+  [1m[36mTRANSACTION (0.0ms)[0m  [1m[35mBEGIN[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mSAVEPOINT active_record_1[0m
+  [1m[36mRailsMcp::Account Create (0.2ms)[0m  [1m[32mINSERT INTO "accounts" ("name", "onboarded_at", "created_at", "updated_at") VALUES ($1, $2, $3, $4) RETURNING "id"[0m  [["name", "Acme"], ["onboarded_at", nil], ["created_at", "2026-05-23 09:55:30.145318"], ["updated_at", "2026-05-23 09:55:30.145318"]]
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mRELEASE SAVEPOINT active_record_1[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mSAVEPOINT active_record_1[0m
+  [1m[36mRailsMcp::User Exists? (0.2ms)[0m  [1m[34mSELECT 1 AS one FROM "users" WHERE "users"."identity_id" = $1 LIMIT $2[0m  [["identity_id", "host"], ["LIMIT", 1]]
+  [1m[36mRailsMcp::User Exists? (0.1ms)[0m  [1m[34mSELECT 1 AS one FROM "users" WHERE LOWER("users"."email") = LOWER($1) LIMIT $2[0m  [["email", "host@example.com"], ["LIMIT", 1]]
+  [1m[36mRailsMcp::User Create (0.2ms)[0m  [1m[32mINSERT INTO "users" ("account_id", "email", "name", "identity_id", "created_at", "updated_at") VALUES ($1, $2, $3, $4, $5, $6) RETURNING "id"[0m  [["account_id", 239], ["email", "host@example.com"], ["name", nil], ["identity_id", "host"], ["created_at", "2026-05-23 09:55:30.146404"], ["updated_at", "2026-05-23 09:55:30.146404"]]
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mRELEASE SAVEPOINT active_record_1[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mSAVEPOINT active_record_1[0m
+  [1m[36mRailsMcp::Invitation Exists? (0.2ms)[0m  [1m[34mSELECT 1 AS one FROM "invitations" WHERE "invitations"."token" = $1 LIMIT $2[0m  [["token", "jmfWVfVidd5SfaW-Kz6YgU7jVuJgYYD4nJNG5B8fAQ8"], ["LIMIT", 1]]
+  [1m[36mRailsMcp::Invitation Create (0.2ms)[0m  [1m[32mINSERT INTO "invitations" ("account_id", "invited_by_id", "email", "token", "expires_at", "accepted_at", "revoked_at", "created_at", "updated_at") VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING "id"[0m  [["account_id", 239], ["invited_by_id", 226], ["email", "a@example.com"], ["token", "jmfWVfVidd5SfaW-Kz6YgU7jVuJgYYD4nJNG5B8fAQ8"], ["expires_at", "2026-06-06 09:55:30.146916"], ["accepted_at", nil], ["revoked_at", nil], ["created_at", "2026-05-23 09:55:30.147282"], ["updated_at", "2026-05-23 09:55:30.147282"]]
+  [1m[36mTRANSACTION (0.0ms)[0m  [1m[35mRELEASE SAVEPOINT active_record_1[0m
+  [1m[36mTRANSACTION (0.0ms)[0m  [1m[35mSAVEPOINT active_record_1[0m
+  [1m[36mRailsMcp::Invitation Update (0.2ms)[0m  [1m[33mUPDATE "invitations" SET "accepted_at" = $1, "updated_at" = $2 WHERE "invitations"."id" = $3[0m  [["accepted_at", "2026-05-23 09:55:30.147726"], ["updated_at", "2026-05-23 09:55:30.147807"], ["id", 109]]
+  [1m[36mTRANSACTION (0.0ms)[0m  [1m[35mRELEASE SAVEPOINT active_record_1[0m
+  [1m[36mTRANSACTION (0.0ms)[0m  [1m[35mSAVEPOINT active_record_1[0m
+  [1m[36mRailsMcp::Invitation Exists? (0.3ms)[0m  [1m[34mSELECT 1 AS one FROM "invitations" WHERE "invitations"."token" = $1 LIMIT $2[0m  [["token", "i7Bg0SqCPFEreuRBPkHirygy9m0rWjy1xeZfD_fs-P0"], ["LIMIT", 1]]
+  [1m[36mRailsMcp::Invitation Create (0.2ms)[0m  [1m[32mINSERT INTO "invitations" ("account_id", "invited_by_id", "email", "token", "expires_at", "accepted_at", "revoked_at", "created_at", "updated_at") VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING "id"[0m  [["account_id", 239], ["invited_by_id", 226], ["email", "r@example.com"], ["token", "i7Bg0SqCPFEreuRBPkHirygy9m0rWjy1xeZfD_fs-P0"], ["expires_at", "2026-06-06 09:55:30.148354"], ["accepted_at", nil], ["revoked_at", nil], ["created_at", "2026-05-23 09:55:30.148746"], ["updated_at", "2026-05-23 09:55:30.148746"]]
+  [1m[36mTRANSACTION (0.0ms)[0m  [1m[35mRELEASE SAVEPOINT active_record_1[0m
+  [1m[36mTRANSACTION (0.0ms)[0m  [1m[35mSAVEPOINT active_record_1[0m
+  [1m[36mRailsMcp::Invitation Update (0.2ms)[0m  [1m[33mUPDATE "invitations" SET "revoked_at" = $1, "updated_at" = $2 WHERE "invitations"."id" = $3[0m  [["revoked_at", "2026-05-23 09:55:30.149163"], ["updated_at", "2026-05-23 09:55:30.149244"], ["id", 110]]
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mRELEASE SAVEPOINT active_record_1[0m
+  [1m[36mTRANSACTION (0.0ms)[0m  [1m[35mSAVEPOINT active_record_1[0m
+  [1m[36mRailsMcp::Invitation Exists? (0.2ms)[0m  [1m[34mSELECT 1 AS one FROM "invitations" WHERE "invitations"."token" = $1 LIMIT $2[0m  [["token", "Y1LzqrSPdY8NgwEYjb0GeCtXSxDaHU4ZIYQdkk5AACc"], ["LIMIT", 1]]
+  [1m[36mRailsMcp::Invitation Create (0.2ms)[0m  [1m[32mINSERT INTO "invitations" ("account_id", "invited_by_id", "email", "token", "expires_at", "accepted_at", "revoked_at", "created_at", "updated_at") VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING "id"[0m  [["account_id", 239], ["invited_by_id", 226], ["email", "x@example.com"], ["token", "Y1LzqrSPdY8NgwEYjb0GeCtXSxDaHU4ZIYQdkk5AACc"], ["expires_at", "2026-05-22 09:55:30.149688"], ["accepted_at", nil], ["revoked_at", nil], ["created_at", "2026-05-23 09:55:30.150102"], ["updated_at", "2026-05-23 09:55:30.150102"]]
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mRELEASE SAVEPOINT active_record_1[0m
+  [1m[36mTRANSACTION (0.0ms)[0m  [1m[35mSAVEPOINT active_record_1[0m
+  [1m[36mRailsMcp::Invitation Exists? (0.2ms)[0m  [1m[34mSELECT 1 AS one FROM "invitations" WHERE "invitations"."token" = $1 LIMIT $2[0m  [["token", "Yh3BScHFwIFVsdhZ8SiwPFZvLzyCw2xv2vwz5C2Iqx8"], ["LIMIT", 1]]
+  [1m[36mRailsMcp::Invitation Create (0.2ms)[0m  [1m[32mINSERT INTO "invitations" ("account_id", "invited_by_id", "email", "token", "expires_at", "accepted_at", "revoked_at", "created_at", "updated_at") VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING "id"[0m  [["account_id", 239], ["invited_by_id", 226], ["email", "p@example.com"], ["token", "Yh3BScHFwIFVsdhZ8SiwPFZvLzyCw2xv2vwz5C2Iqx8"], ["expires_at", "2026-06-06 09:55:30.150665"], ["accepted_at", nil], ["revoked_at", nil], ["created_at", "2026-05-23 09:55:30.151020"], ["updated_at", "2026-05-23 09:55:30.151020"]]
+  [1m[36mTRANSACTION (0.0ms)[0m  [1m[35mRELEASE SAVEPOINT active_record_1[0m
+  [1m[36mRailsMcp::Invitation Load (0.2ms)[0m  [1m[34mSELECT "invitations".* FROM "invitations" WHERE "invitations"."accepted_at" IS NULL AND "invitations"."revoked_at" IS NULL AND (expires_at > $1)[0m  [[nil, "2026-05-23 09:55:30.151447"]]
+  [1m[36mTRANSACTION (0.2ms)[0m  [1m[31mROLLBACK[0m
+  [1m[36mTRANSACTION (0.0ms)[0m  [1m[35mBEGIN[0m
+  [1m[36mTRANSACTION (0.0ms)[0m  [1m[31mROLLBACK[0m
+  [1m[36mTRANSACTION (0.0ms)[0m  [1m[35mBEGIN[0m
+  [1m[36mRailsMcp::Invitation Load (0.2ms)[0m  [1m[34mSELECT "invitations".* FROM "invitations" WHERE "invitations"."token" = $1 LIMIT $2[0m  [["token", "bogus"], ["LIMIT", 1]]
+  [1m[36mTRANSACTION (0.0ms)[0m  [1m[31mROLLBACK[0m
+  [1m[36mTRANSACTION (0.0ms)[0m  [1m[35mBEGIN[0m
+  [1m[36mTRANSACTION (0.0ms)[0m  [1m[35mSAVEPOINT active_record_1[0m
+  [1m[36mRailsMcp::Account Create (0.2ms)[0m  [1m[32mINSERT INTO "accounts" ("name", "onboarded_at", "created_at", "updated_at") VALUES ($1, $2, $3, $4) RETURNING "id"[0m  [["name", "Acme"], ["onboarded_at", nil], ["created_at", "2026-05-23 09:55:30.153383"], ["updated_at", "2026-05-23 09:55:30.153383"]]
+  [1m[36mTRANSACTION (0.0ms)[0m  [1m[35mRELEASE SAVEPOINT active_record_1[0m
+  [1m[36mTRANSACTION (0.0ms)[0m  [1m[35mSAVEPOINT active_record_1[0m
+  [1m[36mRailsMcp::User Exists? (0.2ms)[0m  [1m[34mSELECT 1 AS one FROM "users" WHERE "users"."identity_id" = $1 LIMIT $2[0m  [["identity_id", "host"], ["LIMIT", 1]]
+  [1m[36mRailsMcp::User Exists? (0.1ms)[0m  [1m[34mSELECT 1 AS one FROM "users" WHERE LOWER("users"."email") = LOWER($1) LIMIT $2[0m  [["email", "host@example.com"], ["LIMIT", 1]]
+  [1m[36mRailsMcp::User Create (0.2ms)[0m  [1m[32mINSERT INTO "users" ("account_id", "email", "name", "identity_id", "created_at", "updated_at") VALUES ($1, $2, $3, $4, $5, $6) RETURNING "id"[0m  [["account_id", 240], ["email", "host@example.com"], ["name", nil], ["identity_id", "host"], ["created_at", "2026-05-23 09:55:30.154425"], ["updated_at", "2026-05-23 09:55:30.154425"]]
+  [1m[36mTRANSACTION (0.0ms)[0m  [1m[35mRELEASE SAVEPOINT active_record_1[0m
+  [1m[36mTRANSACTION (0.0ms)[0m  [1m[35mSAVEPOINT active_record_1[0m
+  [1m[36mRailsMcp::Invitation Exists? (0.2ms)[0m  [1m[34mSELECT 1 AS one FROM "invitations" WHERE "invitations"."token" = $1 LIMIT $2[0m  [["token", "IStNPZZHcPFv3TI9gh2Nla7S_i5naD02n1bOgw8qrzw"], ["LIMIT", 1]]
+  [1m[36mRailsMcp::Invitation Create (0.2ms)[0m  [1m[32mINSERT INTO "invitations" ("account_id", "invited_by_id", "email", "token", "expires_at", "accepted_at", "revoked_at", "created_at", "updated_at") VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING "id"[0m  [["account_id", 240], ["invited_by_id", 227], ["email", "guest@example.com"], ["token", "IStNPZZHcPFv3TI9gh2Nla7S_i5naD02n1bOgw8qrzw"], ["expires_at", "2026-06-06 09:55:30.154922"], ["accepted_at", nil], ["revoked_at", nil], ["created_at", "2026-05-23 09:55:30.155225"], ["updated_at", "2026-05-23 09:55:30.155225"]]
+  [1m[36mTRANSACTION (0.0ms)[0m  [1m[35mRELEASE SAVEPOINT active_record_1[0m
+  [1m[36mTRANSACTION (0.0ms)[0m  [1m[35mSAVEPOINT active_record_1[0m
+  [1m[36mRailsMcp::Invitation Update (0.2ms)[0m  [1m[33mUPDATE "invitations" SET "accepted_at" = $1, "updated_at" = $2 WHERE "invitations"."id" = $3[0m  [["accepted_at", "2026-05-23 09:55:30.155630"], ["updated_at", "2026-05-23 09:55:30.155712"], ["id", 113]]
+  [1m[36mTRANSACTION (0.0ms)[0m  [1m[35mRELEASE SAVEPOINT active_record_1[0m
+  [1m[36mRailsMcp::Invitation Load (0.1ms)[0m  [1m[34mSELECT "invitations".* FROM "invitations" WHERE "invitations"."token" = $1 LIMIT $2[0m  [["token", "IStNPZZHcPFv3TI9gh2Nla7S_i5naD02n1bOgw8qrzw"], ["LIMIT", 1]]
+  [1m[36mTRANSACTION (0.2ms)[0m  [1m[31mROLLBACK[0m
+  [1m[36mTRANSACTION (0.0ms)[0m  [1m[35mBEGIN[0m
+  [1m[36mTRANSACTION (0.0ms)[0m  [1m[35mSAVEPOINT active_record_1[0m
+  [1m[36mRailsMcp::Account Create (0.2ms)[0m  [1m[32mINSERT INTO "accounts" ("name", "onboarded_at", "created_at", "updated_at") VALUES ($1, $2, $3, $4) RETURNING "id"[0m  [["name", "Acme"], ["onboarded_at", nil], ["created_at", "2026-05-23 09:55:30.156941"], ["updated_at", "2026-05-23 09:55:30.156941"]]
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mRELEASE SAVEPOINT active_record_1[0m
+  [1m[36mTRANSACTION (0.0ms)[0m  [1m[35mSAVEPOINT active_record_1[0m
+  [1m[36mRailsMcp::User Exists? (0.2ms)[0m  [1m[34mSELECT 1 AS one FROM "users" WHERE "users"."identity_id" = $1 LIMIT $2[0m  [["identity_id", "host"], ["LIMIT", 1]]
+  [1m[36mRailsMcp::User Exists? (0.1ms)[0m  [1m[34mSELECT 1 AS one FROM "users" WHERE LOWER("users"."email") = LOWER($1) LIMIT $2[0m  [["email", "host@example.com"], ["LIMIT", 1]]
+  [1m[36mRailsMcp::User Create (0.1ms)[0m  [1m[32mINSERT INTO "users" ("account_id", "email", "name", "identity_id", "created_at", "updated_at") VALUES ($1, $2, $3, $4, $5, $6) RETURNING "id"[0m  [["account_id", 241], ["email", "host@example.com"], ["name", nil], ["identity_id", "host"], ["created_at", "2026-05-23 09:55:30.158047"], ["updated_at", "2026-05-23 09:55:30.158047"]]
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mRELEASE SAVEPOINT active_record_1[0m
+  [1m[36mTRANSACTION (0.0ms)[0m  [1m[35mSAVEPOINT active_record_1[0m
+  [1m[36mRailsMcp::Invitation Exists? (0.2ms)[0m  [1m[34mSELECT 1 AS one FROM "invitations" WHERE "invitations"."token" = $1 LIMIT $2[0m  [["token", "4zSSK91POnwLG2-zwJyZWT_s34rsTGIhNOTUXvCDClo"], ["LIMIT", 1]]
+  [1m[36mRailsMcp::Invitation Create (0.2ms)[0m  [1m[32mINSERT INTO "invitations" ("account_id", "invited_by_id", "email", "token", "expires_at", "accepted_at", "revoked_at", "created_at", "updated_at") VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING "id"[0m  [["account_id", 241], ["invited_by_id", 228], ["email", "guest@example.com"], ["token", "4zSSK91POnwLG2-zwJyZWT_s34rsTGIhNOTUXvCDClo"], ["expires_at", "2026-06-06 09:55:30.158562"], ["accepted_at", nil], ["revoked_at", nil], ["created_at", "2026-05-23 09:55:30.158901"], ["updated_at", "2026-05-23 09:55:30.158901"]]
+  [1m[36mTRANSACTION (0.0ms)[0m  [1m[35mRELEASE SAVEPOINT active_record_1[0m
+  [1m[36mRailsMcp::Invitation Load (0.1ms)[0m  [1m[34mSELECT "invitations".* FROM "invitations" WHERE "invitations"."token" = $1 LIMIT $2[0m  [["token", "4zSSK91POnwLG2-zwJyZWT_s34rsTGIhNOTUXvCDClo"], ["LIMIT", 1]]
+  [1m[36mTRANSACTION (0.2ms)[0m  [1m[31mROLLBACK[0m
+  [1m[36mTRANSACTION (0.0ms)[0m  [1m[35mBEGIN[0m
+  [1m[36mTRANSACTION (0.0ms)[0m  [1m[35mSAVEPOINT active_record_1[0m
+  [1m[36mRailsMcp::Account Create (0.2ms)[0m  [1m[32mINSERT INTO "accounts" ("name", "onboarded_at", "created_at", "updated_at") VALUES ($1, $2, $3, $4) RETURNING "id"[0m  [["name", "Acme"], ["onboarded_at", nil], ["created_at", "2026-05-23 09:55:30.160216"], ["updated_at", "2026-05-23 09:55:30.160216"]]
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mRELEASE SAVEPOINT active_record_1[0m
+  [1m[36mTRANSACTION (0.0ms)[0m  [1m[35mSAVEPOINT active_record_1[0m
+  [1m[36mRailsMcp::User Exists? (0.2ms)[0m  [1m[34mSELECT 1 AS one FROM "users" WHERE "users"."identity_id" = $1 LIMIT $2[0m  [["identity_id", "host"], ["LIMIT", 1]]
+  [1m[36mRailsMcp::User Exists? (0.1ms)[0m  [1m[34mSELECT 1 AS one FROM "users" WHERE LOWER("users"."email") = LOWER($1) LIMIT $2[0m  [["email", "host@example.com"], ["LIMIT", 1]]
+  [1m[36mRailsMcp::User Create (0.1ms)[0m  [1m[32mINSERT INTO "users" ("account_id", "email", "name", "identity_id", "created_at", "updated_at") VALUES ($1, $2, $3, $4, $5, $6) RETURNING "id"[0m  [["account_id", 242], ["email", "host@example.com"], ["name", nil], ["identity_id", "host"], ["created_at", "2026-05-23 09:55:30.161345"], ["updated_at", "2026-05-23 09:55:30.161345"]]
+  [1m[36mTRANSACTION (0.0ms)[0m  [1m[35mRELEASE SAVEPOINT active_record_1[0m
+  [1m[36mTRANSACTION (0.0ms)[0m  [1m[35mSAVEPOINT active_record_1[0m
+  [1m[36mRailsMcp::Invitation Exists? (0.2ms)[0m  [1m[34mSELECT 1 AS one FROM "invitations" WHERE "invitations"."token" = $1 LIMIT $2[0m  [["token", "nhq0ubv2FmTwaaFzVQxT8_8jGPFDVQlxvbTxz7IUla0"], ["LIMIT", 1]]
+  [1m[36mRailsMcp::Invitation Create (0.2ms)[0m  [1m[32mINSERT INTO "invitations" ("account_id", "invited_by_id", "email", "token", "expires_at", "accepted_at", "revoked_at", "created_at", "updated_at") VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING "id"[0m  [["account_id", 242], ["invited_by_id", 229], ["email", "guest@example.com"], ["token", "nhq0ubv2FmTwaaFzVQxT8_8jGPFDVQlxvbTxz7IUla0"], ["expires_at", "2026-06-06 09:55:30.161862"], ["accepted_at", nil], ["revoked_at", nil], ["created_at", "2026-05-23 09:55:30.162179"], ["updated_at", "2026-05-23 09:55:30.162179"]]
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mRELEASE SAVEPOINT active_record_1[0m
+  [1m[36mRailsMcp::Invitation Load (0.1ms)[0m  [1m[34mSELECT "invitations".* FROM "invitations" WHERE "invitations"."token" = $1 LIMIT $2[0m  [["token", "nhq0ubv2FmTwaaFzVQxT8_8jGPFDVQlxvbTxz7IUla0"], ["LIMIT", 1]]
+  [1m[36mTRANSACTION (0.2ms)[0m  [1m[31mROLLBACK[0m
+  [1m[36mTRANSACTION (0.0ms)[0m  [1m[35mBEGIN[0m
+  [1m[36mTRANSACTION (0.0ms)[0m  [1m[31mROLLBACK[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mBEGIN[0m
+  [1m[36mTRANSACTION (0.0ms)[0m  [1m[31mROLLBACK[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mBEGIN[0m
+  [1m[36mTRANSACTION (0.0ms)[0m  [1m[31mROLLBACK[0m
+  [1m[36mTRANSACTION (0.0ms)[0m  [1m[35mBEGIN[0m
+  [1m[36mTRANSACTION (0.0ms)[0m  [1m[35mSAVEPOINT active_record_1[0m
+  [1m[36mRailsMcp::Account Create (0.2ms)[0m  [1m[32mINSERT INTO "accounts" ("name", "onboarded_at", "created_at", "updated_at") VALUES ($1, $2, $3, $4) RETURNING "id"[0m  [["name", "Acme"], ["onboarded_at", nil], ["created_at", "2026-05-23 09:55:30.165126"], ["updated_at", "2026-05-23 09:55:30.165126"]]
+  [1m[36mTRANSACTION (0.0ms)[0m  [1m[35mRELEASE SAVEPOINT active_record_1[0m
+  [1m[36mRailsMcp::User Exists? (0.1ms)[0m  [1m[34mSELECT 1 AS one FROM "users" WHERE "users"."identity_id" IS NULL LIMIT $1[0m  [["LIMIT", 1]]
+  [1m[36mRailsMcp::User Exists? (0.1ms)[0m  [1m[34mSELECT 1 AS one FROM "users" WHERE "users"."email" IS NULL LIMIT $1[0m  [["LIMIT", 1]]
+  [1m[36mTRANSACTION (0.2ms)[0m  [1m[31mROLLBACK[0m
+  [1m[36mTRANSACTION (0.0ms)[0m  [1m[35mBEGIN[0m
+  [1m[36mTRANSACTION (0.0ms)[0m  [1m[35mSAVEPOINT active_record_1[0m
+  [1m[36mRailsMcp::Account Create (0.2ms)[0m  [1m[32mINSERT INTO "accounts" ("name", "onboarded_at", "created_at", "updated_at") VALUES ($1, $2, $3, $4) RETURNING "id"[0m  [["name", "Acme"], ["onboarded_at", nil], ["created_at", "2026-05-23 09:55:30.166604"], ["updated_at", "2026-05-23 09:55:30.166604"]]
+  [1m[36mTRANSACTION (0.0ms)[0m  [1m[35mRELEASE SAVEPOINT active_record_1[0m
+  [1m[36mTRANSACTION (0.0ms)[0m  [1m[35mSAVEPOINT active_record_1[0m
+  [1m[36mRailsMcp::User Exists? (0.1ms)[0m  [1m[34mSELECT 1 AS one FROM "users" WHERE "users"."identity_id" = $1 LIMIT $2[0m  [["identity_id", "id-1"], ["LIMIT", 1]]
+  [1m[36mRailsMcp::User Exists? (0.1ms)[0m  [1m[34mSELECT 1 AS one FROM "users" WHERE LOWER("users"."email") = LOWER($1) LIMIT $2[0m  [["email", "foo@example.com"], ["LIMIT", 1]]
+  [1m[36mRailsMcp::User Create (0.1ms)[0m  [1m[32mINSERT INTO "users" ("account_id", "email", "name", "identity_id", "created_at", "updated_at") VALUES ($1, $2, $3, $4, $5, $6) RETURNING "id"[0m  [["account_id", 244], ["email", "foo@example.com"], ["name", nil], ["identity_id", "id-1"], ["created_at", "2026-05-23 09:55:30.167563"], ["updated_at", "2026-05-23 09:55:30.167563"]]
+  [1m[36mTRANSACTION (0.0ms)[0m  [1m[35mRELEASE SAVEPOINT active_record_1[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[31mROLLBACK[0m
+  [1m[36mTRANSACTION (0.0ms)[0m  [1m[35mBEGIN[0m
+  [1m[36mTRANSACTION (0.0ms)[0m  [1m[35mSAVEPOINT active_record_1[0m
+  [1m[36mRailsMcp::Account Create (0.2ms)[0m  [1m[32mINSERT INTO "accounts" ("name", "onboarded_at", "created_at", "updated_at") VALUES ($1, $2, $3, $4) RETURNING "id"[0m  [["name", "Acme"], ["onboarded_at", nil], ["created_at", "2026-05-23 09:55:30.168412"], ["updated_at", "2026-05-23 09:55:30.168412"]]
+  [1m[36mTRANSACTION (0.0ms)[0m  [1m[35mRELEASE SAVEPOINT active_record_1[0m
+  [1m[36mTRANSACTION (0.0ms)[0m  [1m[35mSAVEPOINT active_record_1[0m
+  [1m[36mRailsMcp::User Exists? (0.2ms)[0m  [1m[34mSELECT 1 AS one FROM "users" WHERE "users"."identity_id" = $1 LIMIT $2[0m  [["identity_id", "id-1"], ["LIMIT", 1]]
+  [1m[36mRailsMcp::User Exists? (0.1ms)[0m  [1m[34mSELECT 1 AS one FROM "users" WHERE LOWER("users"."email") = LOWER($1) LIMIT $2[0m  [["email", "a@example.com"], ["LIMIT", 1]]
+  [1m[36mRailsMcp::User Create (0.1ms)[0m  [1m[32mINSERT INTO "users" ("account_id", "email", "name", "identity_id", "created_at", "updated_at") VALUES ($1, $2, $3, $4, $5, $6) RETURNING "id"[0m  [["account_id", 245], ["email", "a@example.com"], ["name", nil], ["identity_id", "id-1"], ["created_at", "2026-05-23 09:55:30.169398"], ["updated_at", "2026-05-23 09:55:30.169398"]]
+  [1m[36mTRANSACTION (0.0ms)[0m  [1m[35mRELEASE SAVEPOINT active_record_1[0m
+  [1m[36mRailsMcp::User Exists? (0.1ms)[0m  [1m[34mSELECT 1 AS one FROM "users" WHERE "users"."identity_id" = $1 LIMIT $2[0m  [["identity_id", "id-2"], ["LIMIT", 1]]
+  [1m[36mRailsMcp::User Exists? (0.1ms)[0m  [1m[34mSELECT 1 AS one FROM "users" WHERE LOWER("users"."email") = LOWER($1) LIMIT $2[0m  [["email", "a@example.com"], ["LIMIT", 1]]
+  [1m[36mTRANSACTION (0.2ms)[0m  [1m[31mROLLBACK[0m
+  [1m[36mTRANSACTION (0.0ms)[0m  [1m[35mBEGIN[0m
+  [1m[36mTRANSACTION (0.0ms)[0m  [1m[35mSAVEPOINT active_record_1[0m
+  [1m[36mRailsMcp::Account Create (0.2ms)[0m  [1m[32mINSERT INTO "accounts" ("name", "onboarded_at", "created_at", "updated_at") VALUES ($1, $2, $3, $4) RETURNING "id"[0m  [["name", "Acme"], ["onboarded_at", nil], ["created_at", "2026-05-23 09:55:30.171768"], ["updated_at", "2026-05-23 09:55:30.171768"]]
+  [1m[36mTRANSACTION (0.0ms)[0m  [1m[35mRELEASE SAVEPOINT active_record_1[0m
+  [1m[36mTRANSACTION (0.0ms)[0m  [1m[35mSAVEPOINT active_record_1[0m
+  [1m[36mRailsMcp::User Exists? (0.2ms)[0m  [1m[34mSELECT 1 AS one FROM "users" WHERE "users"."identity_id" = $1 LIMIT $2[0m  [["identity_id", "shared"], ["LIMIT", 1]]
+  [1m[36mRailsMcp::User Exists? (0.1ms)[0m  [1m[34mSELECT 1 AS one FROM "users" WHERE LOWER("users"."email") = LOWER($1) LIMIT $2[0m  [["email", "a@example.com"], ["LIMIT", 1]]
+  [1m[36mRailsMcp::User Create (0.1ms)[0m  [1m[32mINSERT INTO "users" ("account_id", "email", "name", "identity_id", "created_at", "updated_at") VALUES ($1, $2, $3, $4, $5, $6) RETURNING "id"[0m  [["account_id", 246], ["email", "a@example.com"], ["name", nil], ["identity_id", "shared"], ["created_at", "2026-05-23 09:55:30.173073"], ["updated_at", "2026-05-23 09:55:30.173073"]]
+  [1m[36mTRANSACTION (0.0ms)[0m  [1m[35mRELEASE SAVEPOINT active_record_1[0m
+  [1m[36mTRANSACTION (0.0ms)[0m  [1m[35mSAVEPOINT active_record_1[0m
+  [1m[36mRailsMcp::Account Create (0.2ms)[0m  [1m[32mINSERT INTO "accounts" ("name", "onboarded_at", "created_at", "updated_at") VALUES ($1, $2, $3, $4) RETURNING "id"[0m  [["name", "Other"], ["onboarded_at", nil], ["created_at", "2026-05-23 09:55:30.173720"], ["updated_at", "2026-05-23 09:55:30.173720"]]
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mRELEASE SAVEPOINT active_record_1[0m
+  [1m[36mRailsMcp::User Exists? (0.1ms)[0m  [1m[34mSELECT 1 AS one FROM "users" WHERE "users"."identity_id" = $1 LIMIT $2[0m  [["identity_id", "shared"], ["LIMIT", 1]]
+  [1m[36mRailsMcp::User Exists? (0.1ms)[0m  [1m[34mSELECT 1 AS one FROM "users" WHERE LOWER("users"."email") = LOWER($1) LIMIT $2[0m  [["email", "b@example.com"], ["LIMIT", 1]]
+  [1m[36mTRANSACTION (0.2ms)[0m  [1m[31mROLLBACK[0m
+  [1m[36mTRANSACTION (0.0ms)[0m  [1m[35mBEGIN[0m
+  [1m[36mDoorkeeper::Application Count (1.1ms)[0m  [1m[34mSELECT COUNT(*) FROM "oauth_applications"[0m
+Started POST "/oauth/register" for 127.0.0.1 at 2026-05-23 10:55:30 +0100
+Processing by RailsMcp::Oauth::ClientsController#create as HTML
+  Parameters: {"client_name" => "Claude", "redirect_uris" => ["https://claude.example/cb"], "grant_types" => ["authorization_code", "refresh_token"], "client" => {"client_name" => "Claude", "redirect_uris" => ["https://claude.example/cb"], "grant_types" => ["authorization_code", "refresh_token"]}}
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mSAVEPOINT active_record_1[0m
+  [1m[36mDoorkeeper::Application Exists? (0.3ms)[0m  [1m[34mSELECT 1 AS one FROM "oauth_applications" WHERE "oauth_applications"."uid" = $1 LIMIT $2[0m  [["uid", "21Xuzk8V8fhozI92JT-JrzcCgkKkfDmPvU-kmAp0OhQ"], ["LIMIT", 1]]
+  [1m[36mDoorkeeper::Application Create (0.5ms)[0m  [1m[32mINSERT INTO "oauth_applications" ("name", "uid", "secret", "redirect_uri", "scopes", "confidential", "created_at", "updated_at") VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING "id"[0m  [["name", "Claude"], ["uid", "21Xuzk8V8fhozI92JT-JrzcCgkKkfDmPvU-kmAp0OhQ"], ["secret", nil], ["redirect_uri", "https://claude.example/cb"], ["scopes", "read write"], ["confidential", false], ["created_at", "2026-05-23 09:55:30.204934"], ["updated_at", "2026-05-23 09:55:30.204934"]]
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mRELEASE SAVEPOINT active_record_1[0m
+Completed 201 Created in 13ms (Views: 0.4ms | ActiveRecord: 2.6ms (2 queries, 0 cached) | GC: 6.3ms)
+  [1m[36mDoorkeeper::Application Count (0.2ms)[0m  [1m[34mSELECT COUNT(*) FROM "oauth_applications"[0m
+  [1m[36mDoorkeeper::Application Load (0.2ms)[0m  [1m[34mSELECT "oauth_applications".* FROM "oauth_applications" ORDER BY "oauth_applications"."id" DESC LIMIT $1[0m  [["LIMIT", 1]]
+  [1m[36mTRANSACTION (0.3ms)[0m  [1m[31mROLLBACK[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mBEGIN[0m
+Started POST "/oauth/register" for 127.0.0.1 at 2026-05-23 10:55:30 +0100
+Processing by RailsMcp::Oauth::ClientsController#create as HTML
+  Parameters: {"client_name" => "Claude", "client" => {"client_name" => "Claude"}}
+Completed 400 Bad Request in 0ms (Views: 0.0ms | ActiveRecord: 0.0ms (0 queries, 0 cached) | GC: 0.0ms)
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[31mROLLBACK[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mBEGIN[0m
+Started POST "/oauth/register" for 127.0.0.1 at 2026-05-23 10:55:30 +0100
+Processing by RailsMcp::Oauth::ClientsController#create as HTML
+  Parameters: {"redirect_uris" => ["https://example/cb"], "grant_types" => ["implicit"], "client" => {"redirect_uris" => ["https://example/cb"], "grant_types" => ["implicit"]}}
+Completed 400 Bad Request in 0ms (Views: 0.0ms | ActiveRecord: 0.0ms (0 queries, 0 cached) | GC: 0.0ms)
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[31mROLLBACK[0m
+  [1m[36mTRANSACTION (0.0ms)[0m  [1m[35mBEGIN[0m
+  [1m[36mTRANSACTION (0.0ms)[0m  [1m[35mSAVEPOINT active_record_1[0m
+  [1m[36mRailsMcp::Account Create (0.3ms)[0m  [1m[32mINSERT INTO "accounts" ("name", "onboarded_at", "created_at", "updated_at") VALUES ($1, $2, $3, $4) RETURNING "id"[0m  [["name", "Acme"], ["onboarded_at", nil], ["created_at", "2026-05-23 09:55:30.216779"], ["updated_at", "2026-05-23 09:55:30.216779"]]
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mRELEASE SAVEPOINT active_record_1[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mSAVEPOINT active_record_1[0m
+  [1m[36mRailsMcp::User Exists? (0.3ms)[0m  [1m[34mSELECT 1 AS one FROM "users" WHERE "users"."identity_id" = $1 LIMIT $2[0m  [["identity_id", "host"], ["LIMIT", 1]]
+  [1m[36mRailsMcp::User Exists? (0.1ms)[0m  [1m[34mSELECT 1 AS one FROM "users" WHERE LOWER("users"."email") = LOWER($1) LIMIT $2[0m  [["email", "host@example.com"], ["LIMIT", 1]]
+  [1m[36mRailsMcp::User Create (0.2ms)[0m  [1m[32mINSERT INTO "users" ("account_id", "email", "name", "identity_id", "created_at", "updated_at") VALUES ($1, $2, $3, $4, $5, $6) RETURNING "id"[0m  [["account_id", 248], ["email", "host@example.com"], ["name", nil], ["identity_id", "host"], ["created_at", "2026-05-23 09:55:30.218251"], ["updated_at", "2026-05-23 09:55:30.218251"]]
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mRELEASE SAVEPOINT active_record_1[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mSAVEPOINT active_record_1[0m
+  [1m[36mRailsMcp::Invitation Exists? (0.3ms)[0m  [1m[34mSELECT 1 AS one FROM "invitations" WHERE "invitations"."token" = $1 LIMIT $2[0m  [["token", "X2-XxaCmhftsUUlN0K9LvRC9hMB4t5BuvXELotCREYk"], ["LIMIT", 1]]
+  [1m[36mRailsMcp::Invitation Create (0.3ms)[0m  [1m[32mINSERT INTO "invitations" ("account_id", "invited_by_id", "email", "token", "expires_at", "accepted_at", "revoked_at", "created_at", "updated_at") VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING "id"[0m  [["account_id", 248], ["invited_by_id", 233], ["email", "guest@example.com"], ["token", "X2-XxaCmhftsUUlN0K9LvRC9hMB4t5BuvXELotCREYk"], ["expires_at", "2026-06-06 09:55:30.218928"], ["accepted_at", nil], ["revoked_at", nil], ["created_at", "2026-05-23 09:55:30.219361"], ["updated_at", "2026-05-23 09:55:30.219361"]]
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mRELEASE SAVEPOINT active_record_1[0m
+Started GET "/invite/X2-XxaCmhftsUUlN0K9LvRC9hMB4t5BuvXELotCREYk" for 127.0.0.1 at 2026-05-23 10:55:30 +0100
+Processing by RailsMcp::InvitationsController#show as HTML
+  Parameters: {"token" => "X2-XxaCmhftsUUlN0K9LvRC9hMB4t5BuvXELotCREYk"}
+  [1m[36mRailsMcp::Invitation Load (0.2ms)[0m  [1m[34mSELECT "invitations".* FROM "invitations" WHERE "invitations"."token" = $1 LIMIT $2[0m  [["token", "X2-XxaCmhftsUUlN0K9LvRC9hMB4t5BuvXELotCREYk"], ["LIMIT", 1]]
+  Rendering /Users/matt/Development/basecamp-mcp-rails/engines/rails_mcp/app/views/rails_mcp/invitations/show.html.erb
+  [1m[36mRailsMcp::User Load (0.1ms)[0m  [1m[34mSELECT "users".* FROM "users" WHERE "users"."id" = $1 LIMIT $2[0m  [["id", 233], ["LIMIT", 1]]
+  [1m[36mRailsMcp::Account Load (0.1ms)[0m  [1m[34mSELECT "accounts".* FROM "accounts" WHERE "accounts"."id" = $1 LIMIT $2[0m  [["id", 248], ["LIMIT", 1]]
+  Rendered /Users/matt/Development/basecamp-mcp-rails/engines/rails_mcp/app/views/rails_mcp/invitations/show.html.erb (Duration: 0.8ms | GC: 0.0ms)
+Completed 200 OK in 2ms (Views: 1.6ms | ActiveRecord: 0.4ms (3 queries, 0 cached) | GC: 0.0ms)
+  [1m[36mTRANSACTION (0.2ms)[0m  [1m[31mROLLBACK[0m
+  [1m[36mTRANSACTION (0.0ms)[0m  [1m[35mBEGIN[0m
+  [1m[36mTRANSACTION (0.0ms)[0m  [1m[35mSAVEPOINT active_record_1[0m
+  [1m[36mRailsMcp::Account Create (0.2ms)[0m  [1m[32mINSERT INTO "accounts" ("name", "onboarded_at", "created_at", "updated_at") VALUES ($1, $2, $3, $4) RETURNING "id"[0m  [["name", "Acme"], ["onboarded_at", nil], ["created_at", "2026-05-23 09:55:30.225101"], ["updated_at", "2026-05-23 09:55:30.225101"]]
+  [1m[36mTRANSACTION (0.0ms)[0m  [1m[35mRELEASE SAVEPOINT active_record_1[0m
+  [1m[36mTRANSACTION (0.0ms)[0m  [1m[35mSAVEPOINT active_record_1[0m
+  [1m[36mRailsMcp::User Exists? (0.3ms)[0m  [1m[34mSELECT 1 AS one FROM "users" WHERE "users"."identity_id" = $1 LIMIT $2[0m  [["identity_id", "host"], ["LIMIT", 1]]
+  [1m[36mRailsMcp::User Exists? (0.2ms)[0m  [1m[34mSELECT 1 AS one FROM "users" WHERE LOWER("users"."email") = LOWER($1) LIMIT $2[0m  [["email", "host@example.com"], ["LIMIT", 1]]
+  [1m[36mRailsMcp::User Create (0.5ms)[0m  [1m[32mINSERT INTO "users" ("account_id", "email", "name", "identity_id", "created_at", "updated_at") VALUES ($1, $2, $3, $4, $5, $6) RETURNING "id"[0m  [["account_id", 249], ["email", "host@example.com"], ["name", nil], ["identity_id", "host"], ["created_at", "2026-05-23 09:55:30.226636"], ["updated_at", "2026-05-23 09:55:30.226636"]]
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mRELEASE SAVEPOINT active_record_1[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mSAVEPOINT active_record_1[0m
+  [1m[36mRailsMcp::Invitation Exists? (0.3ms)[0m  [1m[34mSELECT 1 AS one FROM "invitations" WHERE "invitations"."token" = $1 LIMIT $2[0m  [["token", "RY-2hv-d5Api2m1ty3w6kUh1PxnXRVOM7Z6sR_o1VOE"], ["LIMIT", 1]]
+  [1m[36mRailsMcp::Invitation Create (0.2ms)[0m  [1m[32mINSERT INTO "invitations" ("account_id", "invited_by_id", "email", "token", "expires_at", "accepted_at", "revoked_at", "created_at", "updated_at") VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING "id"[0m  [["account_id", 249], ["invited_by_id", 234], ["email", "guest@example.com"], ["token", "RY-2hv-d5Api2m1ty3w6kUh1PxnXRVOM7Z6sR_o1VOE"], ["expires_at", "2026-06-06 09:55:30.227558"], ["accepted_at", nil], ["revoked_at", nil], ["created_at", "2026-05-23 09:55:30.227953"], ["updated_at", "2026-05-23 09:55:30.227953"]]
+  [1m[36mTRANSACTION (0.0ms)[0m  [1m[35mRELEASE SAVEPOINT active_record_1[0m
+  [1m[36mTRANSACTION (0.0ms)[0m  [1m[35mSAVEPOINT active_record_1[0m
+  [1m[36mRailsMcp::Invitation Update (0.3ms)[0m  [1m[33mUPDATE "invitations" SET "accepted_at" = $1, "updated_at" = $2 WHERE "invitations"."id" = $3[0m  [["accepted_at", "2026-05-23 09:55:30.228395"], ["updated_at", "2026-05-23 09:55:30.228486"], ["id", 117]]
+  [1m[36mTRANSACTION (0.0ms)[0m  [1m[35mRELEASE SAVEPOINT active_record_1[0m
+Started GET "/invite/RY-2hv-d5Api2m1ty3w6kUh1PxnXRVOM7Z6sR_o1VOE" for 127.0.0.1 at 2026-05-23 10:55:30 +0100
+Processing by RailsMcp::InvitationsController#show as HTML
+  Parameters: {"token" => "RY-2hv-d5Api2m1ty3w6kUh1PxnXRVOM7Z6sR_o1VOE"}
+  [1m[36mRailsMcp::Invitation Load (0.2ms)[0m  [1m[34mSELECT "invitations".* FROM "invitations" WHERE "invitations"."token" = $1 LIMIT $2[0m  [["token", "RY-2hv-d5Api2m1ty3w6kUh1PxnXRVOM7Z6sR_o1VOE"], ["LIMIT", 1]]
+  Rendering /Users/matt/Development/basecamp-mcp-rails/engines/rails_mcp/app/views/rails_mcp/invitations/show.html.erb
+  [1m[36mRailsMcp::User Load (0.1ms)[0m  [1m[34mSELECT "users".* FROM "users" WHERE "users"."id" = $1 LIMIT $2[0m  [["id", 234], ["LIMIT", 1]]
+  Rendered /Users/matt/Development/basecamp-mcp-rails/engines/rails_mcp/app/views/rails_mcp/invitations/show.html.erb (Duration: 0.3ms | GC: 0.0ms)
+Completed 200 OK in 1ms (Views: 0.3ms | ActiveRecord: 0.3ms (2 queries, 0 cached) | GC: 0.0ms)
+  [1m[36mTRANSACTION (0.2ms)[0m  [1m[31mROLLBACK[0m
+  [1m[36mTRANSACTION (0.0ms)[0m  [1m[35mBEGIN[0m
+  [1m[36mTRANSACTION (0.7ms)[0m  [1m[35mSAVEPOINT active_record_1[0m
+  [1m[36mRailsMcp::Account Create (0.9ms)[0m  [1m[32mINSERT INTO "accounts" ("name", "onboarded_at", "created_at", "updated_at") VALUES ($1, $2, $3, $4) RETURNING "id"[0m  [["name", "Acme"], ["onboarded_at", nil], ["created_at", "2026-05-23 09:55:30.231487"], ["updated_at", "2026-05-23 09:55:30.231487"]]
+  [1m[36mTRANSACTION (0.0ms)[0m  [1m[35mRELEASE SAVEPOINT active_record_1[0m
+  [1m[36mTRANSACTION (0.0ms)[0m  [1m[35mSAVEPOINT active_record_1[0m
+  [1m[36mRailsMcp::User Exists? (0.3ms)[0m  [1m[34mSELECT 1 AS one FROM "users" WHERE "users"."identity_id" = $1 LIMIT $2[0m  [["identity_id", "host"], ["LIMIT", 1]]
+  [1m[36mRailsMcp::User Exists? (0.1ms)[0m  [1m[34mSELECT 1 AS one FROM "users" WHERE LOWER("users"."email") = LOWER($1) LIMIT $2[0m  [["email", "host@example.com"], ["LIMIT", 1]]
+  [1m[36mRailsMcp::User Create (0.2ms)[0m  [1m[32mINSERT INTO "users" ("account_id", "email", "name", "identity_id", "created_at", "updated_at") VALUES ($1, $2, $3, $4, $5, $6) RETURNING "id"[0m  [["account_id", 250], ["email", "host@example.com"], ["name", nil], ["identity_id", "host"], ["created_at", "2026-05-23 09:55:30.233603"], ["updated_at", "2026-05-23 09:55:30.233603"]]
+  [1m[36mTRANSACTION (0.0ms)[0m  [1m[35mRELEASE SAVEPOINT active_record_1[0m
+  [1m[36mTRANSACTION (0.0ms)[0m  [1m[35mSAVEPOINT active_record_1[0m
+  [1m[36mRailsMcp::Invitation Exists? (0.2ms)[0m  [1m[34mSELECT 1 AS one FROM "invitations" WHERE "invitations"."token" = $1 LIMIT $2[0m  [["token", "or1GS1qkYcqY8mmFct5Pre0z-sSMo5yn9SPhKQej3g4"], ["LIMIT", 1]]
+  [1m[36mRailsMcp::Invitation Create (0.2ms)[0m  [1m[32mINSERT INTO "invitations" ("account_id", "invited_by_id", "email", "token", "expires_at", "accepted_at", "revoked_at", "created_at", "updated_at") VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING "id"[0m  [["account_id", 250], ["invited_by_id", 235], ["email", "guest@example.com"], ["token", "or1GS1qkYcqY8mmFct5Pre0z-sSMo5yn9SPhKQej3g4"], ["expires_at", "2026-06-06 09:55:30.234135"], ["accepted_at", nil], ["revoked_at", nil], ["created_at", "2026-05-23 09:55:30.234453"], ["updated_at", "2026-05-23 09:55:30.234453"]]
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mRELEASE SAVEPOINT active_record_1[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mSAVEPOINT active_record_1[0m
+  [1m[36mRailsMcp::Invitation Update (0.4ms)[0m  [1m[33mUPDATE "invitations" SET "revoked_at" = $1, "updated_at" = $2 WHERE "invitations"."id" = $3[0m  [["revoked_at", "2026-05-23 09:55:30.234883"], ["updated_at", "2026-05-23 09:55:30.234975"], ["id", 118]]
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mRELEASE SAVEPOINT active_record_1[0m
+Started GET "/invite/or1GS1qkYcqY8mmFct5Pre0z-sSMo5yn9SPhKQej3g4" for 127.0.0.1 at 2026-05-23 10:55:30 +0100
+Processing by RailsMcp::InvitationsController#show as HTML
+  Parameters: {"token" => "or1GS1qkYcqY8mmFct5Pre0z-sSMo5yn9SPhKQej3g4"}
+  [1m[36mRailsMcp::Invitation Load (0.1ms)[0m  [1m[34mSELECT "invitations".* FROM "invitations" WHERE "invitations"."token" = $1 LIMIT $2[0m  [["token", "or1GS1qkYcqY8mmFct5Pre0z-sSMo5yn9SPhKQej3g4"], ["LIMIT", 1]]
+  Rendering /Users/matt/Development/basecamp-mcp-rails/engines/rails_mcp/app/views/rails_mcp/invitations/show.html.erb
+  [1m[36mRailsMcp::User Load (0.2ms)[0m  [1m[34mSELECT "users".* FROM "users" WHERE "users"."id" = $1 LIMIT $2[0m  [["id", 235], ["LIMIT", 1]]
+  Rendered /Users/matt/Development/basecamp-mcp-rails/engines/rails_mcp/app/views/rails_mcp/invitations/show.html.erb (Duration: 0.3ms | GC: 0.0ms)
+Completed 200 OK in 1ms (Views: 0.3ms | ActiveRecord: 0.3ms (2 queries, 0 cached) | GC: 0.0ms)
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[31mROLLBACK[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mBEGIN[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mSAVEPOINT active_record_1[0m
+  [1m[36mRailsMcp::Account Create (0.3ms)[0m  [1m[32mINSERT INTO "accounts" ("name", "onboarded_at", "created_at", "updated_at") VALUES ($1, $2, $3, $4) RETURNING "id"[0m  [["name", "Acme"], ["onboarded_at", nil], ["created_at", "2026-05-23 09:55:30.238221"], ["updated_at", "2026-05-23 09:55:30.238221"]]
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mRELEASE SAVEPOINT active_record_1[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mSAVEPOINT active_record_1[0m
+  [1m[36mRailsMcp::User Exists? (0.3ms)[0m  [1m[34mSELECT 1 AS one FROM "users" WHERE "users"."identity_id" = $1 LIMIT $2[0m  [["identity_id", "host"], ["LIMIT", 1]]
+  [1m[36mRailsMcp::User Exists? (0.2ms)[0m  [1m[34mSELECT 1 AS one FROM "users" WHERE LOWER("users"."email") = LOWER($1) LIMIT $2[0m  [["email", "host@example.com"], ["LIMIT", 1]]
+  [1m[36mRailsMcp::User Create (0.2ms)[0m  [1m[32mINSERT INTO "users" ("account_id", "email", "name", "identity_id", "created_at", "updated_at") VALUES ($1, $2, $3, $4, $5, $6) RETURNING "id"[0m  [["account_id", 251], ["email", "host@example.com"], ["name", nil], ["identity_id", "host"], ["created_at", "2026-05-23 09:55:30.239522"], ["updated_at", "2026-05-23 09:55:30.239522"]]
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mRELEASE SAVEPOINT active_record_1[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mSAVEPOINT active_record_1[0m
+  [1m[36mRailsMcp::Invitation Exists? (0.2ms)[0m  [1m[34mSELECT 1 AS one FROM "invitations" WHERE "invitations"."token" = $1 LIMIT $2[0m  [["token", "LBpbQExcltvkgX07hV9N4HOH2WDGw5sTgXx1LVR-lqA"], ["LIMIT", 1]]
+  [1m[36mRailsMcp::Invitation Create (0.2ms)[0m  [1m[32mINSERT INTO "invitations" ("account_id", "invited_by_id", "email", "token", "expires_at", "accepted_at", "revoked_at", "created_at", "updated_at") VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING "id"[0m  [["account_id", 251], ["invited_by_id", 236], ["email", "guest@example.com"], ["token", "LBpbQExcltvkgX07hV9N4HOH2WDGw5sTgXx1LVR-lqA"], ["expires_at", "2026-06-06 09:55:30.240092"], ["accepted_at", nil], ["revoked_at", nil], ["created_at", "2026-05-23 09:55:30.240469"], ["updated_at", "2026-05-23 09:55:30.240469"]]
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mRELEASE SAVEPOINT active_record_1[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mSAVEPOINT active_record_1[0m
+  [1m[36mRailsMcp::Invitation Update (0.3ms)[0m  [1m[33mUPDATE "invitations" SET "expires_at" = $1, "updated_at" = $2 WHERE "invitations"."id" = $3[0m  [["expires_at", "2026-05-22 09:55:30.240963"], ["updated_at", "2026-05-23 09:55:30.241063"], ["id", 119]]
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mRELEASE SAVEPOINT active_record_1[0m
+Started GET "/invite/LBpbQExcltvkgX07hV9N4HOH2WDGw5sTgXx1LVR-lqA" for 127.0.0.1 at 2026-05-23 10:55:30 +0100
+Processing by RailsMcp::InvitationsController#show as HTML
+  Parameters: {"token" => "LBpbQExcltvkgX07hV9N4HOH2WDGw5sTgXx1LVR-lqA"}
+  [1m[36mRailsMcp::Invitation Load (0.1ms)[0m  [1m[34mSELECT "invitations".* FROM "invitations" WHERE "invitations"."token" = $1 LIMIT $2[0m  [["token", "LBpbQExcltvkgX07hV9N4HOH2WDGw5sTgXx1LVR-lqA"], ["LIMIT", 1]]
+  Rendering /Users/matt/Development/basecamp-mcp-rails/engines/rails_mcp/app/views/rails_mcp/invitations/show.html.erb
+  [1m[36mRailsMcp::User Load (0.1ms)[0m  [1m[34mSELECT "users".* FROM "users" WHERE "users"."id" = $1 LIMIT $2[0m  [["id", 236], ["LIMIT", 1]]
+  Rendered /Users/matt/Development/basecamp-mcp-rails/engines/rails_mcp/app/views/rails_mcp/invitations/show.html.erb (Duration: 0.3ms | GC: 0.0ms)
+Completed 200 OK in 1ms (Views: 0.3ms | ActiveRecord: 0.2ms (2 queries, 0 cached) | GC: 0.0ms)
+  [1m[36mTRANSACTION (0.2ms)[0m  [1m[31mROLLBACK[0m
+  [1m[36mTRANSACTION (0.0ms)[0m  [1m[35mBEGIN[0m
+Started GET "/invite/bogus" for 127.0.0.1 at 2026-05-23 10:55:30 +0100
+Processing by RailsMcp::InvitationsController#show as HTML
+  Parameters: {"token" => "bogus"}
+  [1m[36mRailsMcp::Invitation Load (0.1ms)[0m  [1m[34mSELECT "invitations".* FROM "invitations" WHERE "invitations"."token" = $1 LIMIT $2[0m  [["token", "bogus"], ["LIMIT", 1]]
+  Rendering /Users/matt/Development/basecamp-mcp-rails/engines/rails_mcp/app/views/rails_mcp/invitations/show.html.erb
+  Rendered /Users/matt/Development/basecamp-mcp-rails/engines/rails_mcp/app/views/rails_mcp/invitations/show.html.erb (Duration: 0.0ms | GC: 0.0ms)
+Completed 404 Not Found in 0ms (Views: 0.1ms | ActiveRecord: 0.1ms (1 query, 0 cached) | GC: 0.0ms)
+  [1m[36mTRANSACTION (0.0ms)[0m  [1m[31mROLLBACK[0m
+  [1m[36mTRANSACTION (0.0ms)[0m  [1m[35mBEGIN[0m
+Started POST "/mcp" for 127.0.0.1 at 2026-05-23 10:55:30 +0100
+Processing by RailsMcp::McpController#handle as HTML
+  Parameters: {"jsonrpc" => "2.0", "id" => 1, "method" => "initialize", "mcp" => {"jsonrpc" => "2.0", "id" => 1, "method" => "initialize"}}
+Filter chain halted as :doorkeeper_authorize! rendered or redirected
+Completed 401 Unauthorized in 2ms (Views: 0.1ms | ActiveRecord: 0.0ms (0 queries, 0 cached) | GC: 0.0ms)
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[31mROLLBACK[0m
+  [1m[36mTRANSACTION (0.0ms)[0m  [1m[35mBEGIN[0m
+  [1m[36mTRANSACTION (0.0ms)[0m  [1m[35mSAVEPOINT active_record_1[0m
+  [1m[36mRailsMcp::Account Create (0.3ms)[0m  [1m[32mINSERT INTO "accounts" ("name", "onboarded_at", "created_at", "updated_at") VALUES ($1, $2, $3, $4) RETURNING "id"[0m  [["name", "Acme"], ["onboarded_at", nil], ["created_at", "2026-05-23 09:55:30.251307"], ["updated_at", "2026-05-23 09:55:30.251307"]]
+  [1m[36mTRANSACTION (0.0ms)[0m  [1m[35mRELEASE SAVEPOINT active_record_1[0m
+  [1m[36mTRANSACTION (0.0ms)[0m  [1m[35mSAVEPOINT active_record_1[0m
+  [1m[36mRailsMcp::User Exists? (0.2ms)[0m  [1m[34mSELECT 1 AS one FROM "users" WHERE "users"."identity_id" = $1 LIMIT $2[0m  [["identity_id", "id-1"], ["LIMIT", 1]]
+  [1m[36mRailsMcp::User Exists? (0.1ms)[0m  [1m[34mSELECT 1 AS one FROM "users" WHERE LOWER("users"."email") = LOWER($1) LIMIT $2[0m  [["email", "u@example.com"], ["LIMIT", 1]]
+  [1m[36mRailsMcp::User Create (0.2ms)[0m  [1m[32mINSERT INTO "users" ("account_id", "email", "name", "identity_id", "created_at", "updated_at") VALUES ($1, $2, $3, $4, $5, $6) RETURNING "id"[0m  [["account_id", 252], ["email", "u@example.com"], ["name", nil], ["identity_id", "id-1"], ["created_at", "2026-05-23 09:55:30.252582"], ["updated_at", "2026-05-23 09:55:30.252582"]]
+  [1m[36mTRANSACTION (0.0ms)[0m  [1m[35mRELEASE SAVEPOINT active_record_1[0m
+  [1m[36mTRANSACTION (0.0ms)[0m  [1m[35mSAVEPOINT active_record_1[0m
+  [1m[36mDoorkeeper::Application Exists? (0.2ms)[0m  [1m[34mSELECT 1 AS one FROM "oauth_applications" WHERE "oauth_applications"."uid" = $1 LIMIT $2[0m  [["uid", "vLa8KhD8JNm6n7XSwmdenZ-p7WZv_487rSpUuc966bs"], ["LIMIT", 1]]
+  [1m[36mDoorkeeper::Application Create (0.1ms)[0m  [1m[32mINSERT INTO "oauth_applications" ("name", "uid", "secret", "redirect_uri", "scopes", "confidential", "created_at", "updated_at") VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING "id"[0m  [["name", "Test"], ["uid", "vLa8KhD8JNm6n7XSwmdenZ-p7WZv_487rSpUuc966bs"], ["secret", nil], ["redirect_uri", "https://example/cb"], ["scopes", "read write"], ["confidential", false], ["created_at", "2026-05-23 09:55:30.253385"], ["updated_at", "2026-05-23 09:55:30.253385"]]
+  [1m[36mTRANSACTION (0.0ms)[0m  [1m[35mRELEASE SAVEPOINT active_record_1[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mSAVEPOINT active_record_1[0m
+  [1m[36mDoorkeeper::Application Load (0.5ms)[0m  [1m[34mSELECT "oauth_applications".* FROM "oauth_applications" WHERE "oauth_applications"."id" = $1 LIMIT $2[0m  [["id", 42], ["LIMIT", 1]]
+  [1m[36mDoorkeeper::AccessToken Exists? (0.8ms)[0m  [1m[34mSELECT 1 AS one FROM "oauth_access_tokens" WHERE "oauth_access_tokens"."token" = $1 LIMIT $2[0m  [["token", "72iHBPiyZ3CpLMKLva8cCUSauk8XIxcH3reKVVYW2JU"], ["LIMIT", 1]]
+  [1m[36mDoorkeeper::AccessToken Create (0.3ms)[0m  [1m[32mINSERT INTO "oauth_access_tokens" ("resource_owner_id", "application_id", "token", "refresh_token", "expires_in", "scopes", "created_at", "revoked_at", "previous_refresh_token") VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING "id"[0m  [["resource_owner_id", 237], ["application_id", 42], ["token", "72iHBPiyZ3CpLMKLva8cCUSauk8XIxcH3reKVVYW2JU"], ["refresh_token", "[FILTERED]"], ["expires_in", 3600], ["scopes", "read write"], ["created_at", "2026-05-23 09:55:30.256408"], ["revoked_at", nil], ["previous_refresh_token", ""]]
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mRELEASE SAVEPOINT active_record_1[0m
+Started POST "/mcp" for 127.0.0.1 at 2026-05-23 10:55:30 +0100
+Processing by RailsMcp::McpController#handle as HTML
+  Parameters: {"jsonrpc" => "2.0", "id" => 1, "method" => "initialize", "mcp" => {"jsonrpc" => "2.0", "id" => 1, "method" => "initialize"}}
+  [1m[36mDoorkeeper::AccessToken Load (0.2ms)[0m  [1m[34mSELECT "oauth_access_tokens".* FROM "oauth_access_tokens" WHERE "oauth_access_tokens"."token" = $1 LIMIT $2[0m  [["token", "72iHBPiyZ3CpLMKLva8cCUSauk8XIxcH3reKVVYW2JU"], ["LIMIT", 1]]
+  [1m[36mRailsMcp::User Load (0.1ms)[0m  [1m[34mSELECT "users".* FROM "users" WHERE "users"."id" = $1 LIMIT $2[0m  [["id", 237], ["LIMIT", 1]]
+Completed 200 OK in 1ms (Views: 0.0ms | ActiveRecord: 0.3ms (2 queries, 0 cached) | GC: 0.0ms)
+  [1m[36mTRANSACTION (0.2ms)[0m  [1m[31mROLLBACK[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mBEGIN[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mSAVEPOINT active_record_1[0m
+  [1m[36mRailsMcp::Account Create (0.3ms)[0m  [1m[32mINSERT INTO "accounts" ("name", "onboarded_at", "created_at", "updated_at") VALUES ($1, $2, $3, $4) RETURNING "id"[0m  [["name", "Acme"], ["onboarded_at", nil], ["created_at", "2026-05-23 09:55:30.261501"], ["updated_at", "2026-05-23 09:55:30.261501"]]
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mRELEASE SAVEPOINT active_record_1[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mSAVEPOINT active_record_1[0m
+  [1m[36mRailsMcp::User Exists? (0.2ms)[0m  [1m[34mSELECT 1 AS one FROM "users" WHERE "users"."identity_id" = $1 LIMIT $2[0m  [["identity_id", "id-1"], ["LIMIT", 1]]
+  [1m[36mRailsMcp::User Exists? (0.1ms)[0m  [1m[34mSELECT 1 AS one FROM "users" WHERE LOWER("users"."email") = LOWER($1) LIMIT $2[0m  [["email", "u@example.com"], ["LIMIT", 1]]
+  [1m[36mRailsMcp::User Create (0.2ms)[0m  [1m[32mINSERT INTO "users" ("account_id", "email", "name", "identity_id", "created_at", "updated_at") VALUES ($1, $2, $3, $4, $5, $6) RETURNING "id"[0m  [["account_id", 253], ["email", "u@example.com"], ["name", nil], ["identity_id", "id-1"], ["created_at", "2026-05-23 09:55:30.262892"], ["updated_at", "2026-05-23 09:55:30.262892"]]
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mRELEASE SAVEPOINT active_record_1[0m
+  [1m[36mTRANSACTION (0.0ms)[0m  [1m[35mSAVEPOINT active_record_1[0m
+  [1m[36mDoorkeeper::Application Exists? (0.2ms)[0m  [1m[34mSELECT 1 AS one FROM "oauth_applications" WHERE "oauth_applications"."uid" = $1 LIMIT $2[0m  [["uid", "bL4qr8vVN7hQo33IWa0WxWOeNms8_rMW4zqHblC0A7A"], ["LIMIT", 1]]
+  [1m[36mDoorkeeper::Application Create (0.2ms)[0m  [1m[32mINSERT INTO "oauth_applications" ("name", "uid", "secret", "redirect_uri", "scopes", "confidential", "created_at", "updated_at") VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING "id"[0m  [["name", "Test"], ["uid", "bL4qr8vVN7hQo33IWa0WxWOeNms8_rMW4zqHblC0A7A"], ["secret", nil], ["redirect_uri", "https://example/cb"], ["scopes", "read write"], ["confidential", false], ["created_at", "2026-05-23 09:55:30.263778"], ["updated_at", "2026-05-23 09:55:30.263778"]]
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mRELEASE SAVEPOINT active_record_1[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mSAVEPOINT active_record_1[0m
+  [1m[36mDoorkeeper::Application Load (0.2ms)[0m  [1m[34mSELECT "oauth_applications".* FROM "oauth_applications" WHERE "oauth_applications"."id" = $1 LIMIT $2[0m  [["id", 43], ["LIMIT", 1]]
+  [1m[36mDoorkeeper::AccessToken Exists? (0.1ms)[0m  [1m[34mSELECT 1 AS one FROM "oauth_access_tokens" WHERE "oauth_access_tokens"."token" = $1 LIMIT $2[0m  [["token", "62LNcHnhEb7jk4roB6Yaf5B42nD0zSI7HoRO6hWh7Bs"], ["LIMIT", 1]]
+  [1m[36mDoorkeeper::AccessToken Create (0.2ms)[0m  [1m[32mINSERT INTO "oauth_access_tokens" ("resource_owner_id", "application_id", "token", "refresh_token", "expires_in", "scopes", "created_at", "revoked_at", "previous_refresh_token") VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING "id"[0m  [["resource_owner_id", 238], ["application_id", 43], ["token", "62LNcHnhEb7jk4roB6Yaf5B42nD0zSI7HoRO6hWh7Bs"], ["refresh_token", "[FILTERED]"], ["expires_in", 3600], ["scopes", "read write"], ["created_at", "2026-05-23 09:55:30.264217"], ["revoked_at", nil], ["previous_refresh_token", ""]]
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mRELEASE SAVEPOINT active_record_1[0m
+Started POST "/mcp" for 127.0.0.1 at 2026-05-23 10:55:30 +0100
+Processing by RailsMcp::McpController#handle as HTML
+  Parameters: {"jsonrpc" => "2.0", "id" => 2, "method" => "tools/list", "mcp" => {"jsonrpc" => "2.0", "id" => 2, "method" => "tools/list"}}
+  [1m[36mDoorkeeper::AccessToken Load (0.6ms)[0m  [1m[34mSELECT "oauth_access_tokens".* FROM "oauth_access_tokens" WHERE "oauth_access_tokens"."token" = $1 LIMIT $2[0m  [["token", "62LNcHnhEb7jk4roB6Yaf5B42nD0zSI7HoRO6hWh7Bs"], ["LIMIT", 1]]
+  [1m[36mRailsMcp::User Load (0.1ms)[0m  [1m[34mSELECT "users".* FROM "users" WHERE "users"."id" = $1 LIMIT $2[0m  [["id", 238], ["LIMIT", 1]]
+Completed 200 OK in 1ms (Views: 0.0ms | ActiveRecord: 0.7ms (2 queries, 0 cached) | GC: 0.0ms)
+  [1m[36mTRANSACTION (0.2ms)[0m  [1m[31mROLLBACK[0m
+  [1m[36mTRANSACTION (0.0ms)[0m  [1m[35mBEGIN[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mSAVEPOINT active_record_1[0m
+  [1m[36mRailsMcp::Account Create (0.3ms)[0m  [1m[32mINSERT INTO "accounts" ("name", "onboarded_at", "created_at", "updated_at") VALUES ($1, $2, $3, $4) RETURNING "id"[0m  [["name", "Acme"], ["onboarded_at", nil], ["created_at", "2026-05-23 09:55:30.268082"], ["updated_at", "2026-05-23 09:55:30.268082"]]
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mRELEASE SAVEPOINT active_record_1[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mSAVEPOINT active_record_1[0m
+  [1m[36mRailsMcp::User Exists? (0.3ms)[0m  [1m[34mSELECT 1 AS one FROM "users" WHERE "users"."identity_id" = $1 LIMIT $2[0m  [["identity_id", "id-1"], ["LIMIT", 1]]
+  [1m[36mRailsMcp::User Exists? (0.2ms)[0m  [1m[34mSELECT 1 AS one FROM "users" WHERE LOWER("users"."email") = LOWER($1) LIMIT $2[0m  [["email", "u@example.com"], ["LIMIT", 1]]
+  [1m[36mRailsMcp::User Create (0.2ms)[0m  [1m[32mINSERT INTO "users" ("account_id", "email", "name", "identity_id", "created_at", "updated_at") VALUES ($1, $2, $3, $4, $5, $6) RETURNING "id"[0m  [["account_id", 254], ["email", "u@example.com"], ["name", nil], ["identity_id", "id-1"], ["created_at", "2026-05-23 09:55:30.269452"], ["updated_at", "2026-05-23 09:55:30.269452"]]
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mRELEASE SAVEPOINT active_record_1[0m
+  [1m[36mTRANSACTION (0.0ms)[0m  [1m[35mSAVEPOINT active_record_1[0m
+  [1m[36mDoorkeeper::Application Exists? (0.2ms)[0m  [1m[34mSELECT 1 AS one FROM "oauth_applications" WHERE "oauth_applications"."uid" = $1 LIMIT $2[0m  [["uid", "OQX2F1IRJSpWj2vzCWKZTwiGo4vpTUYUgisHz5BLzwI"], ["LIMIT", 1]]
+  [1m[36mDoorkeeper::Application Create (0.1ms)[0m  [1m[32mINSERT INTO "oauth_applications" ("name", "uid", "secret", "redirect_uri", "scopes", "confidential", "created_at", "updated_at") VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING "id"[0m  [["name", "Test"], ["uid", "OQX2F1IRJSpWj2vzCWKZTwiGo4vpTUYUgisHz5BLzwI"], ["secret", nil], ["redirect_uri", "https://example/cb"], ["scopes", "read write"], ["confidential", false], ["created_at", "2026-05-23 09:55:30.270240"], ["updated_at", "2026-05-23 09:55:30.270240"]]
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mRELEASE SAVEPOINT active_record_1[0m
+  [1m[36mTRANSACTION (0.0ms)[0m  [1m[35mSAVEPOINT active_record_1[0m
+  [1m[36mDoorkeeper::Application Load (0.2ms)[0m  [1m[34mSELECT "oauth_applications".* FROM "oauth_applications" WHERE "oauth_applications"."id" = $1 LIMIT $2[0m  [["id", 44], ["LIMIT", 1]]
+  [1m[36mDoorkeeper::AccessToken Exists? (0.1ms)[0m  [1m[34mSELECT 1 AS one FROM "oauth_access_tokens" WHERE "oauth_access_tokens"."token" = $1 LIMIT $2[0m  [["token", "xwVoEIiIwdZMZ9IVqws7__zDFGhCDiNoUlAxG9Mz3lw"], ["LIMIT", 1]]
+  [1m[36mDoorkeeper::AccessToken Create (0.2ms)[0m  [1m[32mINSERT INTO "oauth_access_tokens" ("resource_owner_id", "application_id", "token", "refresh_token", "expires_in", "scopes", "created_at", "revoked_at", "previous_refresh_token") VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING "id"[0m  [["resource_owner_id", 239], ["application_id", 44], ["token", "xwVoEIiIwdZMZ9IVqws7__zDFGhCDiNoUlAxG9Mz3lw"], ["refresh_token", "[FILTERED]"], ["expires_in", 3600], ["scopes", "read write"], ["created_at", "2026-05-23 09:55:30.270675"], ["revoked_at", nil], ["previous_refresh_token", ""]]
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mRELEASE SAVEPOINT active_record_1[0m
+Started POST "/mcp" for 127.0.0.1 at 2026-05-23 10:55:30 +0100
+Processing by RailsMcp::McpController#handle as HTML
+  Parameters: {"jsonrpc" => "2.0", "id" => 3, "method" => "tools/call", "params" => {"name" => "list-greetings", "arguments" => {"name" => "Matt"}}, "mcp" => {"jsonrpc" => "2.0", "id" => 3, "method" => "tools/call", "params" => {"name" => "list-greetings", "arguments" => {"name" => "Matt"}}}}
+  [1m[36mDoorkeeper::AccessToken Load (0.2ms)[0m  [1m[34mSELECT "oauth_access_tokens".* FROM "oauth_access_tokens" WHERE "oauth_access_tokens"."token" = $1 LIMIT $2[0m  [["token", "xwVoEIiIwdZMZ9IVqws7__zDFGhCDiNoUlAxG9Mz3lw"], ["LIMIT", 1]]
+  [1m[36mRailsMcp::User Load (0.1ms)[0m  [1m[34mSELECT "users".* FROM "users" WHERE "users"."id" = $1 LIMIT $2[0m  [["id", 239], ["LIMIT", 1]]
+Completed 200 OK in 1ms (Views: 0.0ms | ActiveRecord: 0.2ms (2 queries, 0 cached) | GC: 0.0ms)
+  [1m[36mTRANSACTION (0.2ms)[0m  [1m[31mROLLBACK[0m
+  [1m[36mTRANSACTION (0.0ms)[0m  [1m[35mBEGIN[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mSAVEPOINT active_record_1[0m
+  [1m[36mRailsMcp::Account Create (0.2ms)[0m  [1m[32mINSERT INTO "accounts" ("name", "onboarded_at", "created_at", "updated_at") VALUES ($1, $2, $3, $4) RETURNING "id"[0m  [["name", "Acme"], ["onboarded_at", nil], ["created_at", "2026-05-23 09:55:30.274080"], ["updated_at", "2026-05-23 09:55:30.274080"]]
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mRELEASE SAVEPOINT active_record_1[0m
+  [1m[36mTRANSACTION (0.0ms)[0m  [1m[35mSAVEPOINT active_record_1[0m
+  [1m[36mRailsMcp::User Exists? (0.2ms)[0m  [1m[34mSELECT 1 AS one FROM "users" WHERE "users"."identity_id" = $1 LIMIT $2[0m  [["identity_id", "id-1"], ["LIMIT", 1]]
+  [1m[36mRailsMcp::User Exists? (0.1ms)[0m  [1m[34mSELECT 1 AS one FROM "users" WHERE LOWER("users"."email") = LOWER($1) LIMIT $2[0m  [["email", "u@example.com"], ["LIMIT", 1]]
+  [1m[36mRailsMcp::User Create (0.1ms)[0m  [1m[32mINSERT INTO "users" ("account_id", "email", "name", "identity_id", "created_at", "updated_at") VALUES ($1, $2, $3, $4, $5, $6) RETURNING "id"[0m  [["account_id", 255], ["email", "u@example.com"], ["name", nil], ["identity_id", "id-1"], ["created_at", "2026-05-23 09:55:30.275162"], ["updated_at", "2026-05-23 09:55:30.275162"]]
+  [1m[36mTRANSACTION (0.0ms)[0m  [1m[35mRELEASE SAVEPOINT active_record_1[0m
+  [1m[36mTRANSACTION (0.0ms)[0m  [1m[35mSAVEPOINT active_record_1[0m
+  [1m[36mDoorkeeper::Application Exists? (0.2ms)[0m  [1m[34mSELECT 1 AS one FROM "oauth_applications" WHERE "oauth_applications"."uid" = $1 LIMIT $2[0m  [["uid", "NdecrocXTvyqJh0X61KK89f258qpQLRyq2J8SQkO1p4"], ["LIMIT", 1]]
+  [1m[36mDoorkeeper::Application Create (0.1ms)[0m  [1m[32mINSERT INTO "oauth_applications" ("name", "uid", "secret", "redirect_uri", "scopes", "confidential", "created_at", "updated_at") VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING "id"[0m  [["name", "Test"], ["uid", "NdecrocXTvyqJh0X61KK89f258qpQLRyq2J8SQkO1p4"], ["secret", nil], ["redirect_uri", "https://example/cb"], ["scopes", "read write"], ["confidential", false], ["created_at", "2026-05-23 09:55:30.276072"], ["updated_at", "2026-05-23 09:55:30.276072"]]
+  [1m[36mTRANSACTION (0.0ms)[0m  [1m[35mRELEASE SAVEPOINT active_record_1[0m
+  [1m[36mTRANSACTION (0.0ms)[0m  [1m[35mSAVEPOINT active_record_1[0m
+  [1m[36mDoorkeeper::Application Load (0.2ms)[0m  [1m[34mSELECT "oauth_applications".* FROM "oauth_applications" WHERE "oauth_applications"."id" = $1 LIMIT $2[0m  [["id", 45], ["LIMIT", 1]]
+  [1m[36mDoorkeeper::AccessToken Exists? (0.1ms)[0m  [1m[34mSELECT 1 AS one FROM "oauth_access_tokens" WHERE "oauth_access_tokens"."token" = $1 LIMIT $2[0m  [["token", "v1GfdpxeWhu19A19u0fcZm90ANNl01GR2L2z6SqmloY"], ["LIMIT", 1]]
+  [1m[36mDoorkeeper::AccessToken Create (0.2ms)[0m  [1m[32mINSERT INTO "oauth_access_tokens" ("resource_owner_id", "application_id", "token", "refresh_token", "expires_in", "scopes", "created_at", "revoked_at", "previous_refresh_token") VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING "id"[0m  [["resource_owner_id", 240], ["application_id", 45], ["token", "v1GfdpxeWhu19A19u0fcZm90ANNl01GR2L2z6SqmloY"], ["refresh_token", "[FILTERED]"], ["expires_in", 3600], ["scopes", "read write"], ["created_at", "2026-05-23 09:55:30.276480"], ["revoked_at", nil], ["previous_refresh_token", ""]]
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mRELEASE SAVEPOINT active_record_1[0m
+Started POST "/mcp" for 127.0.0.1 at 2026-05-23 10:55:30 +0100
+Processing by RailsMcp::McpController#handle as HTML
+  Parameters: {"jsonrpc" => "2.0", "id" => 4, "method" => "tools/call", "params" => {"name" => "list-greetings", "arguments" => {"bogus" => 1}}, "mcp" => {"jsonrpc" => "2.0", "id" => 4, "method" => "tools/call", "params" => {"name" => "list-greetings", "arguments" => {"bogus" => 1}}}}
+  [1m[36mDoorkeeper::AccessToken Load (0.1ms)[0m  [1m[34mSELECT "oauth_access_tokens".* FROM "oauth_access_tokens" WHERE "oauth_access_tokens"."token" = $1 LIMIT $2[0m  [["token", "v1GfdpxeWhu19A19u0fcZm90ANNl01GR2L2z6SqmloY"], ["LIMIT", 1]]
+  [1m[36mRailsMcp::User Load (0.1ms)[0m  [1m[34mSELECT "users".* FROM "users" WHERE "users"."id" = $1 LIMIT $2[0m  [["id", 240], ["LIMIT", 1]]
+Completed 200 OK in 1ms (Views: 0.0ms | ActiveRecord: 0.2ms (2 queries, 0 cached) | GC: 0.0ms)
+  [1m[36mTRANSACTION (0.2ms)[0m  [1m[31mROLLBACK[0m
+  [1m[36mTRANSACTION (0.0ms)[0m  [1m[35mBEGIN[0m
+  [1m[36mTRANSACTION (0.0ms)[0m  [1m[35mSAVEPOINT active_record_1[0m
+  [1m[36mRailsMcp::Account Create (0.2ms)[0m  [1m[32mINSERT INTO "accounts" ("name", "onboarded_at", "created_at", "updated_at") VALUES ($1, $2, $3, $4) RETURNING "id"[0m  [["name", "Acme"], ["onboarded_at", nil], ["created_at", "2026-05-23 09:55:30.279943"], ["updated_at", "2026-05-23 09:55:30.279943"]]
+  [1m[36mTRANSACTION (0.0ms)[0m  [1m[35mRELEASE SAVEPOINT active_record_1[0m
+  [1m[36mTRANSACTION (0.0ms)[0m  [1m[35mSAVEPOINT active_record_1[0m
+  [1m[36mRailsMcp::User Exists? (0.2ms)[0m  [1m[34mSELECT 1 AS one FROM "users" WHERE "users"."identity_id" = $1 LIMIT $2[0m  [["identity_id", "id-1"], ["LIMIT", 1]]
+  [1m[36mRailsMcp::User Exists? (0.1ms)[0m  [1m[34mSELECT 1 AS one FROM "users" WHERE LOWER("users"."email") = LOWER($1) LIMIT $2[0m  [["email", "u@example.com"], ["LIMIT", 1]]
+  [1m[36mRailsMcp::User Create (0.2ms)[0m  [1m[32mINSERT INTO "users" ("account_id", "email", "name", "identity_id", "created_at", "updated_at") VALUES ($1, $2, $3, $4, $5, $6) RETURNING "id"[0m  [["account_id", 256], ["email", "u@example.com"], ["name", nil], ["identity_id", "id-1"], ["created_at", "2026-05-23 09:55:30.281208"], ["updated_at", "2026-05-23 09:55:30.281208"]]
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mRELEASE SAVEPOINT active_record_1[0m
+  [1m[36mTRANSACTION (0.0ms)[0m  [1m[35mSAVEPOINT active_record_1[0m
+  [1m[36mDoorkeeper::Application Exists? (0.2ms)[0m  [1m[34mSELECT 1 AS one FROM "oauth_applications" WHERE "oauth_applications"."uid" = $1 LIMIT $2[0m  [["uid", "brgginWEzqhWaq2NHe3PAeDJQzWYu-lxxUOLH-delks"], ["LIMIT", 1]]
+  [1m[36mDoorkeeper::Application Create (0.2ms)[0m  [1m[32mINSERT INTO "oauth_applications" ("name", "uid", "secret", "redirect_uri", "scopes", "confidential", "created_at", "updated_at") VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING "id"[0m  [["name", "Test"], ["uid", "brgginWEzqhWaq2NHe3PAeDJQzWYu-lxxUOLH-delks"], ["secret", nil], ["redirect_uri", "https://example/cb"], ["scopes", "read write"], ["confidential", false], ["created_at", "2026-05-23 09:55:30.282013"], ["updated_at", "2026-05-23 09:55:30.282013"]]
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mRELEASE SAVEPOINT active_record_1[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mSAVEPOINT active_record_1[0m
+  [1m[36mDoorkeeper::Application Load (0.2ms)[0m  [1m[34mSELECT "oauth_applications".* FROM "oauth_applications" WHERE "oauth_applications"."id" = $1 LIMIT $2[0m  [["id", 46], ["LIMIT", 1]]
+  [1m[36mDoorkeeper::AccessToken Exists? (0.1ms)[0m  [1m[34mSELECT 1 AS one FROM "oauth_access_tokens" WHERE "oauth_access_tokens"."token" = $1 LIMIT $2[0m  [["token", "xEbjPST1_aH7moEPtc2CfQVjXECUUAtmqQQBatGxrcY"], ["LIMIT", 1]]
+  [1m[36mDoorkeeper::AccessToken Create (0.2ms)[0m  [1m[32mINSERT INTO "oauth_access_tokens" ("resource_owner_id", "application_id", "token", "refresh_token", "expires_in", "scopes", "created_at", "revoked_at", "previous_refresh_token") VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING "id"[0m  [["resource_owner_id", 241], ["application_id", 46], ["token", "xEbjPST1_aH7moEPtc2CfQVjXECUUAtmqQQBatGxrcY"], ["refresh_token", "[FILTERED]"], ["expires_in", 3600], ["scopes", "read write"], ["created_at", "2026-05-23 09:55:30.282466"], ["revoked_at", nil], ["previous_refresh_token", ""]]
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mRELEASE SAVEPOINT active_record_1[0m
+Started POST "/mcp" for 127.0.0.1 at 2026-05-23 10:55:30 +0100
+Processing by RailsMcp::McpController#handle as HTML
+  Parameters: {"jsonrpc" => "2.0", "id" => 5, "method" => "tools/call", "params" => {"name" => "nope"}, "mcp" => {"jsonrpc" => "2.0", "id" => 5, "method" => "tools/call", "params" => {"name" => "nope"}}}
+  [1m[36mDoorkeeper::AccessToken Load (0.1ms)[0m  [1m[34mSELECT "oauth_access_tokens".* FROM "oauth_access_tokens" WHERE "oauth_access_tokens"."token" = $1 LIMIT $2[0m  [["token", "xEbjPST1_aH7moEPtc2CfQVjXECUUAtmqQQBatGxrcY"], ["LIMIT", 1]]
+  [1m[36mRailsMcp::User Load (0.1ms)[0m  [1m[34mSELECT "users".* FROM "users" WHERE "users"."id" = $1 LIMIT $2[0m  [["id", 241], ["LIMIT", 1]]
+Completed 200 OK in 1ms (Views: 0.0ms | ActiveRecord: 0.2ms (2 queries, 0 cached) | GC: 0.0ms)
+  [1m[36mTRANSACTION (0.2ms)[0m  [1m[31mROLLBACK[0m
+  [1m[36mTRANSACTION (0.0ms)[0m  [1m[35mBEGIN[0m
+  [1m[36mTRANSACTION (0.0ms)[0m  [1m[35mSAVEPOINT active_record_1[0m
+  [1m[36mRailsMcp::Account Create (0.2ms)[0m  [1m[32mINSERT INTO "accounts" ("name", "onboarded_at", "created_at", "updated_at") VALUES ($1, $2, $3, $4) RETURNING "id"[0m  [["name", "Acme"], ["onboarded_at", nil], ["created_at", "2026-05-23 09:55:30.285895"], ["updated_at", "2026-05-23 09:55:30.285895"]]
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mRELEASE SAVEPOINT active_record_1[0m
+  [1m[36mTRANSACTION (0.0ms)[0m  [1m[35mSAVEPOINT active_record_1[0m
+  [1m[36mRailsMcp::User Exists? (0.2ms)[0m  [1m[34mSELECT 1 AS one FROM "users" WHERE "users"."identity_id" = $1 LIMIT $2[0m  [["identity_id", "id-1"], ["LIMIT", 1]]
+  [1m[36mRailsMcp::User Exists? (0.1ms)[0m  [1m[34mSELECT 1 AS one FROM "users" WHERE LOWER("users"."email") = LOWER($1) LIMIT $2[0m  [["email", "u@example.com"], ["LIMIT", 1]]
+  [1m[36mRailsMcp::User Create (0.2ms)[0m  [1m[32mINSERT INTO "users" ("account_id", "email", "name", "identity_id", "created_at", "updated_at") VALUES ($1, $2, $3, $4, $5, $6) RETURNING "id"[0m  [["account_id", 257], ["email", "u@example.com"], ["name", nil], ["identity_id", "id-1"], ["created_at", "2026-05-23 09:55:30.287051"], ["updated_at", "2026-05-23 09:55:30.287051"]]
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mRELEASE SAVEPOINT active_record_1[0m
+  [1m[36mTRANSACTION (0.0ms)[0m  [1m[35mSAVEPOINT active_record_1[0m
+  [1m[36mDoorkeeper::Application Exists? (0.2ms)[0m  [1m[34mSELECT 1 AS one FROM "oauth_applications" WHERE "oauth_applications"."uid" = $1 LIMIT $2[0m  [["uid", "xHK_oMYgnivJ6VRKnfqem6_W4WvyzviKQxzTbk1Xg9E"], ["LIMIT", 1]]
+  [1m[36mDoorkeeper::Application Create (0.2ms)[0m  [1m[32mINSERT INTO "oauth_applications" ("name", "uid", "secret", "redirect_uri", "scopes", "confidential", "created_at", "updated_at") VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING "id"[0m  [["name", "Test"], ["uid", "xHK_oMYgnivJ6VRKnfqem6_W4WvyzviKQxzTbk1Xg9E"], ["secret", nil], ["redirect_uri", "https://example/cb"], ["scopes", "read write"], ["confidential", false], ["created_at", "2026-05-23 09:55:30.287837"], ["updated_at", "2026-05-23 09:55:30.287837"]]
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mRELEASE SAVEPOINT active_record_1[0m
+  [1m[36mTRANSACTION (0.0ms)[0m  [1m[35mSAVEPOINT active_record_1[0m
+  [1m[36mDoorkeeper::Application Load (0.2ms)[0m  [1m[34mSELECT "oauth_applications".* FROM "oauth_applications" WHERE "oauth_applications"."id" = $1 LIMIT $2[0m  [["id", 47], ["LIMIT", 1]]
+  [1m[36mDoorkeeper::AccessToken Exists? (0.1ms)[0m  [1m[34mSELECT 1 AS one FROM "oauth_access_tokens" WHERE "oauth_access_tokens"."token" = $1 LIMIT $2[0m  [["token", "SWvWzJ_tE6CMmHmYqMzDOE5SAk49oly2tZVrIkvL5rE"], ["LIMIT", 1]]
+  [1m[36mDoorkeeper::AccessToken Create (0.3ms)[0m  [1m[32mINSERT INTO "oauth_access_tokens" ("resource_owner_id", "application_id", "token", "refresh_token", "expires_in", "scopes", "created_at", "revoked_at", "previous_refresh_token") VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING "id"[0m  [["resource_owner_id", 242], ["application_id", 47], ["token", "SWvWzJ_tE6CMmHmYqMzDOE5SAk49oly2tZVrIkvL5rE"], ["refresh_token", "[FILTERED]"], ["expires_in", 3600], ["scopes", "read write"], ["created_at", "2026-05-23 09:55:30.288264"], ["revoked_at", nil], ["previous_refresh_token", ""]]
+  [1m[36mTRANSACTION (0.0ms)[0m  [1m[35mRELEASE SAVEPOINT active_record_1[0m
+Started POST "/mcp" for 127.0.0.1 at 2026-05-23 10:55:30 +0100
+Processing by RailsMcp::McpController#handle as HTML
+  Parameters: {"jsonrpc" => "2.0", "id" => 6, "method" => "tools/call", "params" => {"name" => "explode"}, "mcp" => {"jsonrpc" => "2.0", "id" => 6, "method" => "tools/call", "params" => {"name" => "explode"}}}
+  [1m[36mDoorkeeper::AccessToken Load (0.2ms)[0m  [1m[34mSELECT "oauth_access_tokens".* FROM "oauth_access_tokens" WHERE "oauth_access_tokens"."token" = $1 LIMIT $2[0m  [["token", "SWvWzJ_tE6CMmHmYqMzDOE5SAk49oly2tZVrIkvL5rE"], ["LIMIT", 1]]
+  [1m[36mRailsMcp::User Load (0.1ms)[0m  [1m[34mSELECT "users".* FROM "users" WHERE "users"."id" = $1 LIMIT $2[0m  [["id", 242], ["LIMIT", 1]]
+Completed 200 OK in 1ms (Views: 0.0ms | ActiveRecord: 0.3ms (2 queries, 0 cached) | GC: 0.0ms)
+  [1m[36mTRANSACTION (0.3ms)[0m  [1m[31mROLLBACK[0m
+  [1m[36mTRANSACTION (0.0ms)[0m  [1m[35mBEGIN[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mSAVEPOINT active_record_1[0m
+  [1m[36mRailsMcp::Account Create (0.2ms)[0m  [1m[32mINSERT INTO "accounts" ("name", "onboarded_at", "created_at", "updated_at") VALUES ($1, $2, $3, $4) RETURNING "id"[0m  [["name", "Acme"], ["onboarded_at", nil], ["created_at", "2026-05-23 09:55:30.292185"], ["updated_at", "2026-05-23 09:55:30.292185"]]
+  [1m[36mTRANSACTION (0.0ms)[0m  [1m[35mRELEASE SAVEPOINT active_record_1[0m
+  [1m[36mTRANSACTION (0.0ms)[0m  [1m[35mSAVEPOINT active_record_1[0m
+  [1m[36mRailsMcp::User Exists? (0.2ms)[0m  [1m[34mSELECT 1 AS one FROM "users" WHERE "users"."identity_id" = $1 LIMIT $2[0m  [["identity_id", "id-1"], ["LIMIT", 1]]
+  [1m[36mRailsMcp::User Exists? (0.1ms)[0m  [1m[34mSELECT 1 AS one FROM "users" WHERE LOWER("users"."email") = LOWER($1) LIMIT $2[0m  [["email", "u@example.com"], ["LIMIT", 1]]
+  [1m[36mRailsMcp::User Create (0.2ms)[0m  [1m[32mINSERT INTO "users" ("account_id", "email", "name", "identity_id", "created_at", "updated_at") VALUES ($1, $2, $3, $4, $5, $6) RETURNING "id"[0m  [["account_id", 258], ["email", "u@example.com"], ["name", nil], ["identity_id", "id-1"], ["created_at", "2026-05-23 09:55:30.293179"], ["updated_at", "2026-05-23 09:55:30.293179"]]
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mRELEASE SAVEPOINT active_record_1[0m
+  [1m[36mTRANSACTION (0.0ms)[0m  [1m[35mSAVEPOINT active_record_1[0m
+  [1m[36mDoorkeeper::Application Exists? (0.2ms)[0m  [1m[34mSELECT 1 AS one FROM "oauth_applications" WHERE "oauth_applications"."uid" = $1 LIMIT $2[0m  [["uid", "LLzDO67tMg8VEM_T121XYhMKL8fQnUws202XKuxFVzw"], ["LIMIT", 1]]
+  [1m[36mDoorkeeper::Application Create (0.1ms)[0m  [1m[32mINSERT INTO "oauth_applications" ("name", "uid", "secret", "redirect_uri", "scopes", "confidential", "created_at", "updated_at") VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING "id"[0m  [["name", "Test"], ["uid", "LLzDO67tMg8VEM_T121XYhMKL8fQnUws202XKuxFVzw"], ["secret", nil], ["redirect_uri", "https://example/cb"], ["scopes", "read write"], ["confidential", false], ["created_at", "2026-05-23 09:55:30.293983"], ["updated_at", "2026-05-23 09:55:30.293983"]]
+  [1m[36mTRANSACTION (0.0ms)[0m  [1m[35mRELEASE SAVEPOINT active_record_1[0m
+  [1m[36mTRANSACTION (0.0ms)[0m  [1m[35mSAVEPOINT active_record_1[0m
+  [1m[36mDoorkeeper::Application Load (0.1ms)[0m  [1m[34mSELECT "oauth_applications".* FROM "oauth_applications" WHERE "oauth_applications"."id" = $1 LIMIT $2[0m  [["id", 48], ["LIMIT", 1]]
+  [1m[36mDoorkeeper::AccessToken Exists? (0.1ms)[0m  [1m[34mSELECT 1 AS one FROM "oauth_access_tokens" WHERE "oauth_access_tokens"."token" = $1 LIMIT $2[0m  [["token", "j4uiA-Crs_aL3hSGgNtBEk38NOxWFn_lw92Kfpe3Zyk"], ["LIMIT", 1]]
+  [1m[36mDoorkeeper::AccessToken Create (0.2ms)[0m  [1m[32mINSERT INTO "oauth_access_tokens" ("resource_owner_id", "application_id", "token", "refresh_token", "expires_in", "scopes", "created_at", "revoked_at", "previous_refresh_token") VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING "id"[0m  [["resource_owner_id", 243], ["application_id", 48], ["token", "j4uiA-Crs_aL3hSGgNtBEk38NOxWFn_lw92Kfpe3Zyk"], ["refresh_token", "[FILTERED]"], ["expires_in", 3600], ["scopes", "read write"], ["created_at", "2026-05-23 09:55:30.294377"], ["revoked_at", nil], ["previous_refresh_token", ""]]
+  [1m[36mTRANSACTION (0.0ms)[0m  [1m[35mRELEASE SAVEPOINT active_record_1[0m
+Started POST "/mcp" for 127.0.0.1 at 2026-05-23 10:55:30 +0100
+Processing by RailsMcp::McpController#handle as HTML
+  Parameters: {"jsonrpc" => "2.0", "id" => 7, "method" => "tools/call", "params" => {"name" => "explode"}, "mcp" => {"jsonrpc" => "2.0", "id" => 7, "method" => "tools/call", "params" => {"name" => "explode"}}}
+  [1m[36mDoorkeeper::AccessToken Load (0.1ms)[0m  [1m[34mSELECT "oauth_access_tokens".* FROM "oauth_access_tokens" WHERE "oauth_access_tokens"."token" = $1 LIMIT $2[0m  [["token", "j4uiA-Crs_aL3hSGgNtBEk38NOxWFn_lw92Kfpe3Zyk"], ["LIMIT", 1]]
+  [1m[36mRailsMcp::User Load (0.1ms)[0m  [1m[34mSELECT "users".* FROM "users" WHERE "users"."id" = $1 LIMIT $2[0m  [["id", 243], ["LIMIT", 1]]
+MCP tool call failed: ExplodingTool::CustomError: kaboom
+/Users/matt/Development/basecamp-mcp-rails/engines/rails_mcp/spec/requests/mcp_spec.rb:19:in 'ExplodingTool#call'
+/Users/matt/Development/basecamp-mcp-rails/engines/rails_mcp/app/controllers/rails_mcp/mcp_controller.rb:87:in 'RailsMcp::McpController#handle_tool_call'
+/Users/matt/Development/basecamp-mcp-rails/engines/rails_mcp/app/controllers/rails_mcp/mcp_controller.rb:56:in 'RailsMcp::McpController#dispatch_message'
+/Users/matt/Development/basecamp-mcp-rails/engines/rails_mcp/app/controllers/rails_mcp/mcp_controller.rb:16:in 'RailsMcp::McpController#handle'
+/Users/matt/.rvm/gems/ruby-4.0.1/gems/actionpack-8.1.3/lib/action_controller/metal/basic_implicit_render.rb:8:in 'ActionController::BasicImplicitRender#send_action'
+Completed 200 OK in 1ms (Views: 0.0ms | ActiveRecord: 0.2ms (2 queries, 0 cached) | GC: 0.0ms)
+  [1m[36mTRANSACTION (0.2ms)[0m  [1m[31mROLLBACK[0m
+  [1m[36mTRANSACTION (0.0ms)[0m  [1m[35mBEGIN[0m
+  [1m[36mTRANSACTION (0.0ms)[0m  [1m[35mSAVEPOINT active_record_1[0m
+  [1m[36mRailsMcp::Account Create (0.2ms)[0m  [1m[32mINSERT INTO "accounts" ("name", "onboarded_at", "created_at", "updated_at") VALUES ($1, $2, $3, $4) RETURNING "id"[0m  [["name", "Acme"], ["onboarded_at", nil], ["created_at", "2026-05-23 09:55:30.297600"], ["updated_at", "2026-05-23 09:55:30.297600"]]
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mRELEASE SAVEPOINT active_record_1[0m
+  [1m[36mTRANSACTION (0.0ms)[0m  [1m[35mSAVEPOINT active_record_1[0m
+  [1m[36mRailsMcp::User Exists? (0.2ms)[0m  [1m[34mSELECT 1 AS one FROM "users" WHERE "users"."identity_id" = $1 LIMIT $2[0m  [["identity_id", "id-1"], ["LIMIT", 1]]
+  [1m[36mRailsMcp::User Exists? (0.1ms)[0m  [1m[34mSELECT 1 AS one FROM "users" WHERE LOWER("users"."email") = LOWER($1) LIMIT $2[0m  [["email", "u@example.com"], ["LIMIT", 1]]
+  [1m[36mRailsMcp::User Create (0.2ms)[0m  [1m[32mINSERT INTO "users" ("account_id", "email", "name", "identity_id", "created_at", "updated_at") VALUES ($1, $2, $3, $4, $5, $6) RETURNING "id"[0m  [["account_id", 259], ["email", "u@example.com"], ["name", nil], ["identity_id", "id-1"], ["created_at", "2026-05-23 09:55:30.298744"], ["updated_at", "2026-05-23 09:55:30.298744"]]
+  [1m[36mTRANSACTION (0.0ms)[0m  [1m[35mRELEASE SAVEPOINT active_record_1[0m
+  [1m[36mTRANSACTION (0.0ms)[0m  [1m[35mSAVEPOINT active_record_1[0m
+  [1m[36mDoorkeeper::Application Exists? (0.2ms)[0m  [1m[34mSELECT 1 AS one FROM "oauth_applications" WHERE "oauth_applications"."uid" = $1 LIMIT $2[0m  [["uid", "AwxdW8z29AsxFXZlZ43Ml63WZSaeK3oPpBOPT0XzLaY"], ["LIMIT", 1]]
+  [1m[36mDoorkeeper::Application Create (0.1ms)[0m  [1m[32mINSERT INTO "oauth_applications" ("name", "uid", "secret", "redirect_uri", "scopes", "confidential", "created_at", "updated_at") VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING "id"[0m  [["name", "Test"], ["uid", "AwxdW8z29AsxFXZlZ43Ml63WZSaeK3oPpBOPT0XzLaY"], ["secret", nil], ["redirect_uri", "https://example/cb"], ["scopes", "read write"], ["confidential", false], ["created_at", "2026-05-23 09:55:30.299486"], ["updated_at", "2026-05-23 09:55:30.299486"]]
+  [1m[36mTRANSACTION (0.0ms)[0m  [1m[35mRELEASE SAVEPOINT active_record_1[0m
+  [1m[36mTRANSACTION (0.0ms)[0m  [1m[35mSAVEPOINT active_record_1[0m
+  [1m[36mDoorkeeper::Application Load (0.1ms)[0m  [1m[34mSELECT "oauth_applications".* FROM "oauth_applications" WHERE "oauth_applications"."id" = $1 LIMIT $2[0m  [["id", 49], ["LIMIT", 1]]
+  [1m[36mDoorkeeper::AccessToken Exists? (0.1ms)[0m  [1m[34mSELECT 1 AS one FROM "oauth_access_tokens" WHERE "oauth_access_tokens"."token" = $1 LIMIT $2[0m  [["token", "Jh98vO_sQ_Qd4_1mibiu-iT0RDSacs45bcP28MvmiKQ"], ["LIMIT", 1]]
+  [1m[36mDoorkeeper::AccessToken Create (0.1ms)[0m  [1m[32mINSERT INTO "oauth_access_tokens" ("resource_owner_id", "application_id", "token", "refresh_token", "expires_in", "scopes", "created_at", "revoked_at", "previous_refresh_token") VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING "id"[0m  [["resource_owner_id", 244], ["application_id", 49], ["token", "Jh98vO_sQ_Qd4_1mibiu-iT0RDSacs45bcP28MvmiKQ"], ["refresh_token", "[FILTERED]"], ["expires_in", 3600], ["scopes", "read write"], ["created_at", "2026-05-23 09:55:30.299875"], ["revoked_at", nil], ["previous_refresh_token", ""]]
+  [1m[36mTRANSACTION (0.0ms)[0m  [1m[35mRELEASE SAVEPOINT active_record_1[0m
+Started POST "/mcp" for 127.0.0.1 at 2026-05-23 10:55:30 +0100
+Processing by RailsMcp::McpController#handle as HTML
+  Parameters: {"_json" => [{"jsonrpc" => "2.0", "id" => 10, "method" => "initialize"}, {"jsonrpc" => "2.0", "id" => 11, "method" => "tools/list"}], "mcp" => {"_json" => [{"jsonrpc" => "2.0", "id" => 10, "method" => "initialize"}, {"jsonrpc" => "2.0", "id" => 11, "method" => "tools/list"}]}}
+  [1m[36mDoorkeeper::AccessToken Load (0.1ms)[0m  [1m[34mSELECT "oauth_access_tokens".* FROM "oauth_access_tokens" WHERE "oauth_access_tokens"."token" = $1 LIMIT $2[0m  [["token", "Jh98vO_sQ_Qd4_1mibiu-iT0RDSacs45bcP28MvmiKQ"], ["LIMIT", 1]]
+  [1m[36mRailsMcp::User Load (0.1ms)[0m  [1m[34mSELECT "users".* FROM "users" WHERE "users"."id" = $1 LIMIT $2[0m  [["id", 244], ["LIMIT", 1]]
+Completed 200 OK in 1ms (Views: 0.0ms | ActiveRecord: 0.2ms (2 queries, 0 cached) | GC: 0.0ms)
+  [1m[36mTRANSACTION (0.2ms)[0m  [1m[31mROLLBACK[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mBEGIN[0m
+  [1m[36mTRANSACTION (0.0ms)[0m  [1m[35mSAVEPOINT active_record_1[0m
+  [1m[36mRailsMcp::Account Create (0.2ms)[0m  [1m[32mINSERT INTO "accounts" ("name", "onboarded_at", "created_at", "updated_at") VALUES ($1, $2, $3, $4) RETURNING "id"[0m  [["name", "Acme"], ["onboarded_at", nil], ["created_at", "2026-05-23 09:55:30.303405"], ["updated_at", "2026-05-23 09:55:30.303405"]]
+  [1m[36mTRANSACTION (0.0ms)[0m  [1m[35mRELEASE SAVEPOINT active_record_1[0m
+  [1m[36mTRANSACTION (0.0ms)[0m  [1m[35mSAVEPOINT active_record_1[0m
+  [1m[36mRailsMcp::User Exists? (0.2ms)[0m  [1m[34mSELECT 1 AS one FROM "users" WHERE "users"."identity_id" = $1 LIMIT $2[0m  [["identity_id", "id-1"], ["LIMIT", 1]]
+  [1m[36mRailsMcp::User Exists? (0.1ms)[0m  [1m[34mSELECT 1 AS one FROM "users" WHERE LOWER("users"."email") = LOWER($1) LIMIT $2[0m  [["email", "u@example.com"], ["LIMIT", 1]]
+  [1m[36mRailsMcp::User Create (0.1ms)[0m  [1m[32mINSERT INTO "users" ("account_id", "email", "name", "identity_id", "created_at", "updated_at") VALUES ($1, $2, $3, $4, $5, $6) RETURNING "id"[0m  [["account_id", 260], ["email", "u@example.com"], ["name", nil], ["identity_id", "id-1"], ["created_at", "2026-05-23 09:55:30.304496"], ["updated_at", "2026-05-23 09:55:30.304496"]]
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mRELEASE SAVEPOINT active_record_1[0m
+  [1m[36mTRANSACTION (0.0ms)[0m  [1m[35mSAVEPOINT active_record_1[0m
+  [1m[36mDoorkeeper::Application Exists? (0.2ms)[0m  [1m[34mSELECT 1 AS one FROM "oauth_applications" WHERE "oauth_applications"."uid" = $1 LIMIT $2[0m  [["uid", "pamXnoeOgZ5v0l2RXk5-Y2UdzjO9tcZWd36VynBIJ80"], ["LIMIT", 1]]
+  [1m[36mDoorkeeper::Application Create (0.1ms)[0m  [1m[32mINSERT INTO "oauth_applications" ("name", "uid", "secret", "redirect_uri", "scopes", "confidential", "created_at", "updated_at") VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING "id"[0m  [["name", "Test"], ["uid", "pamXnoeOgZ5v0l2RXk5-Y2UdzjO9tcZWd36VynBIJ80"], ["secret", nil], ["redirect_uri", "https://example/cb"], ["scopes", "read write"], ["confidential", false], ["created_at", "2026-05-23 09:55:30.305246"], ["updated_at", "2026-05-23 09:55:30.305246"]]
+  [1m[36mTRANSACTION (0.0ms)[0m  [1m[35mRELEASE SAVEPOINT active_record_1[0m
+  [1m[36mTRANSACTION (0.0ms)[0m  [1m[35mSAVEPOINT active_record_1[0m
+  [1m[36mDoorkeeper::Application Load (0.1ms)[0m  [1m[34mSELECT "oauth_applications".* FROM "oauth_applications" WHERE "oauth_applications"."id" = $1 LIMIT $2[0m  [["id", 50], ["LIMIT", 1]]
+  [1m[36mDoorkeeper::AccessToken Exists? (0.1ms)[0m  [1m[34mSELECT 1 AS one FROM "oauth_access_tokens" WHERE "oauth_access_tokens"."token" = $1 LIMIT $2[0m  [["token", "7Q4oTXd8k_tRyYjPvUk6UDrDimbfB4BPpCSDvFCv9y4"], ["LIMIT", 1]]
+  [1m[36mDoorkeeper::AccessToken Create (0.2ms)[0m  [1m[32mINSERT INTO "oauth_access_tokens" ("resource_owner_id", "application_id", "token", "refresh_token", "expires_in", "scopes", "created_at", "revoked_at", "previous_refresh_token") VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING "id"[0m  [["resource_owner_id", 245], ["application_id", 50], ["token", "7Q4oTXd8k_tRyYjPvUk6UDrDimbfB4BPpCSDvFCv9y4"], ["refresh_token", "[FILTERED]"], ["expires_in", 3600], ["scopes", "read write"], ["created_at", "2026-05-23 09:55:30.305659"], ["revoked_at", nil], ["previous_refresh_token", ""]]
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mRELEASE SAVEPOINT active_record_1[0m
+Started POST "/mcp" for 127.0.0.1 at 2026-05-23 10:55:30 +0100
+Processing by RailsMcp::McpController#handle as HTML
+  Parameters: {"jsonrpc" => "2.0", "method" => "notifications/initialized", "mcp" => {"jsonrpc" => "2.0", "method" => "notifications/initialized"}}
+  [1m[36mDoorkeeper::AccessToken Load (0.1ms)[0m  [1m[34mSELECT "oauth_access_tokens".* FROM "oauth_access_tokens" WHERE "oauth_access_tokens"."token" = $1 LIMIT $2[0m  [["token", "7Q4oTXd8k_tRyYjPvUk6UDrDimbfB4BPpCSDvFCv9y4"], ["LIMIT", 1]]
+  [1m[36mRailsMcp::User Load (0.1ms)[0m  [1m[34mSELECT "users".* FROM "users" WHERE "users"."id" = $1 LIMIT $2[0m  [["id", 245], ["LIMIT", 1]]
+Completed 204 No Content in 0ms (ActiveRecord: 0.2ms (2 queries, 0 cached) | GC: 0.0ms)
+  [1m[36mTRANSACTION (0.2ms)[0m  [1m[31mROLLBACK[0m
+  [1m[36mTRANSACTION (0.0ms)[0m  [1m[35mBEGIN[0m
+Started GET "/onboarding" for 127.0.0.1 at 2026-05-23 10:55:30 +0100
+Processing by RailsMcp::OnboardingController#new as HTML
+Redirected to http://www.example.com/sign_in
+Filter chain halted as :require_sign_in rendered or redirected
+Completed 302 Found in 0ms (ActiveRecord: 0.0ms (0 queries, 0 cached) | GC: 0.0ms)
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[31mROLLBACK[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mBEGIN[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mSAVEPOINT active_record_1[0m
+  [1m[36mRailsMcp::Account Create (0.3ms)[0m  [1m[32mINSERT INTO "accounts" ("name", "onboarded_at", "created_at", "updated_at") VALUES ($1, $2, $3, $4) RETURNING "id"[0m  [["name", "Default"], ["onboarded_at", nil], ["created_at", "2026-05-23 09:55:30.311737"], ["updated_at", "2026-05-23 09:55:30.311737"]]
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mRELEASE SAVEPOINT active_record_1[0m
+  [1m[36mTRANSACTION (0.0ms)[0m  [1m[35mSAVEPOINT active_record_1[0m
+  [1m[36mRailsMcp::User Exists? (0.2ms)[0m  [1m[34mSELECT 1 AS one FROM "users" WHERE "users"."identity_id" = $1 LIMIT $2[0m  [["identity_id", "id-1"], ["LIMIT", 1]]
+  [1m[36mRailsMcp::User Exists? (0.2ms)[0m  [1m[34mSELECT 1 AS one FROM "users" WHERE LOWER("users"."email") = LOWER($1) LIMIT $2[0m  [["email", "u@example.com"], ["LIMIT", 1]]
+  [1m[36mRailsMcp::User Create (0.2ms)[0m  [1m[32mINSERT INTO "users" ("account_id", "email", "name", "identity_id", "created_at", "updated_at") VALUES ($1, $2, $3, $4, $5, $6) RETURNING "id"[0m  [["account_id", 261], ["email", "u@example.com"], ["name", nil], ["identity_id", "id-1"], ["created_at", "2026-05-23 09:55:30.313018"], ["updated_at", "2026-05-23 09:55:30.313018"]]
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mRELEASE SAVEPOINT active_record_1[0m
+Started POST "/test_sign_in" for 127.0.0.1 at 2026-05-23 10:55:30 +0100
+Processing by SessionsController#test_sign_in as HTML
+  Parameters: {"user_id" => "246"}
+Completed 200 OK in 0ms (ActiveRecord: 0.0ms (0 queries, 0 cached) | GC: 0.0ms)
+Started GET "/onboarding" for 127.0.0.1 at 2026-05-23 10:55:30 +0100
+Processing by RailsMcp::OnboardingController#new as HTML
+  [1m[36mRailsMcp::User Load (0.1ms)[0m  [1m[34mSELECT "users".* FROM "users" WHERE "users"."id" = $1 LIMIT $2[0m  [["id", 246], ["LIMIT", 1]]
+  [1m[36mRailsMcp::Account Load (0.1ms)[0m  [1m[34mSELECT "accounts".* FROM "accounts" WHERE "accounts"."id" = $1 LIMIT $2[0m  [["id", 261], ["LIMIT", 1]]
+  Rendering /Users/matt/Development/basecamp-mcp-rails/engines/rails_mcp/app/views/rails_mcp/onboarding/new.html.erb
+  Rendered /Users/matt/Development/basecamp-mcp-rails/engines/rails_mcp/app/views/rails_mcp/onboarding/new.html.erb (Duration: 2.7ms | GC: 0.0ms)
+Completed 200 OK in 4ms (Views: 3.0ms | ActiveRecord: 0.2ms (2 queries, 0 cached) | GC: 0.0ms)
+  [1m[36mTRANSACTION (0.2ms)[0m  [1m[31mROLLBACK[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mBEGIN[0m
+  [1m[36mTRANSACTION (0.0ms)[0m  [1m[35mSAVEPOINT active_record_1[0m
+  [1m[36mRailsMcp::Account Create (0.2ms)[0m  [1m[32mINSERT INTO "accounts" ("name", "onboarded_at", "created_at", "updated_at") VALUES ($1, $2, $3, $4) RETURNING "id"[0m  [["name", "Default"], ["onboarded_at", nil], ["created_at", "2026-05-23 09:55:30.324581"], ["updated_at", "2026-05-23 09:55:30.324581"]]
+  [1m[36mTRANSACTION (0.0ms)[0m  [1m[35mRELEASE SAVEPOINT active_record_1[0m
+  [1m[36mTRANSACTION (0.0ms)[0m  [1m[35mSAVEPOINT active_record_1[0m
+  [1m[36mRailsMcp::User Exists? (0.2ms)[0m  [1m[34mSELECT 1 AS one FROM "users" WHERE "users"."identity_id" = $1 LIMIT $2[0m  [["identity_id", "id-1"], ["LIMIT", 1]]
+  [1m[36mRailsMcp::User Exists? (0.1ms)[0m  [1m[34mSELECT 1 AS one FROM "users" WHERE LOWER("users"."email") = LOWER($1) LIMIT $2[0m  [["email", "u@example.com"], ["LIMIT", 1]]
+  [1m[36mRailsMcp::User Create (0.2ms)[0m  [1m[32mINSERT INTO "users" ("account_id", "email", "name", "identity_id", "created_at", "updated_at") VALUES ($1, $2, $3, $4, $5, $6) RETURNING "id"[0m  [["account_id", 262], ["email", "u@example.com"], ["name", nil], ["identity_id", "id-1"], ["created_at", "2026-05-23 09:55:30.325744"], ["updated_at", "2026-05-23 09:55:30.325744"]]
+  [1m[36mTRANSACTION (0.0ms)[0m  [1m[35mRELEASE SAVEPOINT active_record_1[0m
+Started POST "/test_sign_in" for 127.0.0.1 at 2026-05-23 10:55:30 +0100
+Processing by SessionsController#test_sign_in as HTML
+  Parameters: {"user_id" => "247"}
+Completed 200 OK in 0ms (ActiveRecord: 0.0ms (0 queries, 0 cached) | GC: 0.0ms)
+Started POST "/onboarding" for 127.0.0.1 at 2026-05-23 10:55:30 +0100
+Processing by RailsMcp::OnboardingController#create as HTML
+  Parameters: {"name" => "My Workspace"}
+  [1m[36mRailsMcp::User Load (0.1ms)[0m  [1m[34mSELECT "users".* FROM "users" WHERE "users"."id" = $1 LIMIT $2[0m  [["id", 247], ["LIMIT", 1]]
+  [1m[36mRailsMcp::Account Load (0.1ms)[0m  [1m[34mSELECT "accounts".* FROM "accounts" WHERE "accounts"."id" = $1 LIMIT $2[0m  [["id", 262], ["LIMIT", 1]]
+  [1m[36mTRANSACTION (0.0ms)[0m  [1m[35mSAVEPOINT active_record_1[0m
+  [1m[36mRailsMcp::Account Update (0.2ms)[0m  [1m[33mUPDATE "accounts" SET "name" = $1, "updated_at" = $2 WHERE "accounts"."id" = $3[0m  [["name", "My Workspace"], ["updated_at", "2026-05-23 09:55:30.328985"], ["id", 262]]
+  [1m[36mTRANSACTION (0.0ms)[0m  [1m[35mRELEASE SAVEPOINT active_record_1[0m
+  [1m[36mTRANSACTION (0.0ms)[0m  [1m[35mSAVEPOINT active_record_1[0m
+  [1m[36mRailsMcp::Account Update (0.2ms)[0m  [1m[33mUPDATE "accounts" SET "onboarded_at" = $1, "updated_at" = $2 WHERE "accounts"."id" = $3[0m  [["onboarded_at", "2026-05-23 09:55:30.329457"], ["updated_at", "2026-05-23 09:55:30.329565"], ["id", 262]]
+  [1m[36mTRANSACTION (0.0ms)[0m  [1m[35mRELEASE SAVEPOINT active_record_1[0m
+Redirected to http://www.example.com/connections
+Completed 302 Found in 2ms (ActiveRecord: 0.7ms (4 queries, 0 cached) | GC: 0.0ms)
+  [1m[36mRailsMcp::Account Load (0.1ms)[0m  [1m[34mSELECT "accounts".* FROM "accounts" WHERE "accounts"."id" = $1 LIMIT $2[0m  [["id", 262], ["LIMIT", 1]]
+  [1m[36mTRANSACTION (0.2ms)[0m  [1m[31mROLLBACK[0m
+  [1m[36mTRANSACTION (0.0ms)[0m  [1m[35mBEGIN[0m
+  [1m[36mTRANSACTION (0.0ms)[0m  [1m[35mSAVEPOINT active_record_1[0m
+  [1m[36mRailsMcp::Account Create (0.2ms)[0m  [1m[32mINSERT INTO "accounts" ("name", "onboarded_at", "created_at", "updated_at") VALUES ($1, $2, $3, $4) RETURNING "id"[0m  [["name", "Default"], ["onboarded_at", nil], ["created_at", "2026-05-23 09:55:30.331116"], ["updated_at", "2026-05-23 09:55:30.331116"]]
+  [1m[36mTRANSACTION (0.0ms)[0m  [1m[35mRELEASE SAVEPOINT active_record_1[0m
+  [1m[36mTRANSACTION (0.0ms)[0m  [1m[35mSAVEPOINT active_record_1[0m
+  [1m[36mRailsMcp::User Exists? (0.2ms)[0m  [1m[34mSELECT 1 AS one FROM "users" WHERE "users"."identity_id" = $1 LIMIT $2[0m  [["identity_id", "id-1"], ["LIMIT", 1]]
+  [1m[36mRailsMcp::User Exists? (0.1ms)[0m  [1m[34mSELECT 1 AS one FROM "users" WHERE LOWER("users"."email") = LOWER($1) LIMIT $2[0m  [["email", "u@example.com"], ["LIMIT", 1]]
+  [1m[36mRailsMcp::User Create (0.1ms)[0m  [1m[32mINSERT INTO "users" ("account_id", "email", "name", "identity_id", "created_at", "updated_at") VALUES ($1, $2, $3, $4, $5, $6) RETURNING "id"[0m  [["account_id", 263], ["email", "u@example.com"], ["name", nil], ["identity_id", "id-1"], ["created_at", "2026-05-23 09:55:30.332055"], ["updated_at", "2026-05-23 09:55:30.332055"]]
+  [1m[36mTRANSACTION (0.0ms)[0m  [1m[35mRELEASE SAVEPOINT active_record_1[0m
+Started POST "/test_sign_in" for 127.0.0.1 at 2026-05-23 10:55:30 +0100
+Processing by SessionsController#test_sign_in as HTML
+  Parameters: {"user_id" => "248"}
+Completed 200 OK in 0ms (ActiveRecord: 0.0ms (0 queries, 0 cached) | GC: 0.0ms)
+Started POST "/onboarding" for 127.0.0.1 at 2026-05-23 10:55:30 +0100
+Processing by RailsMcp::OnboardingController#create as HTML
+  Parameters: {"name" => " "}
+  [1m[36mRailsMcp::User Load (0.1ms)[0m  [1m[34mSELECT "users".* FROM "users" WHERE "users"."id" = $1 LIMIT $2[0m  [["id", 248], ["LIMIT", 1]]
+  [1m[36mRailsMcp::Account Load (0.1ms)[0m  [1m[34mSELECT "accounts".* FROM "accounts" WHERE "accounts"."id" = $1 LIMIT $2[0m  [["id", 263], ["LIMIT", 1]]
+  [1m[36mTRANSACTION (0.0ms)[0m  [1m[35mSAVEPOINT active_record_1[0m
+  [1m[36mRailsMcp::Account Update (0.2ms)[0m  [1m[33mUPDATE "accounts" SET "name" = $1, "updated_at" = $2 WHERE "accounts"."id" = $3[0m  [["name", "Suggested for u@example.com"], ["updated_at", "2026-05-23 09:55:30.335165"], ["id", 263]]
+  [1m[36mTRANSACTION (0.0ms)[0m  [1m[35mRELEASE SAVEPOINT active_record_1[0m
+  [1m[36mTRANSACTION (0.0ms)[0m  [1m[35mSAVEPOINT active_record_1[0m
+  [1m[36mRailsMcp::Account Update (0.2ms)[0m  [1m[33mUPDATE "accounts" SET "onboarded_at" = $1, "updated_at" = $2 WHERE "accounts"."id" = $3[0m  [["onboarded_at", "2026-05-23 09:55:30.335607"], ["updated_at", "2026-05-23 09:55:30.335690"], ["id", 263]]
+  [1m[36mTRANSACTION (0.0ms)[0m  [1m[35mRELEASE SAVEPOINT active_record_1[0m
+Redirected to http://www.example.com/connections
+Completed 302 Found in 2ms (ActiveRecord: 0.7ms (4 queries, 0 cached) | GC: 0.0ms)
+  [1m[36mRailsMcp::Account Load (0.0ms)[0m  [1m[34mSELECT "accounts".* FROM "accounts" WHERE "accounts"."id" = $1 LIMIT $2[0m  [["id", 263], ["LIMIT", 1]]
+  [1m[36mTRANSACTION (0.2ms)[0m  [1m[31mROLLBACK[0m
+  [1m[36mTRANSACTION (0.0ms)[0m  [1m[35mBEGIN[0m
+  [1m[36mTRANSACTION (0.0ms)[0m  [1m[35mSAVEPOINT active_record_1[0m
+  [1m[36mRailsMcp::Account Create (0.2ms)[0m  [1m[32mINSERT INTO "accounts" ("name", "onboarded_at", "created_at", "updated_at") VALUES ($1, $2, $3, $4) RETURNING "id"[0m  [["name", "Default"], ["onboarded_at", nil], ["created_at", "2026-05-23 09:55:30.337091"], ["updated_at", "2026-05-23 09:55:30.337091"]]
+  [1m[36mTRANSACTION (0.0ms)[0m  [1m[35mRELEASE SAVEPOINT active_record_1[0m
+  [1m[36mTRANSACTION (0.0ms)[0m  [1m[35mSAVEPOINT active_record_1[0m
+  [1m[36mRailsMcp::User Exists? (0.2ms)[0m  [1m[34mSELECT 1 AS one FROM "users" WHERE "users"."identity_id" = $1 LIMIT $2[0m  [["identity_id", "id-1"], ["LIMIT", 1]]
+  [1m[36mRailsMcp::User Exists? (0.1ms)[0m  [1m[34mSELECT 1 AS one FROM "users" WHERE LOWER("users"."email") = LOWER($1) LIMIT $2[0m  [["email", "u@example.com"], ["LIMIT", 1]]
+  [1m[36mRailsMcp::User Create (0.1ms)[0m  [1m[32mINSERT INTO "users" ("account_id", "email", "name", "identity_id", "created_at", "updated_at") VALUES ($1, $2, $3, $4, $5, $6) RETURNING "id"[0m  [["account_id", 264], ["email", "u@example.com"], ["name", nil], ["identity_id", "id-1"], ["created_at", "2026-05-23 09:55:30.338043"], ["updated_at", "2026-05-23 09:55:30.338043"]]
+  [1m[36mTRANSACTION (0.0ms)[0m  [1m[35mRELEASE SAVEPOINT active_record_1[0m
+Started POST "/test_sign_in" for 127.0.0.1 at 2026-05-23 10:55:30 +0100
+Processing by SessionsController#test_sign_in as HTML
+  Parameters: {"user_id" => "249"}
+Completed 200 OK in 0ms (ActiveRecord: 0.0ms (0 queries, 0 cached) | GC: 0.0ms)
+  [1m[36mTRANSACTION (0.0ms)[0m  [1m[35mSAVEPOINT active_record_1[0m
+  [1m[36mRailsMcp::Account Update (0.2ms)[0m  [1m[33mUPDATE "accounts" SET "onboarded_at" = $1, "updated_at" = $2 WHERE "accounts"."id" = $3[0m  [["onboarded_at", "2026-05-23 09:55:30.339638"], ["updated_at", "2026-05-23 09:55:30.339748"], ["id", 264]]
+  [1m[36mTRANSACTION (0.0ms)[0m  [1m[35mRELEASE SAVEPOINT active_record_1[0m
+Started GET "/onboarding" for 127.0.0.1 at 2026-05-23 10:55:30 +0100
+Processing by RailsMcp::OnboardingController#new as HTML
+  [1m[36mRailsMcp::User Load (0.1ms)[0m  [1m[34mSELECT "users".* FROM "users" WHERE "users"."id" = $1 LIMIT $2[0m  [["id", 249], ["LIMIT", 1]]
+  [1m[36mRailsMcp::Account Load (0.0ms)[0m  [1m[34mSELECT "accounts".* FROM "accounts" WHERE "accounts"."id" = $1 LIMIT $2[0m  [["id", 264], ["LIMIT", 1]]
+Redirected to http://www.example.com/connections
+Filter chain halted as :skip_if_already_onboarded rendered or redirected
+Completed 302 Found in 1ms (ActiveRecord: 0.1ms (2 queries, 0 cached) | GC: 0.0ms)
+  [1m[36mTRANSACTION (0.2ms)[0m  [1m[31mROLLBACK[0m
+  [1m[36mTRANSACTION (0.0ms)[0m  [1m[35mBEGIN[0m
+  [1m[36mTRANSACTION (0.0ms)[0m  [1m[35mSAVEPOINT active_record_1[0m
+  [1m[36mRailsMcp::Account Create (0.2ms)[0m  [1m[32mINSERT INTO "accounts" ("name", "onboarded_at", "created_at", "updated_at") VALUES ($1, $2, $3, $4) RETURNING "id"[0m  [["name", "Acme"], ["onboarded_at", nil], ["created_at", "2026-05-23 09:55:30.342767"], ["updated_at", "2026-05-23 09:55:30.342767"]]
+  [1m[36mTRANSACTION (0.0ms)[0m  [1m[35mRELEASE SAVEPOINT active_record_1[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mSAVEPOINT active_record_1[0m
+  [1m[36mRailsMcp::Account Update (0.2ms)[0m  [1m[33mUPDATE "accounts" SET "onboarded_at" = $1, "updated_at" = $2 WHERE "accounts"."id" = $3[0m  [["onboarded_at", "2026-05-23 09:55:30.343254"], ["updated_at", "2026-05-23 09:55:30.343378"], ["id", 265]]
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mRELEASE SAVEPOINT active_record_1[0m
+  [1m[36mTRANSACTION (0.0ms)[0m  [1m[35mSAVEPOINT active_record_1[0m
+  [1m[36mRailsMcp::User Exists? (0.2ms)[0m  [1m[34mSELECT 1 AS one FROM "users" WHERE "users"."identity_id" = $1 LIMIT $2[0m  [["identity_id", "host"], ["LIMIT", 1]]
+  [1m[36mRailsMcp::User Exists? (0.1ms)[0m  [1m[34mSELECT 1 AS one FROM "users" WHERE LOWER("users"."email") = LOWER($1) LIMIT $2[0m  [["email", "host@example.com"], ["LIMIT", 1]]
+  [1m[36mRailsMcp::User Create (0.2ms)[0m  [1m[32mINSERT INTO "users" ("account_id", "email", "name", "identity_id", "created_at", "updated_at") VALUES ($1, $2, $3, $4, $5, $6) RETURNING "id"[0m  [["account_id", 265], ["email", "host@example.com"], ["name", nil], ["identity_id", "host"], ["created_at", "2026-05-23 09:55:30.344573"], ["updated_at", "2026-05-23 09:55:30.344573"]]
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mRELEASE SAVEPOINT active_record_1[0m
+Started POST "/test_sign_in" for 127.0.0.1 at 2026-05-23 10:55:30 +0100
+Processing by SessionsController#test_sign_in as HTML
+  Parameters: {"user_id" => "250"}
+Completed 200 OK in 0ms (ActiveRecord: 0.0ms (0 queries, 0 cached) | GC: 0.0ms)
+  [1m[36mTRANSACTION (0.0ms)[0m  [1m[35mSAVEPOINT active_record_1[0m
+  [1m[36mRailsMcp::User Exists? (0.2ms)[0m  [1m[34mSELECT 1 AS one FROM "users" WHERE "users"."identity_id" = $1 LIMIT $2[0m  [["identity_id", "tm"], ["LIMIT", 1]]
+  [1m[36mRailsMcp::User Exists? (0.1ms)[0m  [1m[34mSELECT 1 AS one FROM "users" WHERE LOWER("users"."email") = LOWER($1) LIMIT $2[0m  [["email", "teammate@example.com"], ["LIMIT", 1]]
+  [1m[36mRailsMcp::User Create (0.2ms)[0m  [1m[32mINSERT INTO "users" ("account_id", "email", "name", "identity_id", "created_at", "updated_at") VALUES ($1, $2, $3, $4, $5, $6) RETURNING "id"[0m  [["account_id", 265], ["email", "teammate@example.com"], ["name", nil], ["identity_id", "tm"], ["created_at", "2026-05-23 09:55:30.346896"], ["updated_at", "2026-05-23 09:55:30.346896"]]
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mRELEASE SAVEPOINT active_record_1[0m
+  [1m[36mTRANSACTION (0.0ms)[0m  [1m[35mSAVEPOINT active_record_1[0m
+  [1m[36mRailsMcp::Invitation Exists? (0.2ms)[0m  [1m[34mSELECT 1 AS one FROM "invitations" WHERE "invitations"."token" = $1 LIMIT $2[0m  [["token", "tMfsjUmHHjiu76I_0CwJ1WQNET1dfh5g0nm6R9Pm0iI"], ["LIMIT", 1]]
+  [1m[36mRailsMcp::Invitation Create (0.2ms)[0m  [1m[32mINSERT INTO "invitations" ("account_id", "invited_by_id", "email", "token", "expires_at", "accepted_at", "revoked_at", "created_at", "updated_at") VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING "id"[0m  [["account_id", 265], ["invited_by_id", 250], ["email", "guest@example.com"], ["token", "tMfsjUmHHjiu76I_0CwJ1WQNET1dfh5g0nm6R9Pm0iI"], ["expires_at", "2026-06-06 09:55:30.347558"], ["accepted_at", nil], ["revoked_at", nil], ["created_at", "2026-05-23 09:55:30.347940"], ["updated_at", "2026-05-23 09:55:30.347940"]]
+  [1m[36mTRANSACTION (0.0ms)[0m  [1m[35mRELEASE SAVEPOINT active_record_1[0m
+  [1m[36mTRANSACTION (0.0ms)[0m  [1m[35mSAVEPOINT active_record_1[0m
+  [1m[36mRailsMcp::Invitation Exists? (0.2ms)[0m  [1m[34mSELECT 1 AS one FROM "invitations" WHERE "invitations"."token" = $1 LIMIT $2[0m  [["token", "7QDCRGJzTC_i-w1cjWLREdznVeeCEi7LuYVxWjXz-ds"], ["LIMIT", 1]]
+  [1m[36mRailsMcp::Invitation Create (0.2ms)[0m  [1m[32mINSERT INTO "invitations" ("account_id", "invited_by_id", "email", "token", "expires_at", "accepted_at", "revoked_at", "created_at", "updated_at") VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING "id"[0m  [["account_id", 265], ["invited_by_id", 250], ["email", "old@example.com"], ["token", "7QDCRGJzTC_i-w1cjWLREdznVeeCEi7LuYVxWjXz-ds"], ["expires_at", "2026-06-06 09:55:30.348533"], ["accepted_at", "2026-05-23 09:55:30.348363"], ["revoked_at", nil], ["created_at", "2026-05-23 09:55:30.348860"], ["updated_at", "2026-05-23 09:55:30.348860"]]
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mRELEASE SAVEPOINT active_record_1[0m
+Started GET "/team" for 127.0.0.1 at 2026-05-23 10:55:30 +0100
+Processing by RailsMcp::TeamController#index as HTML
+  [1m[36mRailsMcp::User Load (0.1ms)[0m  [1m[34mSELECT "users".* FROM "users" WHERE "users"."id" = $1 LIMIT $2[0m  [["id", 250], ["LIMIT", 1]]
+  [1m[36mRailsMcp::Account Load (0.1ms)[0m  [1m[34mSELECT "accounts".* FROM "accounts" WHERE "accounts"."id" = $1 LIMIT $2[0m  [["id", 265], ["LIMIT", 1]]
+  Rendering /Users/matt/Development/basecamp-mcp-rails/engines/rails_mcp/app/views/rails_mcp/team/index.html.erb
+  [1m[36mRailsMcp::User Count (0.2ms)[0m  [1m[34mSELECT COUNT(*) FROM "users" WHERE "users"."account_id" = $1[0m  [["account_id", 265]]
+  [1m[36mRailsMcp::User Load (0.4ms)[0m  [1m[34mSELECT "users".* FROM "users" WHERE "users"."account_id" = $1 ORDER BY "users"."created_at" ASC[0m  [["account_id", 265]]
+  [1m[36mRailsMcp::Invitation Count (0.1ms)[0m  [1m[34mSELECT COUNT(*) FROM "invitations" WHERE "invitations"."account_id" = $1 AND "invitations"."accepted_at" IS NULL AND "invitations"."revoked_at" IS NULL AND (expires_at > $2)[0m  [["account_id", 265], [nil, "2026-05-23 09:55:30.352278"]]
+  [1m[36mRailsMcp::Invitation Exists? (0.1ms)[0m  [1m[34mSELECT 1 AS one FROM "invitations" WHERE "invitations"."account_id" = $1 AND "invitations"."accepted_at" IS NULL AND "invitations"."revoked_at" IS NULL AND (expires_at > $2) LIMIT $3[0m  [["account_id", 265], [nil, "2026-05-23 09:55:30.352278"], ["LIMIT", 1]]
+  [1m[36mRailsMcp::Invitation Load (0.2ms)[0m  [1m[34mSELECT "invitations".* FROM "invitations" WHERE "invitations"."account_id" = $1 AND "invitations"."accepted_at" IS NULL AND "invitations"."revoked_at" IS NULL AND (expires_at > $2) ORDER BY "invitations"."created_at" DESC[0m  [["account_id", 265], [nil, "2026-05-23 09:55:30.352278"]]
+  [1m[36mCACHE RailsMcp::User Load (0.0ms)[0m  [1m[34mSELECT "users".* FROM "users" WHERE "users"."id" = $1 LIMIT $2[0m  [["id", 250], ["LIMIT", 1]]
+  Rendered /Users/matt/Development/basecamp-mcp-rails/engines/rails_mcp/app/views/rails_mcp/team/index.html.erb (Duration: 3.1ms | GC: 0.0ms)
+Completed 200 OK in 5ms (Views: 2.4ms | ActiveRecord: 1.1ms (8 queries, 1 cached) | GC: 0.0ms)
+  [1m[36mTRANSACTION (0.2ms)[0m  [1m[31mROLLBACK[0m
+  [1m[36mTRANSACTION (0.0ms)[0m  [1m[35mBEGIN[0m
+  [1m[36mTRANSACTION (0.0ms)[0m  [1m[35mSAVEPOINT active_record_1[0m
+  [1m[36mRailsMcp::Account Create (0.2ms)[0m  [1m[32mINSERT INTO "accounts" ("name", "onboarded_at", "created_at", "updated_at") VALUES ($1, $2, $3, $4) RETURNING "id"[0m  [["name", "Acme"], ["onboarded_at", nil], ["created_at", "2026-05-23 09:55:30.356908"], ["updated_at", "2026-05-23 09:55:30.356908"]]
+  [1m[36mTRANSACTION (0.0ms)[0m  [1m[35mRELEASE SAVEPOINT active_record_1[0m
+  [1m[36mTRANSACTION (0.0ms)[0m  [1m[35mSAVEPOINT active_record_1[0m
+  [1m[36mRailsMcp::Account Update (0.2ms)[0m  [1m[33mUPDATE "accounts" SET "onboarded_at" = $1, "updated_at" = $2 WHERE "accounts"."id" = $3[0m  [["onboarded_at", "2026-05-23 09:55:30.357324"], ["updated_at", "2026-05-23 09:55:30.357388"], ["id", 266]]
+  [1m[36mTRANSACTION (0.0ms)[0m  [1m[35mRELEASE SAVEPOINT active_record_1[0m
+  [1m[36mTRANSACTION (0.0ms)[0m  [1m[35mSAVEPOINT active_record_1[0m
+  [1m[36mRailsMcp::User Exists? (0.1ms)[0m  [1m[34mSELECT 1 AS one FROM "users" WHERE "users"."identity_id" = $1 LIMIT $2[0m  [["identity_id", "host"], ["LIMIT", 1]]
+  [1m[36mRailsMcp::User Exists? (0.1ms)[0m  [1m[34mSELECT 1 AS one FROM "users" WHERE LOWER("users"."email") = LOWER($1) LIMIT $2[0m  [["email", "host@example.com"], ["LIMIT", 1]]
+  [1m[36mRailsMcp::User Create (0.1ms)[0m  [1m[32mINSERT INTO "users" ("account_id", "email", "name", "identity_id", "created_at", "updated_at") VALUES ($1, $2, $3, $4, $5, $6) RETURNING "id"[0m  [["account_id", 266], ["email", "host@example.com"], ["name", nil], ["identity_id", "host"], ["created_at", "2026-05-23 09:55:30.358336"], ["updated_at", "2026-05-23 09:55:30.358336"]]
+  [1m[36mTRANSACTION (0.0ms)[0m  [1m[35mRELEASE SAVEPOINT active_record_1[0m
+Started POST "/test_sign_in" for 127.0.0.1 at 2026-05-23 10:55:30 +0100
+Processing by SessionsController#test_sign_in as HTML
+  Parameters: {"user_id" => "252"}
+Completed 200 OK in 0ms (ActiveRecord: 0.0ms (0 queries, 0 cached) | GC: 0.0ms)
+  [1m[36mRailsMcp::Invitation Count (0.1ms)[0m  [1m[34mSELECT COUNT(*) FROM "invitations"[0m
+Started POST "/team/invitations" for 127.0.0.1 at 2026-05-23 10:55:30 +0100
+Processing by RailsMcp::TeamController#create_invitation as HTML
+  Parameters: {"email" => "new@example.com"}
+  [1m[36mRailsMcp::User Load (0.1ms)[0m  [1m[34mSELECT "users".* FROM "users" WHERE "users"."id" = $1 LIMIT $2[0m  [["id", 252], ["LIMIT", 1]]
+  [1m[36mRailsMcp::Account Load (0.1ms)[0m  [1m[34mSELECT "accounts".* FROM "accounts" WHERE "accounts"."id" = $1 LIMIT $2[0m  [["id", 266], ["LIMIT", 1]]
+  [1m[36mRailsMcp::User Exists? (0.1ms)[0m  [1m[34mSELECT 1 AS one FROM "users" WHERE "users"."account_id" = $1 AND (LOWER(email) = $2) LIMIT $3[0m  [["account_id", 266], [nil, "new@example.com"], ["LIMIT", 1]]
+  [1m[36mRailsMcp::Invitation Exists? (0.1ms)[0m  [1m[34mSELECT 1 AS one FROM "invitations" WHERE "invitations"."account_id" = $1 AND "invitations"."accepted_at" IS NULL AND "invitations"."revoked_at" IS NULL AND (expires_at > $2) AND (LOWER(email) = $3) LIMIT $4[0m  [["account_id", 266], [nil, "2026-05-23 09:55:30.362146"], [nil, "new@example.com"], ["LIMIT", 1]]
+  [1m[36mTRANSACTION (0.0ms)[0m  [1m[35mSAVEPOINT active_record_1[0m
+  [1m[36mRailsMcp::Invitation Exists? (0.1ms)[0m  [1m[34mSELECT 1 AS one FROM "invitations" WHERE "invitations"."token" = $1 LIMIT $2[0m  [["token", "ANg5qnO7bIJiLTxBF5XiZqRTZEUQDudilBl9DTkqnAQ"], ["LIMIT", 1]]
+  [1m[36mRailsMcp::Invitation Create (0.2ms)[0m  [1m[32mINSERT INTO "invitations" ("account_id", "invited_by_id", "email", "token", "expires_at", "accepted_at", "revoked_at", "created_at", "updated_at") VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING "id"[0m  [["account_id", 266], ["invited_by_id", 252], ["email", "new@example.com"], ["token", "ANg5qnO7bIJiLTxBF5XiZqRTZEUQDudilBl9DTkqnAQ"], ["expires_at", "2026-06-06 09:55:30.362550"], ["accepted_at", nil], ["revoked_at", nil], ["created_at", "2026-05-23 09:55:30.362858"], ["updated_at", "2026-05-23 09:55:30.362858"]]
+  [1m[36mTRANSACTION (0.0ms)[0m  [1m[35mRELEASE SAVEPOINT active_record_1[0m
+[ActiveJob] Enqueued ActionMailer::MailDeliveryJob (Job ID: 50027b43-3181-4ef9-8465-2e53921d8bac) to Test(default) with arguments: "RailsMcp::UserMailer", "invite_email", "deliver_now", {args: [{invitation_id: 122}]}
+Redirected to http://www.example.com/team
+Completed 302 Found in 3ms (ActiveRecord: 0.8ms (6 queries, 0 cached) | GC: 0.0ms)
+  [1m[36mRailsMcp::Invitation Count (0.1ms)[0m  [1m[34mSELECT COUNT(*) FROM "invitations"[0m
+  [1m[36mTRANSACTION (0.2ms)[0m  [1m[31mROLLBACK[0m
+  [1m[36mTRANSACTION (0.0ms)[0m  [1m[35mBEGIN[0m
+  [1m[36mTRANSACTION (0.0ms)[0m  [1m[35mSAVEPOINT active_record_1[0m
+  [1m[36mRailsMcp::Account Create (0.2ms)[0m  [1m[32mINSERT INTO "accounts" ("name", "onboarded_at", "created_at", "updated_at") VALUES ($1, $2, $3, $4) RETURNING "id"[0m  [["name", "Acme"], ["onboarded_at", nil], ["created_at", "2026-05-23 09:55:30.365002"], ["updated_at", "2026-05-23 09:55:30.365002"]]
+  [1m[36mTRANSACTION (0.0ms)[0m  [1m[35mRELEASE SAVEPOINT active_record_1[0m
+  [1m[36mTRANSACTION (0.0ms)[0m  [1m[35mSAVEPOINT active_record_1[0m
+  [1m[36mRailsMcp::Account Update (0.2ms)[0m  [1m[33mUPDATE "accounts" SET "onboarded_at" = $1, "updated_at" = $2 WHERE "accounts"."id" = $3[0m  [["onboarded_at", "2026-05-23 09:55:30.365394"], ["updated_at", "2026-05-23 09:55:30.365455"], ["id", 267]]
+  [1m[36mTRANSACTION (0.0ms)[0m  [1m[35mRELEASE SAVEPOINT active_record_1[0m
+  [1m[36mTRANSACTION (0.0ms)[0m  [1m[35mSAVEPOINT active_record_1[0m
+  [1m[36mRailsMcp::User Exists? (0.2ms)[0m  [1m[34mSELECT 1 AS one FROM "users" WHERE "users"."identity_id" = $1 LIMIT $2[0m  [["identity_id", "host"], ["LIMIT", 1]]
+  [1m[36mRailsMcp::User Exists? (0.1ms)[0m  [1m[34mSELECT 1 AS one FROM "users" WHERE LOWER("users"."email") = LOWER($1) LIMIT $2[0m  [["email", "host@example.com"], ["LIMIT", 1]]
+  [1m[36mRailsMcp::User Create (0.1ms)[0m  [1m[32mINSERT INTO "users" ("account_id", "email", "name", "identity_id", "created_at", "updated_at") VALUES ($1, $2, $3, $4, $5, $6) RETURNING "id"[0m  [["account_id", 267], ["email", "host@example.com"], ["name", nil], ["identity_id", "host"], ["created_at", "2026-05-23 09:55:30.366428"], ["updated_at", "2026-05-23 09:55:30.366428"]]
+  [1m[36mTRANSACTION (0.0ms)[0m  [1m[35mRELEASE SAVEPOINT active_record_1[0m
+Started POST "/test_sign_in" for 127.0.0.1 at 2026-05-23 10:55:30 +0100
+Processing by SessionsController#test_sign_in as HTML
+  Parameters: {"user_id" => "253"}
+Completed 200 OK in 0ms (ActiveRecord: 0.0ms (0 queries, 0 cached) | GC: 0.0ms)
+  [1m[36mRailsMcp::Invitation Count (0.1ms)[0m  [1m[34mSELECT COUNT(*) FROM "invitations"[0m
+Started POST "/team/invitations" for 127.0.0.1 at 2026-05-23 10:55:30 +0100
+Processing by RailsMcp::TeamController#create_invitation as HTML
+  Parameters: {"email" => ""}
+  [1m[36mRailsMcp::User Load (0.1ms)[0m  [1m[34mSELECT "users".* FROM "users" WHERE "users"."id" = $1 LIMIT $2[0m  [["id", 253], ["LIMIT", 1]]
+  [1m[36mRailsMcp::Account Load (0.0ms)[0m  [1m[34mSELECT "accounts".* FROM "accounts" WHERE "accounts"."id" = $1 LIMIT $2[0m  [["id", 267], ["LIMIT", 1]]
+Redirected to http://www.example.com/team
+Completed 302 Found in 1ms (ActiveRecord: 0.1ms (2 queries, 0 cached) | GC: 0.0ms)
+  [1m[36mRailsMcp::Invitation Count (0.1ms)[0m  [1m[34mSELECT COUNT(*) FROM "invitations"[0m
+Started GET "/team" for 127.0.0.1 at 2026-05-23 10:55:30 +0100
+Processing by RailsMcp::TeamController#index as HTML
+  [1m[36mRailsMcp::User Load (0.1ms)[0m  [1m[34mSELECT "users".* FROM "users" WHERE "users"."id" = $1 LIMIT $2[0m  [["id", 253], ["LIMIT", 1]]
+  [1m[36mRailsMcp::Account Load (0.0ms)[0m  [1m[34mSELECT "accounts".* FROM "accounts" WHERE "accounts"."id" = $1 LIMIT $2[0m  [["id", 267], ["LIMIT", 1]]
+  Rendering /Users/matt/Development/basecamp-mcp-rails/engines/rails_mcp/app/views/rails_mcp/team/index.html.erb
+  [1m[36mRailsMcp::User Count (0.1ms)[0m  [1m[34mSELECT COUNT(*) FROM "users" WHERE "users"."account_id" = $1[0m  [["account_id", 267]]
+  [1m[36mRailsMcp::User Load (0.1ms)[0m  [1m[34mSELECT "users".* FROM "users" WHERE "users"."account_id" = $1 ORDER BY "users"."created_at" ASC[0m  [["account_id", 267]]
+  [1m[36mRailsMcp::Invitation Count (0.1ms)[0m  [1m[34mSELECT COUNT(*) FROM "invitations" WHERE "invitations"."account_id" = $1 AND "invitations"."accepted_at" IS NULL AND "invitations"."revoked_at" IS NULL AND (expires_at > $2)[0m  [["account_id", 267], [nil, "2026-05-23 09:55:30.371975"]]
+  [1m[36mRailsMcp::Invitation Exists? (0.1ms)[0m  [1m[34mSELECT 1 AS one FROM "invitations" WHERE "invitations"."account_id" = $1 AND "invitations"."accepted_at" IS NULL AND "invitations"."revoked_at" IS NULL AND (expires_at > $2) LIMIT $3[0m  [["account_id", 267], [nil, "2026-05-23 09:55:30.371975"], ["LIMIT", 1]]
+  Rendered /Users/matt/Development/basecamp-mcp-rails/engines/rails_mcp/app/views/rails_mcp/team/index.html.erb (Duration: 1.3ms | GC: 0.0ms)
+Completed 200 OK in 2ms (Views: 1.0ms | ActiveRecord: 0.5ms (6 queries, 0 cached) | GC: 0.0ms)
+  [1m[36mTRANSACTION (0.2ms)[0m  [1m[31mROLLBACK[0m
+  [1m[36mTRANSACTION (0.0ms)[0m  [1m[35mBEGIN[0m
+  [1m[36mTRANSACTION (0.0ms)[0m  [1m[35mSAVEPOINT active_record_1[0m
+  [1m[36mRailsMcp::Account Create (0.2ms)[0m  [1m[32mINSERT INTO "accounts" ("name", "onboarded_at", "created_at", "updated_at") VALUES ($1, $2, $3, $4) RETURNING "id"[0m  [["name", "Acme"], ["onboarded_at", nil], ["created_at", "2026-05-23 09:55:30.374221"], ["updated_at", "2026-05-23 09:55:30.374221"]]
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mRELEASE SAVEPOINT active_record_1[0m
+  [1m[36mTRANSACTION (0.0ms)[0m  [1m[35mSAVEPOINT active_record_1[0m
+  [1m[36mRailsMcp::Account Update (0.2ms)[0m  [1m[33mUPDATE "accounts" SET "onboarded_at" = $1, "updated_at" = $2 WHERE "accounts"."id" = $3[0m  [["onboarded_at", "2026-05-23 09:55:30.374651"], ["updated_at", "2026-05-23 09:55:30.374715"], ["id", 268]]
+  [1m[36mTRANSACTION (0.0ms)[0m  [1m[35mRELEASE SAVEPOINT active_record_1[0m
+  [1m[36mTRANSACTION (0.0ms)[0m  [1m[35mSAVEPOINT active_record_1[0m
+  [1m[36mRailsMcp::User Exists? (0.2ms)[0m  [1m[34mSELECT 1 AS one FROM "users" WHERE "users"."identity_id" = $1 LIMIT $2[0m  [["identity_id", "host"], ["LIMIT", 1]]
+  [1m[36mRailsMcp::User Exists? (0.1ms)[0m  [1m[34mSELECT 1 AS one FROM "users" WHERE LOWER("users"."email") = LOWER($1) LIMIT $2[0m  [["email", "host@example.com"], ["LIMIT", 1]]
+  [1m[36mRailsMcp::User Create (0.1ms)[0m  [1m[32mINSERT INTO "users" ("account_id", "email", "name", "identity_id", "created_at", "updated_at") VALUES ($1, $2, $3, $4, $5, $6) RETURNING "id"[0m  [["account_id", 268], ["email", "host@example.com"], ["name", nil], ["identity_id", "host"], ["created_at", "2026-05-23 09:55:30.375708"], ["updated_at", "2026-05-23 09:55:30.375708"]]
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mRELEASE SAVEPOINT active_record_1[0m
+Started POST "/test_sign_in" for 127.0.0.1 at 2026-05-23 10:55:30 +0100
+Processing by SessionsController#test_sign_in as HTML
+  Parameters: {"user_id" => "254"}
+Completed 200 OK in 0ms (ActiveRecord: 0.0ms (0 queries, 0 cached) | GC: 0.0ms)
+  [1m[36mRailsMcp::Invitation Count (0.1ms)[0m  [1m[34mSELECT COUNT(*) FROM "invitations"[0m
+Started POST "/team/invitations" for 127.0.0.1 at 2026-05-23 10:55:30 +0100
+Processing by RailsMcp::TeamController#create_invitation as HTML
+  Parameters: {"email" => "HOST@example.com"}
+  [1m[36mRailsMcp::User Load (0.1ms)[0m  [1m[34mSELECT "users".* FROM "users" WHERE "users"."id" = $1 LIMIT $2[0m  [["id", 254], ["LIMIT", 1]]
+  [1m[36mRailsMcp::Account Load (0.1ms)[0m  [1m[34mSELECT "accounts".* FROM "accounts" WHERE "accounts"."id" = $1 LIMIT $2[0m  [["id", 268], ["LIMIT", 1]]
+  [1m[36mRailsMcp::User Exists? (0.1ms)[0m  [1m[34mSELECT 1 AS one FROM "users" WHERE "users"."account_id" = $1 AND (LOWER(email) = $2) LIMIT $3[0m  [["account_id", 268], [nil, "host@example.com"], ["LIMIT", 1]]
+Redirected to http://www.example.com/team
+Completed 302 Found in 1ms (ActiveRecord: 0.3ms (3 queries, 0 cached) | GC: 0.0ms)
+  [1m[36mRailsMcp::Invitation Count (0.1ms)[0m  [1m[34mSELECT COUNT(*) FROM "invitations"[0m
+  [1m[36mTRANSACTION (0.2ms)[0m  [1m[31mROLLBACK[0m
+  [1m[36mTRANSACTION (0.0ms)[0m  [1m[35mBEGIN[0m
+  [1m[36mTRANSACTION (0.0ms)[0m  [1m[35mSAVEPOINT active_record_1[0m
+  [1m[36mRailsMcp::Account Create (0.2ms)[0m  [1m[32mINSERT INTO "accounts" ("name", "onboarded_at", "created_at", "updated_at") VALUES ($1, $2, $3, $4) RETURNING "id"[0m  [["name", "Acme"], ["onboarded_at", nil], ["created_at", "2026-05-23 09:55:30.381155"], ["updated_at", "2026-05-23 09:55:30.381155"]]
+  [1m[36mTRANSACTION (0.0ms)[0m  [1m[35mRELEASE SAVEPOINT active_record_1[0m
+  [1m[36mTRANSACTION (0.0ms)[0m  [1m[35mSAVEPOINT active_record_1[0m
+  [1m[36mRailsMcp::Account Update (0.2ms)[0m  [1m[33mUPDATE "accounts" SET "onboarded_at" = $1, "updated_at" = $2 WHERE "accounts"."id" = $3[0m  [["onboarded_at", "2026-05-23 09:55:30.381575"], ["updated_at", "2026-05-23 09:55:30.381641"], ["id", 269]]
+  [1m[36mTRANSACTION (0.0ms)[0m  [1m[35mRELEASE SAVEPOINT active_record_1[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mSAVEPOINT active_record_1[0m
+  [1m[36mRailsMcp::User Exists? (0.2ms)[0m  [1m[34mSELECT 1 AS one FROM "users" WHERE "users"."identity_id" = $1 LIMIT $2[0m  [["identity_id", "host"], ["LIMIT", 1]]
+  [1m[36mRailsMcp::User Exists? (0.1ms)[0m  [1m[34mSELECT 1 AS one FROM "users" WHERE LOWER("users"."email") = LOWER($1) LIMIT $2[0m  [["email", "host@example.com"], ["LIMIT", 1]]
+  [1m[36mRailsMcp::User Create (0.2ms)[0m  [1m[32mINSERT INTO "users" ("account_id", "email", "name", "identity_id", "created_at", "updated_at") VALUES ($1, $2, $3, $4, $5, $6) RETURNING "id"[0m  [["account_id", 269], ["email", "host@example.com"], ["name", nil], ["identity_id", "host"], ["created_at", "2026-05-23 09:55:30.382674"], ["updated_at", "2026-05-23 09:55:30.382674"]]
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mRELEASE SAVEPOINT active_record_1[0m
+Started POST "/test_sign_in" for 127.0.0.1 at 2026-05-23 10:55:30 +0100
+Processing by SessionsController#test_sign_in as HTML
+  Parameters: {"user_id" => "255"}
+Completed 200 OK in 0ms (ActiveRecord: 0.0ms (0 queries, 0 cached) | GC: 0.0ms)
+  [1m[36mTRANSACTION (0.0ms)[0m  [1m[35mSAVEPOINT active_record_1[0m
+  [1m[36mRailsMcp::Invitation Exists? (0.2ms)[0m  [1m[34mSELECT 1 AS one FROM "invitations" WHERE "invitations"."token" = $1 LIMIT $2[0m  [["token", "G73SZ2bRDQAk6mwd2Zl1OuzIn_kT6liH2q9VpRaApvU"], ["LIMIT", 1]]
+  [1m[36mRailsMcp::Invitation Create (0.2ms)[0m  [1m[32mINSERT INTO "invitations" ("account_id", "invited_by_id", "email", "token", "expires_at", "accepted_at", "revoked_at", "created_at", "updated_at") VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING "id"[0m  [["account_id", 269], ["invited_by_id", 255], ["email", "dup@example.com"], ["token", "G73SZ2bRDQAk6mwd2Zl1OuzIn_kT6liH2q9VpRaApvU"], ["expires_at", "2026-06-06 09:55:30.384542"], ["accepted_at", nil], ["revoked_at", nil], ["created_at", "2026-05-23 09:55:30.384945"], ["updated_at", "2026-05-23 09:55:30.384945"]]
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mRELEASE SAVEPOINT active_record_1[0m
+  [1m[36mRailsMcp::Invitation Count (0.1ms)[0m  [1m[34mSELECT COUNT(*) FROM "invitations"[0m
+Started POST "/team/invitations" for 127.0.0.1 at 2026-05-23 10:55:30 +0100
+Processing by RailsMcp::TeamController#create_invitation as HTML
+  Parameters: {"email" => "dup@example.com"}
+  [1m[36mRailsMcp::User Load (0.1ms)[0m  [1m[34mSELECT "users".* FROM "users" WHERE "users"."id" = $1 LIMIT $2[0m  [["id", 255], ["LIMIT", 1]]
+  [1m[36mRailsMcp::Account Load (0.1ms)[0m  [1m[34mSELECT "accounts".* FROM "accounts" WHERE "accounts"."id" = $1 LIMIT $2[0m  [["id", 269], ["LIMIT", 1]]
+  [1m[36mRailsMcp::User Exists? (0.2ms)[0m  [1m[34mSELECT 1 AS one FROM "users" WHERE "users"."account_id" = $1 AND (LOWER(email) = $2) LIMIT $3[0m  [["account_id", 269], [nil, "dup@example.com"], ["LIMIT", 1]]
+  [1m[36mRailsMcp::Invitation Exists? (0.1ms)[0m  [1m[34mSELECT 1 AS one FROM "invitations" WHERE "invitations"."account_id" = $1 AND "invitations"."accepted_at" IS NULL AND "invitations"."revoked_at" IS NULL AND (expires_at > $2) AND (LOWER(email) = $3) LIMIT $4[0m  [["account_id", 269], [nil, "2026-05-23 09:55:30.387760"], [nil, "dup@example.com"], ["LIMIT", 1]]
+Redirected to http://www.example.com/team
+Completed 302 Found in 2ms (ActiveRecord: 0.5ms (4 queries, 0 cached) | GC: 0.0ms)
+  [1m[36mRailsMcp::Invitation Count (0.2ms)[0m  [1m[34mSELECT COUNT(*) FROM "invitations"[0m
+  [1m[36mTRANSACTION (0.2ms)[0m  [1m[31mROLLBACK[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mBEGIN[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mSAVEPOINT active_record_1[0m
+  [1m[36mRailsMcp::Account Create (1.1ms)[0m  [1m[32mINSERT INTO "accounts" ("name", "onboarded_at", "created_at", "updated_at") VALUES ($1, $2, $3, $4) RETURNING "id"[0m  [["name", "Acme"], ["onboarded_at", nil], ["created_at", "2026-05-23 09:55:30.389629"], ["updated_at", "2026-05-23 09:55:30.389629"]]
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mRELEASE SAVEPOINT active_record_1[0m
+  [1m[36mTRANSACTION (0.0ms)[0m  [1m[35mSAVEPOINT active_record_1[0m
+  [1m[36mRailsMcp::Account Update (0.2ms)[0m  [1m[33mUPDATE "accounts" SET "onboarded_at" = $1, "updated_at" = $2 WHERE "accounts"."id" = $3[0m  [["onboarded_at", "2026-05-23 09:55:30.390980"], ["updated_at", "2026-05-23 09:55:30.391057"], ["id", 270]]
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mRELEASE SAVEPOINT active_record_1[0m
+  [1m[36mTRANSACTION (0.0ms)[0m  [1m[35mSAVEPOINT active_record_1[0m
+  [1m[36mRailsMcp::User Exists? (0.2ms)[0m  [1m[34mSELECT 1 AS one FROM "users" WHERE "users"."identity_id" = $1 LIMIT $2[0m  [["identity_id", "host"], ["LIMIT", 1]]
+  [1m[36mRailsMcp::User Exists? (0.1ms)[0m  [1m[34mSELECT 1 AS one FROM "users" WHERE LOWER("users"."email") = LOWER($1) LIMIT $2[0m  [["email", "host@example.com"], ["LIMIT", 1]]
+  [1m[36mRailsMcp::User Create (0.1ms)[0m  [1m[32mINSERT INTO "users" ("account_id", "email", "name", "identity_id", "created_at", "updated_at") VALUES ($1, $2, $3, $4, $5, $6) RETURNING "id"[0m  [["account_id", 270], ["email", "host@example.com"], ["name", nil], ["identity_id", "host"], ["created_at", "2026-05-23 09:55:30.392130"], ["updated_at", "2026-05-23 09:55:30.392130"]]
+  [1m[36mTRANSACTION (0.0ms)[0m  [1m[35mRELEASE SAVEPOINT active_record_1[0m
+Started POST "/test_sign_in" for 127.0.0.1 at 2026-05-23 10:55:30 +0100
+Processing by SessionsController#test_sign_in as HTML
+  Parameters: {"user_id" => "256"}
+Completed 200 OK in 0ms (ActiveRecord: 0.0ms (0 queries, 0 cached) | GC: 0.0ms)
+Started PATCH "/team/account" for 127.0.0.1 at 2026-05-23 10:55:30 +0100
+Processing by RailsMcp::TeamController#update_account as HTML
+  Parameters: {"name" => "New Name"}
+  [1m[36mRailsMcp::User Load (0.1ms)[0m  [1m[34mSELECT "users".* FROM "users" WHERE "users"."id" = $1 LIMIT $2[0m  [["id", 256], ["LIMIT", 1]]
+  [1m[36mRailsMcp::Account Load (0.1ms)[0m  [1m[34mSELECT "accounts".* FROM "accounts" WHERE "accounts"."id" = $1 LIMIT $2[0m  [["id", 270], ["LIMIT", 1]]
+  [1m[36mTRANSACTION (0.0ms)[0m  [1m[35mSAVEPOINT active_record_1[0m
+  [1m[36mRailsMcp::Account Update (0.2ms)[0m  [1m[33mUPDATE "accounts" SET "name" = $1, "updated_at" = $2 WHERE "accounts"."id" = $3[0m  [["name", "New Name"], ["updated_at", "2026-05-23 09:55:30.395433"], ["id", 270]]
+  [1m[36mTRANSACTION (0.0ms)[0m  [1m[35mRELEASE SAVEPOINT active_record_1[0m
+Redirected to http://www.example.com/team
+Completed 302 Found in 1ms (ActiveRecord: 0.4ms (3 queries, 0 cached) | GC: 0.0ms)
+  [1m[36mRailsMcp::Account Load (0.0ms)[0m  [1m[34mSELECT "accounts".* FROM "accounts" WHERE "accounts"."id" = $1 LIMIT $2[0m  [["id", 270], ["LIMIT", 1]]
+  [1m[36mTRANSACTION (0.2ms)[0m  [1m[31mROLLBACK[0m
+  [1m[36mTRANSACTION (0.0ms)[0m  [1m[35mBEGIN[0m
+  [1m[36mTRANSACTION (0.0ms)[0m  [1m[35mSAVEPOINT active_record_1[0m
+  [1m[36mRailsMcp::Account Create (0.2ms)[0m  [1m[32mINSERT INTO "accounts" ("name", "onboarded_at", "created_at", "updated_at") VALUES ($1, $2, $3, $4) RETURNING "id"[0m  [["name", "Acme"], ["onboarded_at", nil], ["created_at", "2026-05-23 09:55:30.396973"], ["updated_at", "2026-05-23 09:55:30.396973"]]
+  [1m[36mTRANSACTION (0.0ms)[0m  [1m[35mRELEASE SAVEPOINT active_record_1[0m
+  [1m[36mTRANSACTION (0.0ms)[0m  [1m[35mSAVEPOINT active_record_1[0m
+  [1m[36mRailsMcp::Account Update (0.2ms)[0m  [1m[33mUPDATE "accounts" SET "onboarded_at" = $1, "updated_at" = $2 WHERE "accounts"."id" = $3[0m  [["onboarded_at", "2026-05-23 09:55:30.397379"], ["updated_at", "2026-05-23 09:55:30.397440"], ["id", 271]]
+  [1m[36mTRANSACTION (0.0ms)[0m  [1m[35mRELEASE SAVEPOINT active_record_1[0m
+  [1m[36mTRANSACTION (0.0ms)[0m  [1m[35mSAVEPOINT active_record_1[0m
+  [1m[36mRailsMcp::User Exists? (0.1ms)[0m  [1m[34mSELECT 1 AS one FROM "users" WHERE "users"."identity_id" = $1 LIMIT $2[0m  [["identity_id", "host"], ["LIMIT", 1]]
+  [1m[36mRailsMcp::User Exists? (0.1ms)[0m  [1m[34mSELECT 1 AS one FROM "users" WHERE LOWER("users"."email") = LOWER($1) LIMIT $2[0m  [["email", "host@example.com"], ["LIMIT", 1]]
+  [1m[36mRailsMcp::User Create (0.1ms)[0m  [1m[32mINSERT INTO "users" ("account_id", "email", "name", "identity_id", "created_at", "updated_at") VALUES ($1, $2, $3, $4, $5, $6) RETURNING "id"[0m  [["account_id", 271], ["email", "host@example.com"], ["name", nil], ["identity_id", "host"], ["created_at", "2026-05-23 09:55:30.398415"], ["updated_at", "2026-05-23 09:55:30.398415"]]
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mRELEASE SAVEPOINT active_record_1[0m
+Started POST "/test_sign_in" for 127.0.0.1 at 2026-05-23 10:55:30 +0100
+Processing by SessionsController#test_sign_in as HTML
+  Parameters: {"user_id" => "257"}
+Completed 200 OK in 0ms (ActiveRecord: 0.0ms (0 queries, 0 cached) | GC: 0.0ms)
+  [1m[36mTRANSACTION (0.0ms)[0m  [1m[35mSAVEPOINT active_record_1[0m
+  [1m[36mRailsMcp::Invitation Exists? (0.2ms)[0m  [1m[34mSELECT 1 AS one FROM "invitations" WHERE "invitations"."token" = $1 LIMIT $2[0m  [["token", "coJZLSd9WF9PGWmW4x03uP4rVWiIBP0SvPC9oooLE38"], ["LIMIT", 1]]
+  [1m[36mRailsMcp::Invitation Create (0.2ms)[0m  [1m[32mINSERT INTO "invitations" ("account_id", "invited_by_id", "email", "token", "expires_at", "accepted_at", "revoked_at", "created_at", "updated_at") VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING "id"[0m  [["account_id", 271], ["invited_by_id", 257], ["email", "x@example.com"], ["token", "coJZLSd9WF9PGWmW4x03uP4rVWiIBP0SvPC9oooLE38"], ["expires_at", "2026-06-06 09:55:30.400281"], ["accepted_at", nil], ["revoked_at", nil], ["created_at", "2026-05-23 09:55:30.400658"], ["updated_at", "2026-05-23 09:55:30.400658"]]
+  [1m[36mTRANSACTION (0.0ms)[0m  [1m[35mRELEASE SAVEPOINT active_record_1[0m
+Started DELETE "/team/invitations/124" for 127.0.0.1 at 2026-05-23 10:55:30 +0100
+Processing by RailsMcp::TeamController#destroy_invitation as HTML
+  Parameters: {"id" => "124"}
+  [1m[36mRailsMcp::User Load (0.1ms)[0m  [1m[34mSELECT "users".* FROM "users" WHERE "users"."id" = $1 LIMIT $2[0m  [["id", 257], ["LIMIT", 1]]
+  [1m[36mRailsMcp::Account Load (0.1ms)[0m  [1m[34mSELECT "accounts".* FROM "accounts" WHERE "accounts"."id" = $1 LIMIT $2[0m  [["id", 271], ["LIMIT", 1]]
+  [1m[36mRailsMcp::Invitation Load (0.2ms)[0m  [1m[34mSELECT "invitations".* FROM "invitations" WHERE "invitations"."account_id" = $1 AND "invitations"."id" = $2 LIMIT $3[0m  [["account_id", 271], ["id", 124], ["LIMIT", 1]]
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mSAVEPOINT active_record_1[0m
+  [1m[36mRailsMcp::Invitation Update (0.3ms)[0m  [1m[33mUPDATE "invitations" SET "revoked_at" = $1, "updated_at" = $2 WHERE "invitations"."id" = $3[0m  [["revoked_at", "2026-05-23 09:55:30.403187"], ["updated_at", "2026-05-23 09:55:30.403327"], ["id", 124]]
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mRELEASE SAVEPOINT active_record_1[0m
+Redirected to http://www.example.com/team
+Completed 302 Found in 2ms (ActiveRecord: 0.7ms (4 queries, 0 cached) | GC: 0.0ms)
+  [1m[36mRailsMcp::Invitation Load (0.1ms)[0m  [1m[34mSELECT "invitations".* FROM "invitations" WHERE "invitations"."id" = $1 LIMIT $2[0m  [["id", 124], ["LIMIT", 1]]
+  [1m[36mTRANSACTION (0.2ms)[0m  [1m[31mROLLBACK[0m
+  [1m[36mTRANSACTION (0.0ms)[0m  [1m[35mBEGIN[0m
+  [1m[36mTRANSACTION (0.0ms)[0m  [1m[35mSAVEPOINT active_record_1[0m
+  [1m[36mRailsMcp::Account Create (0.2ms)[0m  [1m[32mINSERT INTO "accounts" ("name", "onboarded_at", "created_at", "updated_at") VALUES ($1, $2, $3, $4) RETURNING "id"[0m  [["name", "Acme"], ["onboarded_at", nil], ["created_at", "2026-05-23 09:55:30.405052"], ["updated_at", "2026-05-23 09:55:30.405052"]]
+  [1m[36mTRANSACTION (0.0ms)[0m  [1m[35mRELEASE SAVEPOINT active_record_1[0m
+  [1m[36mTRANSACTION (0.0ms)[0m  [1m[35mSAVEPOINT active_record_1[0m
+  [1m[36mRailsMcp::Account Update (0.2ms)[0m  [1m[33mUPDATE "accounts" SET "onboarded_at" = $1, "updated_at" = $2 WHERE "accounts"."id" = $3[0m  [["onboarded_at", "2026-05-23 09:55:30.405472"], ["updated_at", "2026-05-23 09:55:30.405532"], ["id", 272]]
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mRELEASE SAVEPOINT active_record_1[0m
+  [1m[36mTRANSACTION (0.0ms)[0m  [1m[35mSAVEPOINT active_record_1[0m
+  [1m[36mRailsMcp::User Exists? (0.2ms)[0m  [1m[34mSELECT 1 AS one FROM "users" WHERE "users"."identity_id" = $1 LIMIT $2[0m  [["identity_id", "host"], ["LIMIT", 1]]
+  [1m[36mRailsMcp::User Exists? (0.1ms)[0m  [1m[34mSELECT 1 AS one FROM "users" WHERE LOWER("users"."email") = LOWER($1) LIMIT $2[0m  [["email", "host@example.com"], ["LIMIT", 1]]
+  [1m[36mRailsMcp::User Create (0.1ms)[0m  [1m[32mINSERT INTO "users" ("account_id", "email", "name", "identity_id", "created_at", "updated_at") VALUES ($1, $2, $3, $4, $5, $6) RETURNING "id"[0m  [["account_id", 272], ["email", "host@example.com"], ["name", nil], ["identity_id", "host"], ["created_at", "2026-05-23 09:55:30.406535"], ["updated_at", "2026-05-23 09:55:30.406535"]]
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mRELEASE SAVEPOINT active_record_1[0m
+Started POST "/test_sign_in" for 127.0.0.1 at 2026-05-23 10:55:30 +0100
+Processing by SessionsController#test_sign_in as HTML
+  Parameters: {"user_id" => "258"}
+Completed 200 OK in 0ms (ActiveRecord: 0.0ms (0 queries, 0 cached) | GC: 0.0ms)
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mSAVEPOINT active_record_1[0m
+  [1m[36mRailsMcp::Account Create (0.2ms)[0m  [1m[32mINSERT INTO "accounts" ("name", "onboarded_at", "created_at", "updated_at") VALUES ($1, $2, $3, $4) RETURNING "id"[0m  [["name", "Other"], ["onboarded_at", nil], ["created_at", "2026-05-23 09:55:30.408296"], ["updated_at", "2026-05-23 09:55:30.408296"]]
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mRELEASE SAVEPOINT active_record_1[0m
+  [1m[36mTRANSACTION (0.0ms)[0m  [1m[35mSAVEPOINT active_record_1[0m
+  [1m[36mRailsMcp::Account Update (0.2ms)[0m  [1m[33mUPDATE "accounts" SET "onboarded_at" = $1, "updated_at" = $2 WHERE "accounts"."id" = $3[0m  [["onboarded_at", "2026-05-23 09:55:30.408760"], ["updated_at", "2026-05-23 09:55:30.408863"], ["id", 273]]
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mRELEASE SAVEPOINT active_record_1[0m
+  [1m[36mTRANSACTION (0.0ms)[0m  [1m[35mSAVEPOINT active_record_1[0m
+  [1m[36mRailsMcp::User Exists? (0.2ms)[0m  [1m[34mSELECT 1 AS one FROM "users" WHERE "users"."identity_id" = $1 LIMIT $2[0m  [["identity_id", "other"], ["LIMIT", 1]]
+  [1m[36mRailsMcp::User Exists? (0.1ms)[0m  [1m[34mSELECT 1 AS one FROM "users" WHERE LOWER("users"."email") = LOWER($1) LIMIT $2[0m  [["email", "other@example.com"], ["LIMIT", 1]]
+  [1m[36mRailsMcp::User Create (0.1ms)[0m  [1m[32mINSERT INTO "users" ("account_id", "email", "name", "identity_id", "created_at", "updated_at") VALUES ($1, $2, $3, $4, $5, $6) RETURNING "id"[0m  [["account_id", 273], ["email", "other@example.com"], ["name", nil], ["identity_id", "other"], ["created_at", "2026-05-23 09:55:30.409955"], ["updated_at", "2026-05-23 09:55:30.409955"]]
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mRELEASE SAVEPOINT active_record_1[0m
+  [1m[36mTRANSACTION (0.0ms)[0m  [1m[35mSAVEPOINT active_record_1[0m
+  [1m[36mRailsMcp::Invitation Exists? (0.2ms)[0m  [1m[34mSELECT 1 AS one FROM "invitations" WHERE "invitations"."token" = $1 LIMIT $2[0m  [["token", "hcR6nQnxqD577yVlIFWw2XsIBSmi71v6ZajThkLzOto"], ["LIMIT", 1]]
+  [1m[36mRailsMcp::Invitation Create (0.2ms)[0m  [1m[32mINSERT INTO "invitations" ("account_id", "invited_by_id", "email", "token", "expires_at", "accepted_at", "revoked_at", "created_at", "updated_at") VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING "id"[0m  [["account_id", 273], ["invited_by_id", 259], ["email", "z@example.com"], ["token", "hcR6nQnxqD577yVlIFWw2XsIBSmi71v6ZajThkLzOto"], ["expires_at", "2026-06-06 09:55:30.410572"], ["accepted_at", nil], ["revoked_at", nil], ["created_at", "2026-05-23 09:55:30.410907"], ["updated_at", "2026-05-23 09:55:30.410907"]]
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mRELEASE SAVEPOINT active_record_1[0m
+Started DELETE "/team/invitations/125" for 127.0.0.1 at 2026-05-23 10:55:30 +0100
+Processing by RailsMcp::TeamController#destroy_invitation as HTML
+  Parameters: {"id" => "125"}
+  [1m[36mRailsMcp::User Load (0.1ms)[0m  [1m[34mSELECT "users".* FROM "users" WHERE "users"."id" = $1 LIMIT $2[0m  [["id", 258], ["LIMIT", 1]]
+  [1m[36mRailsMcp::Account Load (0.1ms)[0m  [1m[34mSELECT "accounts".* FROM "accounts" WHERE "accounts"."id" = $1 LIMIT $2[0m  [["id", 272], ["LIMIT", 1]]
+  [1m[36mRailsMcp::Invitation Load (0.1ms)[0m  [1m[34mSELECT "invitations".* FROM "invitations" WHERE "invitations"."account_id" = $1 AND "invitations"."id" = $2 LIMIT $3[0m  [["account_id", 272], ["id", 125], ["LIMIT", 1]]
+Completed 404 Not Found in 1ms (ActiveRecord: 0.2ms (3 queries, 0 cached) | GC: 0.0ms)
+  
+ActiveRecord::RecordNotFound (Couldn't find RailsMcp::Invitation with 'id'="125" [WHERE "invitations"."account_id" = $1]):
+  
+activerecord (8.1.3) lib/active_record/relation/finder_methods.rb:429:in 'ActiveRecord::FinderMethods#raise_record_not_found_exception!'
+activerecord (8.1.3) lib/active_record/relation/finder_methods.rb:537:in 'ActiveRecord::FinderMethods#find_one'
+activerecord (8.1.3) lib/active_record/relation/finder_methods.rb:514:in 'ActiveRecord::FinderMethods#find_with_ids'
+activerecord (8.1.3) lib/active_record/relation/finder_methods.rb:100:in 'ActiveRecord::FinderMethods#find'
+activerecord (8.1.3) lib/active_record/associations/collection_association.rb:113:in 'ActiveRecord::Associations::CollectionAssociation#find'
+activerecord (8.1.3) lib/active_record/associations/collection_proxy.rb:140:in 'ActiveRecord::Associations::CollectionProxy#find'
+/Users/matt/Development/basecamp-mcp-rails/engines/rails_mcp/app/controllers/rails_mcp/team_controller.rb:58:in 'RailsMcp::TeamController#destroy_invitation'
+actionpack (8.1.3) lib/action_controller/metal/basic_implicit_render.rb:8:in 'ActionController::BasicImplicitRender#send_action'
+actionpack (8.1.3) lib/abstract_controller/base.rb:221:in 'AbstractController::Base#process_action'
+actionpack (8.1.3) lib/action_controller/metal/rendering.rb:199:in 'ActionController::Rendering#process_action'
+actionpack (8.1.3) lib/abstract_controller/callbacks.rb:267:in 'block in AbstractController::Callbacks#process_action'
+activesupport (8.1.3) lib/active_support/callbacks.rb:110:in 'ActiveSupport::Callbacks#run_callbacks'
+actionpack (8.1.3) lib/abstract_controller/callbacks.rb:266:in 'AbstractController::Callbacks#process_action'
+actionpack (8.1.3) lib/action_controller/metal/rescue.rb:36:in 'ActionController::Rescue#process_action'
+actionpack (8.1.3) lib/action_controller/metal/instrumentation.rb:76:in 'block in ActionController::Instrumentation#process_action'
+activesupport (8.1.3) lib/active_support/notifications.rb:210:in 'block in ActiveSupport::Notifications.instrument'
+activesupport (8.1.3) lib/active_support/notifications/instrumenter.rb:58:in 'ActiveSupport::Notifications::Instrumenter#instrument'
+activesupport (8.1.3) lib/active_support/notifications.rb:210:in 'ActiveSupport::Notifications.instrument'
+actionpack (8.1.3) lib/action_controller/metal/instrumentation.rb:75:in 'ActionController::Instrumentation#process_action'
+actionpack (8.1.3) lib/action_controller/metal/params_wrapper.rb:259:in 'ActionController::ParamsWrapper#process_action'
+activerecord (8.1.3) lib/active_record/railties/controller_runtime.rb:39:in 'ActiveRecord::Railties::ControllerRuntime#process_action'
+actionpack (8.1.3) lib/abstract_controller/base.rb:154:in 'AbstractController::Base#process'
+actionview (8.1.3) lib/action_view/rendering.rb:40:in 'ActionView::Rendering#process'
+actionpack (8.1.3) lib/action_controller/metal.rb:252:in 'ActionController::Metal#dispatch'
+actionpack (8.1.3) lib/action_controller/metal.rb:335:in 'ActionController::Metal.dispatch'
+actionpack (8.1.3) lib/action_dispatch/routing/route_set.rb:65:in 'ActionDispatch::Routing::RouteSet::Dispatcher#dispatch'
+actionpack (8.1.3) lib/action_dispatch/routing/route_set.rb:50:in 'ActionDispatch::Routing::RouteSet::Dispatcher#serve'
+actionpack (8.1.3) lib/action_dispatch/journey/router.rb:35:in 'block in ActionDispatch::Journey::Router#serve'
+actionpack (8.1.3) lib/action_dispatch/journey/router.rb:86:in 'block in ActionDispatch::Journey::Router#recognize'
+actionpack (8.1.3) lib/action_dispatch/journey/router.rb:66:in 'Array#each'
+actionpack (8.1.3) lib/action_dispatch/journey/router.rb:66:in 'ActionDispatch::Journey::Router#recognize'
+actionpack (8.1.3) lib/action_dispatch/journey/router.rb:31:in 'ActionDispatch::Journey::Router#serve'
+actionpack (8.1.3) lib/action_dispatch/routing/route_set.rb:906:in 'ActionDispatch::Routing::RouteSet#call'
+railties (8.1.3) lib/rails/engine/lazy_route_set.rb:60:in 'Rails::Engine::LazyRouteSet#call'
+railties (8.1.3) lib/rails/engine.rb:534:in 'Rails::Engine#call'
+railties (8.1.3) lib/rails/railtie.rb:225:in 'Kernel#public_send'
+railties (8.1.3) lib/rails/railtie.rb:225:in 'Rails::Railtie.method_missing'
+actionpack (8.1.3) lib/action_dispatch/routing/mapper.rb:33:in 'block in <class:Constraints>'
+actionpack (8.1.3) lib/action_dispatch/routing/mapper.rb:62:in 'ActionDispatch::Routing::Mapper::Constraints#serve'
+actionpack (8.1.3) lib/action_dispatch/journey/router.rb:35:in 'block in ActionDispatch::Journey::Router#serve'
+actionpack (8.1.3) lib/action_dispatch/journey/router.rb:92:in 'block in ActionDispatch::Journey::Router#recognize'
+actionpack (8.1.3) lib/action_dispatch/journey/router.rb:66:in 'Array#each'
+actionpack (8.1.3) lib/action_dispatch/journey/router.rb:66:in 'ActionDispatch::Journey::Router#recognize'
+actionpack (8.1.3) lib/action_dispatch/journey/router.rb:31:in 'ActionDispatch::Journey::Router#serve'
+actionpack (8.1.3) lib/action_dispatch/routing/route_set.rb:906:in 'ActionDispatch::Routing::RouteSet#call'
+railties (8.1.3) lib/rails/engine/lazy_route_set.rb:60:in 'Rails::Engine::LazyRouteSet#call'
+rack-session (2.1.2) lib/rack/session/abstract/id.rb:274:in 'Rack::Session::Abstract::Persisted#context'
+rack-session (2.1.2) lib/rack/session/abstract/id.rb:268:in 'Rack::Session::Abstract::Persisted#call'
+actionpack (8.1.3) lib/action_dispatch/middleware/cookies.rb:708:in 'ActionDispatch::Cookies#call'
+rack (3.2.6) lib/rack/tempfile_reaper.rb:20:in 'Rack::TempfileReaper#call'
+rack (3.2.6) lib/rack/etag.rb:29:in 'Rack::ETag#call'
+rack (3.2.6) lib/rack/conditional_get.rb:44:in 'Rack::ConditionalGet#call'
+rack (3.2.6) lib/rack/head.rb:15:in 'Rack::Head#call'
+actionpack (8.1.3) lib/action_dispatch/http/content_security_policy.rb:38:in 'ActionDispatch::ContentSecurityPolicy::Middleware#call'
+rack-session (2.1.2) lib/rack/session/abstract/id.rb:274:in 'Rack::Session::Abstract::Persisted#context'
+rack-session (2.1.2) lib/rack/session/abstract/id.rb:268:in 'Rack::Session::Abstract::Persisted#call'
+actionpack (8.1.3) lib/action_dispatch/middleware/cookies.rb:708:in 'ActionDispatch::Cookies#call'
+actionpack (8.1.3) lib/action_dispatch/middleware/callbacks.rb:31:in 'block in ActionDispatch::Callbacks#call'
+activesupport (8.1.3) lib/active_support/callbacks.rb:101:in 'ActiveSupport::Callbacks#run_callbacks'
+actionpack (8.1.3) lib/action_dispatch/middleware/callbacks.rb:30:in 'ActionDispatch::Callbacks#call'
+actionpack (8.1.3) lib/action_dispatch/middleware/executor.rb:20:in 'ActionDispatch::Executor#call'
+actionpack (8.1.3) lib/action_dispatch/middleware/debug_exceptions.rb:31:in 'ActionDispatch::DebugExceptions#call'
+actionpack (8.1.3) lib/action_dispatch/middleware/show_exceptions.rb:32:in 'ActionDispatch::ShowExceptions#call'
+railties (8.1.3) lib/rails/rack/logger.rb:41:in 'Rails::Rack::Logger#call_app'
+railties (8.1.3) lib/rails/rack/logger.rb:29:in 'Rails::Rack::Logger#call'
+actionpack (8.1.3) lib/action_dispatch/middleware/remote_ip.rb:98:in 'ActionDispatch::RemoteIp#call'
+actionpack (8.1.3) lib/action_dispatch/middleware/request_id.rb:34:in 'ActionDispatch::RequestId#call'
+rack (3.2.6) lib/rack/method_override.rb:28:in 'Rack::MethodOverride#call'
+rack (3.2.6) lib/rack/runtime.rb:24:in 'Rack::Runtime#call'
+actionpack (8.1.3) lib/action_dispatch/middleware/executor.rb:20:in 'ActionDispatch::Executor#call'
+actionpack (8.1.3) lib/action_dispatch/middleware/static.rb:27:in 'ActionDispatch::Static#call'
+rack (3.2.6) lib/rack/sendfile.rb:131:in 'Rack::Sendfile#call'
+railties (8.1.3) lib/rails/engine.rb:534:in 'Rails::Engine#call'
+rack-test (2.2.0) lib/rack/test.rb:360:in 'Rack::Test::Session#process_request'
+rack-test (2.2.0) lib/rack/test.rb:153:in 'Rack::Test::Session#request'
+actionpack (8.1.3) lib/action_dispatch/testing/integration.rb:298:in 'ActionDispatch::Integration::Session#process'
+actionpack (8.1.3) lib/action_dispatch/testing/integration.rb:43:in 'ActionDispatch::Integration::RequestHelpers#delete'
+actionpack (8.1.3) lib/action_dispatch/testing/integration.rb:389:in 'ActionDispatch::Integration::Runner#delete'
+/Users/matt/Development/basecamp-mcp-rails/engines/rails_mcp/spec/requests/team_spec.rb:77:in 'block (3 levels) in <top (required)>'
+rspec-core (3.13.6) lib/rspec/core/example.rb:263:in 'BasicObject#instance_exec'
+rspec-core (3.13.6) lib/rspec/core/example.rb:263:in 'block in RSpec::Core::Example#run'
+rspec-core (3.13.6) lib/rspec/core/example.rb:511:in 'block in RSpec::Core::Example#with_around_and_singleton_context_hooks'
+rspec-core (3.13.6) lib/rspec/core/example.rb:468:in 'block in RSpec::Core::Example#with_around_example_hooks'
+rspec-core (3.13.6) lib/rspec/core/hooks.rb:486:in 'block in RSpec::Core::Hooks::HookCollections#run'
+rspec-core (3.13.6) lib/rspec/core/hooks.rb:626:in 'block in RSpec::Core::Hooks::HookCollections#run_around_example_hooks_for'
+rspec-core (3.13.6) lib/rspec/core/example.rb:352:in 'RSpec::Core::Example::Procsy#call'
+rspec-rails (8.0.4) lib/rspec/rails/adapters.rb:75:in 'block (2 levels) in <module:MinitestLifecycleAdapter>'
+rspec-core (3.13.6) lib/rspec/core/example.rb:457:in 'BasicObject#instance_exec'
+rspec-core (3.13.6) lib/rspec/core/example.rb:457:in 'RSpec::Core::Example#instance_exec'
+rspec-core (3.13.6) lib/rspec/core/hooks.rb:390:in 'RSpec::Core::Hooks::AroundHook#execute_with'
+rspec-core (3.13.6) lib/rspec/core/hooks.rb:628:in 'block (2 levels) in RSpec::Core::Hooks::HookCollections#run_around_example_hooks_for'
+rspec-core (3.13.6) lib/rspec/core/example.rb:352:in 'RSpec::Core::Example::Procsy#call'
+rspec-core (3.13.6) lib/rspec/core/hooks.rb:629:in 'RSpec::Core::Hooks::HookCollections#run_around_example_hooks_for'
+rspec-core (3.13.6) lib/rspec/core/hooks.rb:486:in 'RSpec::Core::Hooks::HookCollections#run'
+rspec-core (3.13.6) lib/rspec/core/example.rb:468:in 'RSpec::Core::Example#with_around_example_hooks'
+rspec-core (3.13.6) lib/rspec/core/example.rb:511:in 'RSpec::Core::Example#with_around_and_singleton_context_hooks'
+rspec-core (3.13.6) lib/rspec/core/example.rb:259:in 'RSpec::Core::Example#run'
+rspec-core (3.13.6) lib/rspec/core/example_group.rb:653:in 'block in RSpec::Core::ExampleGroup.run_examples'
+rspec-core (3.13.6) lib/rspec/core/example_group.rb:649:in 'Array#map'
+rspec-core (3.13.6) lib/rspec/core/example_group.rb:649:in 'RSpec::Core::ExampleGroup.run_examples'
+rspec-core (3.13.6) lib/rspec/core/example_group.rb:614:in 'RSpec::Core::ExampleGroup.run'
+rspec-core (3.13.6) lib/rspec/core/example_group.rb:615:in 'block in RSpec::Core::ExampleGroup.run'
+rspec-core (3.13.6) lib/rspec/core/example_group.rb:615:in 'Array#map'
+rspec-core (3.13.6) lib/rspec/core/example_group.rb:615:in 'RSpec::Core::ExampleGroup.run'
+rspec-core (3.13.6) lib/rspec/core/runner.rb:121:in 'block (3 levels) in RSpec::Core::Runner#run_specs'
+rspec-core (3.13.6) lib/rspec/core/runner.rb:121:in 'Array#map'
+rspec-core (3.13.6) lib/rspec/core/runner.rb:121:in 'block (2 levels) in RSpec::Core::Runner#run_specs'
+rspec-core (3.13.6) lib/rspec/core/configuration.rb:2097:in 'RSpec::Core::Configuration#with_suite_hooks'
+rspec-core (3.13.6) lib/rspec/core/runner.rb:116:in 'block in RSpec::Core::Runner#run_specs'
+rspec-core (3.13.6) lib/rspec/core/reporter.rb:74:in 'RSpec::Core::Reporter#report'
+rspec-core (3.13.6) lib/rspec/core/runner.rb:115:in 'RSpec::Core::Runner#run_specs'
+rspec-core (3.13.6) lib/rspec/core/runner.rb:89:in 'RSpec::Core::Runner#run'
+rspec-core (3.13.6) lib/rspec/core/runner.rb:71:in 'RSpec::Core::Runner.run'
+rspec-core (3.13.6) lib/rspec/core/runner.rb:45:in 'RSpec::Core::Runner.invoke'
+rspec-core (3.13.6) exe/rspec:4:in '<top (required)>'
+/Users/matt/.rvm/rubies/ruby-4.0.1/lib/ruby/site_ruby/4.0.0/rubygems.rb:304:in 'Kernel#load'
+/Users/matt/.rvm/rubies/ruby-4.0.1/lib/ruby/site_ruby/4.0.0/rubygems.rb:304:in 'Gem.activate_and_load_bin_path'
+/Users/matt/.rvm/gems/ruby-4.0.1/bin/rspec:25:in '<main>'
+/Users/matt/.rvm/gems/ruby-4.0.1/bin/ruby_executable_hooks:22:in 'Kernel#eval'
+/Users/matt/.rvm/gems/ruby-4.0.1/bin/ruby_executable_hooks:22:in '<main>'
+  [1m[36mTRANSACTION (0.2ms)[0m  [1m[31mROLLBACK[0m
+  [1m[36mTRANSACTION (0.0ms)[0m  [1m[35mBEGIN[0m
+Started GET "/.well-known/oauth-authorization-server" for 127.0.0.1 at 2026-05-23 10:55:30 +0100
+Processing by RailsMcp::WellKnownController#oauth_authorization_server as HTML
+Completed 200 OK in 0ms (Views: 0.0ms | ActiveRecord: 0.0ms (0 queries, 0 cached) | GC: 0.0ms)
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[31mROLLBACK[0m
+  [1m[36mTRANSACTION (0.0ms)[0m  [1m[35mBEGIN[0m
+Started GET "/.well-known/oauth-protected-resource" for 127.0.0.1 at 2026-05-23 10:55:30 +0100
+Processing by RailsMcp::WellKnownController#oauth_protected_resource as HTML
+Completed 200 OK in 0ms (Views: 0.0ms | ActiveRecord: 0.0ms (0 queries, 0 cached) | GC: 0.0ms)
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[31mROLLBACK[0m
+  [1m[36mTRANSACTION (0.0ms)[0m  [1m[35mBEGIN[0m
+Started GET "/.well-known/oauth-protected-resource/mcp" for 127.0.0.1 at 2026-05-23 10:55:30 +0100
+Processing by RailsMcp::WellKnownController#oauth_protected_resource as HTML
+  Parameters: {"resource_path" => "mcp"}
+Completed 200 OK in 0ms (Views: 0.0ms | ActiveRecord: 0.0ms (0 queries, 0 cached) | GC: 0.0ms)
+  [1m[36mTRANSACTION (0.0ms)[0m  [1m[31mROLLBACK[0m
