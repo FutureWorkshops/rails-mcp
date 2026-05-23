@@ -1,6 +1,7 @@
 require "rails_mcp/version"
 require "rails_mcp/configuration"
 require "rails_mcp/engine"
+require "rails_mcp/rack_attack_defaults"
 
 module RailsMcp
   class << self

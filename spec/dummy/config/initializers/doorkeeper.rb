@@ -21,5 +21,7 @@ Doorkeeper.configure do
   access_token_expires_in 8.hours
   reuse_access_token
 
+  force_ssl_in_redirect_uri { Rails.env.production? }
+
   base_controller "RailsMcp::OauthBaseController"
 end

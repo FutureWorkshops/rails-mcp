@@ -115,4 +115,48 @@ RSpec.describe "MCP JSON-RPC dispatcher", type: :request do
       expect(response).to have_http_status(:no_content)
     end
   end
+
+  describe "scope enforcement" do
+    before do
+      RailsMcp::Registry.register(GreetTool)
+      RailsMcp::Registry.register(ExplodingTool)
+    end
+
+    let(:user) { make_user }
+
+    # GreetTool's name starts with `list-` so its readOnlyHint is true; ExplodingTool
+    # has no read-only prefix so it requires the `write` scope.
+    let(:read_only_token)  { issue_access_token_for(user, scopes: "read") }
+    let(:write_only_token) { issue_access_token_for(user, scopes: "write") }
+
+    it "allows a read-only token to call a read-only tool" do
+      mcp_call({ jsonrpc: "2.0", id: 100, method: "tools/call",
+                 params: { name: "list-greetings", arguments: {} } }, token: read_only_token)
+      expect(response.parsed_body["result"]["isError"]).to be false
+    end
+
+    it "denies a read-only token from calling a write tool" do
+      mcp_call({ jsonrpc: "2.0", id: 101, method: "tools/call",
+                 params: { name: "explode" } }, token: read_only_token)
+      result = response.parsed_body["result"]
+      expect(result["isError"]).to be true
+      expect(result["content"].first["text"]).to include("Insufficient OAuth scope")
+      expect(result["content"].first["text"]).to include("requires 'write'")
+    end
+
+    it "allows a write-only token to reach a write tool (scope check passes; tool itself can still fail)" do
+      RailsMcp.config.tool_error_handler = ->(error, **) { "handled" }
+      mcp_call({ jsonrpc: "2.0", id: 102, method: "tools/call",
+                 params: { name: "explode" } }, token: write_only_token)
+      expect(response.parsed_body["result"]["content"].first["text"]).to eq("handled")
+    end
+
+    it "denies a write-only token from calling a read-only tool" do
+      mcp_call({ jsonrpc: "2.0", id: 103, method: "tools/call",
+                 params: { name: "list-greetings" } }, token: write_only_token)
+      result = response.parsed_body["result"]
+      expect(result["isError"]).to be true
+      expect(result["content"].first["text"]).to include("requires 'read'")
+    end
+  end
 end

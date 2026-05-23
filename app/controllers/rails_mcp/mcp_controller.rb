@@ -1,7 +1,9 @@
 module RailsMcp
   class McpController < ApplicationController
     skip_before_action :verify_authenticity_token, raise: false
-    before_action :doorkeeper_authorize!
+    # Require either read or write at the OAuth provider level; the per-tool
+    # check inside handle_tool_call decides which of the two is actually needed.
+    before_action -> { doorkeeper_authorize! :read, :write }
     before_action :require_existing_user
 
     PROTOCOL_VERSION = "2024-11-05"
@@ -78,6 +80,13 @@ module RailsMcp
       tool_class = RailsMcp.config.tool_classes.find { |t| t.tool_name == params["name"] }
       return json_error(id, -32601, "Unknown tool: #{params['name']}") unless tool_class
 
+      unless authorized_for_tool?(tool_class)
+        return json_success(id, {
+          content: [ { type: "text", text: insufficient_scope_message(tool_class) } ],
+          isError: true
+        })
+      end
+
       arguments = (params["arguments"] || {}).symbolize_keys
       if (unknown = unknown_arguments(tool_class, arguments)).any?
         message = unknown_argument_message(tool_class, unknown)
@@ -90,6 +99,23 @@ module RailsMcp
       text = host_error_text(e, tool_class) || "Error: #{e.message}"
       Rails.logger.error("MCP tool call failed: #{e.class}: #{e.message}\n#{e.backtrace&.first(5)&.join("\n")}") unless host_error_text(e, tool_class)
       json_success(id, { content: [ { type: "text", text: text } ], isError: true })
+    end
+
+    # Read-only tools require the `read` scope; everything else (create/update/
+    # delete/post/etc.) requires `write`. We use the tool's annotation rather
+    # than asking each tool to declare its scope explicitly, so the contract
+    # stays in lockstep with the `readOnlyHint` advertised to the LLM.
+    def authorized_for_tool?(tool_class)
+      required = required_scope_for(tool_class)
+      Array(doorkeeper_token.scopes).map(&:to_s).include?(required.to_s)
+    end
+
+    def required_scope_for(tool_class)
+      tool_class.annotations[:readOnlyHint] ? :read : :write
+    end
+
+    def insufficient_scope_message(tool_class)
+      "Insufficient OAuth scope for tool #{tool_class.tool_name}: requires '#{required_scope_for(tool_class)}'."
     end
 
     def host_error_text(error, tool_class)

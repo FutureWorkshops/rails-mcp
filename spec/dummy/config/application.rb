@@ -27,5 +27,10 @@ module Dummy
     config.session_store :cookie_store, key: "_dummy_session"
     config.middleware.use ActionDispatch::Cookies
     config.middleware.use ActionDispatch::Session::CookieStore, key: config.session_options[:key]
+
+    # Rack::Attack is wired in at the dummy-app middleware stack so the engine's
+    # rate-limit defaults can be exercised in request specs.
+    require "rack/attack"
+    config.middleware.use Rack::Attack
   end
 end

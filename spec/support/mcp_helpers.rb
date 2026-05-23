@@ -4,12 +4,12 @@ module McpHelpers
     account.users.create!(email: email, identity_id: identity_id)
   end
 
-  def issue_access_token_for(user)
-    app = Doorkeeper::Application.create!(name: "Test", redirect_uri: "https://example/cb", scopes: "read write", confidential: false)
+  def issue_access_token_for(user, scopes: "read write")
+    app = Doorkeeper::Application.create!(name: "Test", redirect_uri: "https://example.com/cb", scopes: "read write", confidential: false)
     Doorkeeper::AccessToken.create!(
       application_id: app.id,
       resource_owner_id: user.id,
-      scopes: "read write",
+      scopes: scopes,
       expires_in: 3600,
       use_refresh_token: false
     )
