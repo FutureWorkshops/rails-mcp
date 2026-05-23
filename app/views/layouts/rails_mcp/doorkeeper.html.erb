@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title><%= content_for(:title) || "Authorize · #{RailsMcp.config.display_name}" %></title>
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <%= csrf_meta_tags %>
+    <%= csp_meta_tag %>
+    <%# Host app provides styling via its own copy of this layout. %>
+  </head>
+  <body class="bg-gray-50 min-h-screen">
+    <nav class="bg-white border-b border-gray-200">
+      <div class="max-w-4xl mx-auto px-4 py-3">
+        <span class="text-lg font-semibold text-gray-900"><%= RailsMcp.config.display_name %></span>
+      </div>
+    </nav>
+
+    <main class="max-w-md mx-auto px-4 py-12">
+      <% if notice.present? %>
+        <div class="mb-4 p-3 bg-green-50 border border-green-200 text-green-800 rounded-lg text-sm"><%= notice %></div>
+      <% end %>
+      <% if alert.present? %>
+        <div class="mb-4 p-3 bg-red-50 border border-red-200 text-red-800 rounded-lg text-sm"><%= alert %></div>
+      <% end %>
+      <%= yield %>
+    </main>
+  </body>
+</html>

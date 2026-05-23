@@ -1,0 +1,25 @@
+<% content_for :title, "Welcome" %>
+
+<div class="max-w-md mx-auto mt-12">
+  <div class="bg-white border border-gray-200 rounded-xl p-6 space-y-4">
+    <h1 class="text-xl font-bold text-gray-900">Name your workspace</h1>
+    <p class="text-sm text-gray-600">
+      Pick a short name for your team. You can change it later.
+    </p>
+
+    <%= form_with url: RailsMcp::Engine.routes.url_helpers.onboarding_path,
+                  method: :post,
+                  class: "space-y-3" do |f| %>
+      <%= f.label :name, "Workspace name", class: "block text-xs text-gray-600" %>
+      <%= f.text_field :name,
+            value: @default_name,
+            required: true,
+            class: "block w-full border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" %>
+      <% if @default_name.present? %>
+        <p class="text-xs text-gray-400">Suggested: <%= @default_name %></p>
+      <% end %>
+      <%= f.submit "Continue",
+            class: "block w-full bg-blue-600 text-white py-2.5 px-4 rounded-lg text-sm font-semibold hover:bg-blue-700 cursor-pointer" %>
+    <% end %>
+  </div>
+</div>

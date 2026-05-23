@@ -1,0 +1,53 @@
+<% content_for :title, "Team invite" %>
+
+<div class="max-w-md mx-auto mt-12">
+  <div class="bg-white border border-gray-200 rounded-xl p-6 space-y-4">
+    <% case @state %>
+    <% when :claimable %>
+      <h1 class="text-xl font-bold text-gray-900">You're invited</h1>
+      <p class="text-sm text-gray-700">
+        <strong><%= @invitation.invited_by&.name.presence || @invitation.invited_by&.email %></strong>
+        has invited <strong><%= @invitation.email %></strong> to join
+        <strong><%= @invitation.account.name %></strong> on <%= RailsMcp.config.display_name %>.
+      </p>
+      <p class="text-sm text-gray-600">
+        Sign in with the account associated with
+        <strong><%= @invitation.email %></strong> to accept.
+      </p>
+      <%= link_to RailsMcp.config.sign_in_path.call(request),
+          class: "block w-full text-center bg-blue-600 text-white py-2.5 px-4 rounded-lg text-sm font-semibold hover:bg-blue-700" do %>
+        Sign in to accept
+      <% end %>
+
+    <% when :accepted %>
+      <h1 class="text-xl font-bold text-gray-900">Already accepted</h1>
+      <p class="text-sm text-gray-700">
+        This invite was already claimed on
+        <%= @invitation.accepted_at.strftime("%-d %b %Y") %>.
+        <% if @invitation.invited_by %>If that wasn't you, contact <%= @invitation.invited_by.email %>.<% end %>
+      </p>
+
+    <% when :revoked %>
+      <h1 class="text-xl font-bold text-gray-900">Invite revoked</h1>
+      <p class="text-sm text-gray-700">
+        This invite was cancelled<% if @invitation.invited_by %> by <%= @invitation.invited_by.email %><% end %>.
+        Ask them to send you a new one.
+      </p>
+
+    <% when :expired %>
+      <h1 class="text-xl font-bold text-gray-900">Invite expired</h1>
+      <p class="text-sm text-gray-700">
+        This invite expired on
+        <%= @invitation.expires_at.strftime("%-d %b %Y") %>.
+        <% if @invitation.invited_by %>Ask <%= @invitation.invited_by.email %> to send a new one.<% end %>
+      </p>
+
+    <% else %>
+      <h1 class="text-xl font-bold text-gray-900">Invite not found</h1>
+      <p class="text-sm text-gray-700">
+        We couldn't find an invite with that link. Double-check the URL or
+        ask the sender for a new invitation.
+      </p>
+    <% end %>
+  </div>
+</div>

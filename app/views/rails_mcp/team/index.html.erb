@@ -1,0 +1,78 @@
+<% content_for :title, "Team" %>
+
+<div class="max-w-2xl mx-auto space-y-8">
+  <h1 class="text-2xl font-bold text-gray-900">Team</h1>
+
+  <div class="bg-white border border-gray-200 rounded-xl p-6 space-y-3">
+    <h2 class="text-base font-semibold text-gray-900">Workspace name</h2>
+    <%= form_with url: RailsMcp::Engine.routes.url_helpers.team_update_account_path,
+                  method: :patch,
+                  class: "flex gap-2 items-center" do |f| %>
+      <%= f.text_field :name, value: @account.name, required: true,
+            class: "flex-1 border border-gray-300 rounded px-3 py-2 text-sm" %>
+      <%= f.submit "Save",
+            class: "bg-gray-100 hover:bg-gray-200 text-gray-700 text-sm px-3 py-2 rounded cursor-pointer" %>
+    <% end %>
+  </div>
+
+  <div class="bg-white border border-gray-200 rounded-xl p-6">
+    <div class="flex items-center justify-between mb-3">
+      <h2 class="text-base font-semibold text-gray-900">Members</h2>
+      <span class="text-xs text-gray-500"><%= @members.size %></span>
+    </div>
+    <ul class="divide-y divide-gray-100">
+      <% @members.each do |m| %>
+        <li class="py-2 flex items-center justify-between">
+          <div class="text-sm text-gray-900">
+            <%= m.name.presence || m.email %>
+            <% if m == current_user %><span class="text-xs text-gray-400">(you)</span><% end %>
+          </div>
+          <div class="text-xs text-gray-500"><%= m.email %></div>
+        </li>
+      <% end %>
+    </ul>
+  </div>
+
+  <div class="bg-white border border-gray-200 rounded-xl p-6 space-y-3">
+    <h2 class="text-base font-semibold text-gray-900">Invite a teammate</h2>
+    <%= form_with url: RailsMcp::Engine.routes.url_helpers.team_invitations_path,
+                  method: :post,
+                  class: "flex gap-2 items-center" do |f| %>
+      <%= f.email_field :email, required: true, placeholder: "person@example.com",
+            class: "flex-1 border border-gray-300 rounded px-3 py-2 text-sm" %>
+      <%= f.submit "Send invite",
+            class: "bg-blue-600 hover:bg-blue-700 text-white text-sm px-3 py-2 rounded cursor-pointer" %>
+    <% end %>
+    <p class="text-xs text-gray-400">
+      Invites expire after <%= RailsMcp::Invitation::EXPIRY_WINDOW.inspect %>.
+    </p>
+  </div>
+
+  <div class="bg-white border border-gray-200 rounded-xl p-6">
+    <div class="flex items-center justify-between mb-3">
+      <h2 class="text-base font-semibold text-gray-900">Pending invitations</h2>
+      <span class="text-xs text-gray-500"><%= @invitations.size %></span>
+    </div>
+    <% if @invitations.empty? %>
+      <p class="text-sm text-gray-500">No outstanding invites.</p>
+    <% else %>
+      <ul class="divide-y divide-gray-100">
+        <% @invitations.each do |inv| %>
+          <li class="py-2 flex items-center justify-between gap-3">
+            <div>
+              <div class="text-sm text-gray-900"><%= inv.email %></div>
+              <div class="text-xs text-gray-500">
+                Invited by <%= inv.invited_by&.email %> · expires <%= inv.expires_at.strftime("%-d %b %Y") %>
+              </div>
+            </div>
+            <%= button_to "Revoke",
+                  RailsMcp::Engine.routes.url_helpers.team_invitation_path(inv),
+                  method: :delete,
+                  form: { data: { turbo_confirm: "Revoke this invite?" } },
+                  class: "text-xs bg-gray-100 hover:bg-gray-200 text-gray-700 px-2 py-1 rounded cursor-pointer" %>
+          </li>
+        <% end %>
+      </ul>
+    <% end %>
+  </div>
+</div>

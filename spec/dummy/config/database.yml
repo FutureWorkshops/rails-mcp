@@ -1,0 +1,12 @@
+default: &default
+  adapter: postgresql
+  encoding: unicode
+  pool: 5
+
+development:
+  <<: *default
+  database: rails_mcp_dummy_development
+
+test:
+  <<: *default
+  database: rails_mcp_dummy_test

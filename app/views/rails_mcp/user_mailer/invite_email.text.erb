@@ -1,0 +1,9 @@
+You're invited to <%= @account_name %>
+
+<%= @inviter_name %> invited <%= @invitation.email %> to join the <%= @account_name %>
+workspace on <%= @app_name %>.
+
+Accept the invitation:
+<%= @accept_url %>
+
+This invitation expires on <%= @invitation.expires_at.strftime("%-d %b %Y") %>.

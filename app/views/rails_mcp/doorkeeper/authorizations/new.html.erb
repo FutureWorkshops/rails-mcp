@@ -1,0 +1,58 @@
+<% content_for :title, "Authorize" %>
+
+<%
+  defaults = RailsMcp.config.scope_descriptions
+%>
+
+<div class="bg-white border border-gray-200 rounded-xl p-6 space-y-6">
+  <div>
+    <h1 class="text-xl font-bold text-gray-900">Authorize <%= @pre_auth.client.name %></h1>
+    <p class="text-sm text-gray-600 mt-1">
+      <strong><%= @pre_auth.client.name %></strong> is requesting access to your <%= RailsMcp.config.display_name %> account.
+    </p>
+  </div>
+
+  <div>
+    <h2 class="text-xs uppercase tracking-wider text-gray-500 font-medium mb-2">This connector will be able to</h2>
+    <ul class="space-y-2">
+      <% @pre_auth.scopes.each do |scope| %>
+        <% copy = defaults[scope.to_s] || { title: scope.to_s, detail: nil } %>
+        <li class="flex gap-3 p-3 border border-gray-200 rounded-lg text-sm">
+          <span class="flex-shrink-0 w-5 h-5 rounded-full bg-blue-600 text-white flex items-center justify-center mt-0.5">
+            <svg width="10" height="10" viewBox="0 0 16 16"><path d="M3 8l3 3 7-8" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </span>
+          <div>
+            <div class="font-medium text-gray-900"><%= copy[:title] %></div>
+            <% if copy[:detail] %><div class="text-gray-600 mt-0.5"><%= copy[:detail] %></div><% end %>
+          </div>
+        </li>
+      <% end %>
+    </ul>
+  </div>
+
+  <div class="space-y-2">
+    <%= form_tag oauth_authorization_path, method: :post do %>
+      <%= hidden_field_tag :client_id, @pre_auth.client.uid, id: nil %>
+      <%= hidden_field_tag :redirect_uri, @pre_auth.redirect_uri, id: nil %>
+      <%= hidden_field_tag :state, @pre_auth.state, id: nil %>
+      <%= hidden_field_tag :response_type, @pre_auth.response_type, id: nil %>
+      <%= hidden_field_tag :response_mode, @pre_auth.response_mode, id: nil %>
+      <%= hidden_field_tag :scope, @pre_auth.scope, id: nil %>
+      <%= hidden_field_tag :code_challenge, @pre_auth.code_challenge, id: nil %>
+      <%= hidden_field_tag :code_challenge_method, @pre_auth.code_challenge_method, id: nil %>
+      <button type="submit" class="w-full bg-blue-600 text-white py-2.5 px-4 rounded-lg text-sm font-semibold hover:bg-blue-700">Authorize <%= @pre_auth.client.name %></button>
+    <% end %>
+
+    <%= form_tag oauth_authorization_path, method: :delete do %>
+      <%= hidden_field_tag :client_id, @pre_auth.client.uid, id: nil %>
+      <%= hidden_field_tag :redirect_uri, @pre_auth.redirect_uri, id: nil %>
+      <%= hidden_field_tag :state, @pre_auth.state, id: nil %>
+      <%= hidden_field_tag :response_type, @pre_auth.response_type, id: nil %>
+      <%= hidden_field_tag :response_mode, @pre_auth.response_mode, id: nil %>
+      <%= hidden_field_tag :scope, @pre_auth.scope, id: nil %>
+      <%= hidden_field_tag :code_challenge, @pre_auth.code_challenge, id: nil %>
+      <%= hidden_field_tag :code_challenge_method, @pre_auth.code_challenge_method, id: nil %>
+      <button type="submit" class="w-full bg-white border border-gray-300 text-gray-700 py-2.5 px-4 rounded-lg text-sm font-medium hover:bg-gray-50">Cancel</button>
+    <% end %>
+  </div>
+</div>
