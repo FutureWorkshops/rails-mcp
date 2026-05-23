@@ -1,0 +1,6 @@
+# Dummy app log accretion from running engine specs.
+spec/dummy/log/*.log
+spec/dummy/tmp/
+
+# Local bundler config.
+.bundle/
