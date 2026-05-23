@@ -31,4 +31,14 @@ RSpec.describe RailsMcp::UserMailer, type: :mailer do
     mail = described_class.invite_email(invitation_id: invitation.id)
     expect(mail.subject).to include("host@example.com")
   end
+
+  it "raises a clear error when default_url_options[:host] is not configured" do
+    original = ActionMailer::Base.default_url_options.dup
+    ActionMailer::Base.default_url_options = original.except(:host)
+    expect {
+      described_class.invite_email(invitation_id: invitation.id).deliver_now
+    }.to raise_error(RuntimeError, /default_url_options\[:host\] is not configured/)
+  ensure
+    ActionMailer::Base.default_url_options = original
+  end
 end

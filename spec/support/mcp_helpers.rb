@@ -1,6 +1,7 @@
 module McpHelpers
-  def make_user(email: "u@example.com", identity_id: "id-1")
+  def make_user(email: "u@example.com", identity_id: "id-1", onboarded: true)
     account = RailsMcp::Account.create!(name: "Acme")
+    account.mark_onboarded! if onboarded
     account.users.create!(email: email, identity_id: identity_id)
   end
 

@@ -116,6 +116,24 @@ RSpec.describe "MCP JSON-RPC dispatcher", type: :request do
     end
   end
 
+  describe "onboarding gate" do
+    let(:user) { make_user(onboarded: false) }
+    let(:token) { issue_access_token_for(user) }
+
+    it "blocks tool calls before the account is onboarded" do
+      mcp_call({ jsonrpc: "2.0", id: 1, method: "initialize" }, token: token)
+      expect(response).to have_http_status(:forbidden)
+      expect(response.parsed_body["error"]["message"]).to include("onboarding is incomplete")
+    end
+
+    it "lets requests through once the account is onboarded" do
+      user.account.mark_onboarded!
+      mcp_call({ jsonrpc: "2.0", id: 1, method: "initialize" }, token: token)
+      expect(response).to have_http_status(:ok)
+      expect(response.parsed_body["result"]).to include("protocolVersion")
+    end
+  end
+
   describe "scope enforcement" do
     before do
       RailsMcp::Registry.register(GreetTool)

@@ -5,10 +5,14 @@ module RailsMcp
       @app_name = RailsMcp.config.display_name
       @inviter_name = @invitation.invited_by&.name.presence || @invitation.invited_by&.email || @app_name
       @account_name = @invitation.account.name
+      host = ActionMailer::Base.default_url_options[:host]
+      raise "ActionMailer::Base.default_url_options[:host] is not configured; cannot build invitation URL" if host.blank?
+
       @accept_url = RailsMcp::Engine.routes.url_helpers.invitation_url(
         token: @invitation.token,
-        host: ActionMailer::Base.default_url_options[:host] || "localhost",
-        port: ActionMailer::Base.default_url_options[:port]
+        host: host,
+        port: ActionMailer::Base.default_url_options[:port],
+        protocol: ActionMailer::Base.default_url_options[:protocol]
       )
 
       mail(
