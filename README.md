@@ -4,6 +4,12 @@ In-repo Rails engine that ships the shared scaffolding behind Future Workshops' 
 
 This README is aimed at engineers wiring the engine into a new host app. The single most important section is **[Security responsibilities of the host](#security-responsibilities-of-the-host)** — the engine ships defaults for OAuth scopes, dynamic client registration, rate limits and so on, but several controls have to live in the host because they're environment- or identity-provider-specific.
 
+## Building a new host
+
+If you're bootstrapping a brand-new MCP server on top of this engine (Gmail, GitHub, Microsoft Graph, …), **start at [`BUILDING_A_HOST.md`](BUILDING_A_HOST.md)**. It's a numbered 25-step guide — Gemfile through Heroku deploy — with code templates for the identity-provider OAuth controller, the API client service, the tool base class, security wiring, and the production env. The doc is structured so you can paste a single prompt into Claude Code and have it follow the steps mechanically.
+
+This README describes the engine's API surface and the security boundary; the build guide describes the *sequence* of steps to wire a new host onto it.
+
 ## What's in the engine
 
 - **MCP JSON-RPC dispatcher** at `POST /mcp` (initialize, tools/list, tools/call, batched arrays, notifications).
