@@ -23,5 +23,17 @@ module RailsMcp
         app.config.paths["db/migrate"] << path
       end
     end
+
+    # OAuth secrets that must never appear in Rails logs. Appending here means
+    # every host that mounts the engine gets the same defensive filter list
+    # without needing to remember to add these keys to its own
+    # filter_parameter_logging initializer.
+    OAUTH_FILTER_PARAMETERS = %i[
+      access_token refresh_token client_secret authorization bearer code
+    ].freeze
+
+    initializer :append_filter_parameters, before: :load_config_initializers do |app|
+      app.config.filter_parameters += OAUTH_FILTER_PARAMETERS
+    end
   end
 end
