@@ -2,9 +2,13 @@ RailsMcp::Engine.routes.draw do
   # MCP JSON-RPC
   post "mcp", to: "mcp#handle"
 
-  # OAuth provider
+  # OAuth provider — dynamic client registration (RFC 7591). The rest of the
+  # Doorkeeper routes (`/oauth/authorize`, `/oauth/token`, `/oauth/revoke`,
+  # `/oauth/introspect`) live in the host's routes.rb. Doorkeeper's controllers
+  # are top-level (Doorkeeper::TokensController etc.) and our engine uses
+  # `isolate_namespace RailsMcp`, which would make `use_doorkeeper` here try to
+  # resolve them under `RailsMcp::Doorkeeper::*` and 500 every request.
   post "oauth/register", to: "oauth/clients#create", as: :oauth_register
-  use_doorkeeper
 
   # Discovery
   get "/.well-known/oauth-authorization-server",

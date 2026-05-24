@@ -23,6 +23,9 @@ gem "rails_mcp", path: "engines/rails_mcp"
 
 # config/routes.rb
 mount RailsMcp::Engine => "/"
+use_doorkeeper   # /oauth/authorize, /oauth/token, /oauth/revoke, /oauth/introspect
+                 # MUST live in the host's routes — see "Why use_doorkeeper isn't
+                 # inside the engine" below.
 
 # config/initializers/rails_mcp.rb
 RailsMcp.configure do |c|
@@ -119,6 +122,17 @@ Required environment variables for a host using this engine on Heroku:
 - `SOLID_QUEUE_IN_PUMA=true` — run jobs inside the web dyno (or split out a worker dyno)
 - `SLACK_WEBHOOK_URL` (optional) — enables the Slack exception notifier
 - `SLACK_ERROR_CHANNEL` (optional, default `#errors`)
+
+## Why `use_doorkeeper` isn't inside the engine
+
+The engine declares `isolate_namespace RailsMcp`, which makes Rails resolve every controller mentioned in `RailsMcp::Engine.routes.draw` under the `RailsMcp::` namespace. Doorkeeper's controllers are top-level (`Doorkeeper::TokensController`, `Doorkeeper::AuthorizationsController`, …); if `use_doorkeeper` runs inside the engine's routes block, Rails tries to look them up as `RailsMcp::Doorkeeper::TokensController` and every `POST /oauth/token` 500s with `uninitialized constant RailsMcp::Doorkeeper`.
+
+The fix is to declare `use_doorkeeper` at the **host's top level** (not inside `RailsMcp::Engine.routes.draw`). The engine still owns:
+
+- `POST /oauth/register` (RFC 7591 dynamic client registration — our own controller, lives under the engine namespace correctly)
+- `/.well-known/oauth-authorization-server` (its payload references the Doorkeeper URLs via `main_app.oauth_token_url(...)` etc.)
+
+When `xero-mcp-rails` (or any future host) adopts the engine, it must add `use_doorkeeper` to its `config/routes.rb` next to the `mount` line.
 
 ## Running the engine specs
 
