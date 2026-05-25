@@ -1,10 +1,9 @@
 <%% content_for :title, "Authorize" %>
 
 <%%
-  scope_copy = {
-    "read"  => { title: "Read your <%= provider_human %> data",         detail: "TODO: short list of what read-only tools surface." },
-    "write" => { title: "Create and update <%= provider_human %> data", detail: "TODO: short list of what write tools do on your behalf." }
-  }
+  # Scope titles + details come from RailsMcp.config.scope_descriptions, set in
+  # config/initializers/rails_mcp.rb. Edit them there, not here.
+  scope_copy = RailsMcp.config.scope_descriptions || {}
   signed_in_user = current_user
 %>
 
@@ -47,7 +46,9 @@
   </div>
 
   <div style="display: grid; gap: 8px;">
-    <%%= form_tag oauth_authorization_path, method: :post do %>
+    <%%# Turbo can't follow OAuth's cross-origin 302 to the client's redirect_uri
+        cleanly; disable it so the browser does a native submit. %>
+    <%%= form_tag oauth_authorization_path, method: :post, data: { turbo: false } do %>
       <%%= hidden_field_tag :client_id, @pre_auth.client.uid, id: nil %>
       <%%= hidden_field_tag :redirect_uri, @pre_auth.redirect_uri, id: nil %>
       <%%= hidden_field_tag :state, @pre_auth.state, id: nil %>
@@ -59,7 +60,7 @@
       <button type="submit" class="cw-btn cw-btn-accent" style="width: 100%; justify-content: center;">Authorize <%%= @pre_auth.client.name %></button>
     <%% end %>
 
-    <%%= form_tag oauth_authorization_path, method: :delete do %>
+    <%%= form_tag oauth_authorization_path, method: :delete, data: { turbo: false } do %>
       <%%= hidden_field_tag :client_id, @pre_auth.client.uid, id: nil %>
       <%%= hidden_field_tag :redirect_uri, @pre_auth.redirect_uri, id: nil %>
       <%%= hidden_field_tag :state, @pre_auth.state, id: nil %>
