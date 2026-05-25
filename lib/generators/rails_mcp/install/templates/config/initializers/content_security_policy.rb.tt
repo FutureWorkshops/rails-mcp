@@ -5,9 +5,12 @@
 # _cowork_tokens.html.erb. Tighten by refactoring to classed CSS if/when you
 # rip out the theme.
 #
-# form-action MUST include your upstream provider's authorize URL host so the
-# OAuth handoff isn't blocked. Update the value below when you fill in
-# AUTHORIZE_URL in app/controllers/<%= provider_slug %>_oauth_controller.rb.
+# form-action allows :https so the OAuth consent screen can redirect to any
+# registered MCP client's redirect_uri (e.g. claude.ai/api/mcp/auth_callback)
+# and the upstream provider's authorize URL host. Dynamic Client Registration
+# means we cannot enumerate clients ahead of time; restricting to :self would
+# block every legitimate OAuth handshake at the 302 step because browsers
+# enforce form-action across redirect chains.
 Rails.application.configure do
   config.content_security_policy do |policy|
     policy.default_src :self, :https
@@ -19,8 +22,7 @@ Rails.application.configure do
     policy.connect_src :self, :https
     policy.frame_ancestors :none
     policy.base_uri    :self
-    # TODO: replace with your provider's authorize-URL host.
-    policy.form_action :self, "https://TODO"
+    policy.form_action :self, :https
   end
 
   config.content_security_policy_nonce_generator = ->(request) { request.session.id.to_s }
