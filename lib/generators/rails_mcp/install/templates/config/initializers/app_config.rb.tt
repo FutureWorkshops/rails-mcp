@@ -33,4 +33,24 @@ module AppConfig
   rescue URI::InvalidURIError, ArgumentError
     nil
   end
+
+  # ---- Cowork Hub (identity / SSO) -----------------------------------------
+
+  def self.cowork_hub_base_url
+    Rails.application.credentials.dig(:cowork_hub, :base_url).presence ||
+      "https://hub.cowork.com"
+  end
+
+  def self.cowork_hub_client_id
+    Rails.application.credentials.dig(:cowork_hub, :client_id)
+  end
+
+  def self.cowork_hub_client_secret
+    Rails.application.credentials.dig(:cowork_hub, :client_secret)
+  end
+
+  def self.cowork_hub_redirect_uri
+    Rails.application.credentials.dig(:cowork_hub, :redirect_uri).presence ||
+      ("https://#{app_host}/cowork_hub/callback" if app_host.present?)
+  end
 end

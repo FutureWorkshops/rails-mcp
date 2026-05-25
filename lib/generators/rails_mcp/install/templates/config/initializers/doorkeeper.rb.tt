@@ -8,7 +8,7 @@ Doorkeeper.configure do
       user
     else
       session[:return_to] = request.fullpath
-      redirect_to("<%= provider_connect_path %>", alert: "Sign in to authorize this connection.")
+      redirect_to(RailsMcp.config.sign_in_path.call(request), alert: "Sign in to authorize this connection.")
     end
   end
 

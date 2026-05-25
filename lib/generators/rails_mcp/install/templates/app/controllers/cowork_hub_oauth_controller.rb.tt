@@ -1,0 +1,20 @@
+# Identity controller: signs visitors in by doing an OAuth-client
+# round-trip against Cowork Hub (FW-AIHub-Rails). The whole MCP host
+# family uses Cowork Hub as its SSO IdP; the heavy lifting lives in
+# RailsMcp::OauthClientController in the engine. This subclass only
+# needs to supply the upstream URLs + credentials accessors.
+#
+# Add a `cowork_hub:` block to credentials with `client_id`,
+# `client_secret`, `base_url`, and optionally `redirect_uri` before
+# trying to sign in.
+class CoworkHubOauthController < RailsMcp::OauthClientController
+  def self.authorize_url = "#{AppConfig.cowork_hub_base_url}/oauth/authorize"
+  def self.token_url     = "#{AppConfig.cowork_hub_base_url}/oauth/token"
+  def self.userinfo_url  = "#{AppConfig.cowork_hub_base_url}/oauth/userinfo"
+
+  def self.client_id      = AppConfig.cowork_hub_client_id
+  def self.client_secret  = AppConfig.cowork_hub_client_secret
+  def self.redirect_uri   = AppConfig.cowork_hub_redirect_uri
+
+  def self.state_session_key = :cowork_hub_oauth_state
+end

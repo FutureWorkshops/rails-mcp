@@ -1,20 +1,22 @@
+# Per-user provider connection: attaches a <%= provider_human %> account
+# to the currently-signed-in user. Identity / sign-in is owned by
+# CoworkHubOauthController; visitors without a session are bounced there
+# first by `require_sign_in`.
 class <%= provider_const %>OauthController < ApplicationController
-  before_action :require_sign_in, only: [ :disconnect ]
+  before_action :require_sign_in
 
   # TODO: Replace with the real authorize / token / userinfo endpoints from
-  # <%= provider_human %>'s OAuth 2.0 docs. The userinfo endpoint should return
-  # at minimum a stable identifier (sub / id) and an email address. Examples:
+  # <%= provider_human %>'s OAuth 2.0 docs. Examples:
   #   Google : https://accounts.google.com/o/oauth2/v2/auth
   #            https://oauth2.googleapis.com/token
   #            https://openidconnect.googleapis.com/v1/userinfo
-  #   GitHub : https://github.com/login/oauth/authorize
-  #            https://github.com/login/oauth/access_token
-  #            https://api.github.com/user
   AUTHORIZE_URL = "https://TODO/authorize".freeze
   TOKEN_URL     = "https://TODO/token".freeze
   USERINFO_URL  = "https://TODO/userinfo".freeze
 
-  # TODO: Set the scopes the upstream provider needs (space-separated).
+  # TODO: Provider scopes only — the host gets identity from Cowork Hub, so
+  # `openid`/`profile`/`email` are NOT needed here unless the provider's
+  # API specifically requires them.
   SCOPES = "TODO".freeze
 
   def connect
@@ -22,11 +24,11 @@ class <%= provider_const %>OauthController < ApplicationController
     session[:<%= session_state_key %>] = state
 
     query = {
-      client_id: AppConfig.<%= provider_slug %>_client_id,
-      redirect_uri: AppConfig.<%= provider_slug %>_redirect_uri,
+      client_id:     AppConfig.<%= provider_slug %>_client_id,
+      redirect_uri:  AppConfig.<%= provider_slug %>_redirect_uri,
       response_type: "code",
-      scope: SCOPES,
-      state: state
+      scope:         SCOPES,
+      state:         state
     }.to_query
 
     redirect_to "#{AUTHORIZE_URL}?#{query}", allow_other_host: true
@@ -34,32 +36,21 @@ class <%= provider_const %>OauthController < ApplicationController
 
   def callback
     if params[:state] != session.delete(:<%= session_state_key %>)
-      return redirect_to root_path, alert: "Invalid OAuth state. Please try again."
+      return redirect_to "/connections", alert: "Invalid OAuth state. Please try again."
     end
 
     if params[:error].present?
-      return redirect_to root_path, alert: "<%= provider_human %> authorisation failed: #{params[:error]}"
+      return redirect_to "/connections", alert: "<%= provider_human %> authorisation failed: #{params[:error]}"
     end
 
     tokens   = exchange_code(params[:code])
     identity = fetch_userinfo(tokens[:access_token])
 
-    invitation = consume_invitation(identity_email(identity))
-    return if performed?
-
-    user = upsert_user(identity, account: invitation&.account)
-    invitation&.accept!
-    upsert_connection(user, tokens, identity)
-
-    # Prevent session fixation: rotate the session ID at the privilege boundary
-    # (anonymous → authenticated), then write the user id into the fresh session.
-    reset_session
-    session[:user_id] = user.id
-
-    redirect_to "/connections", notice: "Signed in."
+    upsert_connection(current_user, tokens, identity)
+    redirect_to "/connections", notice: "Connected #{identity_email(identity)}."
   rescue StandardError => e
     Rails.logger.error("<%= provider_human %> OAuth callback failed: #{e.class}: #{e.message}")
-    redirect_to root_path, alert: "Sign-in failed: #{e.message}"
+    redirect_to "/connections", alert: "Connection failed: #{e.message}"
   end
 
   def disconnect
@@ -70,17 +61,6 @@ class <%= provider_const %>OauthController < ApplicationController
   end
 
   private
-
-  def consume_invitation(candidate_email)
-    RailsMcp::Invitation.consume_from_session!(session, candidate_email: candidate_email) do |error|
-      alert = case error
-      when :unknown        then "Invitation link is no longer valid."
-      when :not_pending    then "That invitation can no longer be claimed."
-      when :email_mismatch then "Signed in with a different email than the invitation was sent to."
-      end
-      redirect_to root_path, alert: alert
-    end
-  end
 
   def exchange_code(code)
     response = Net::HTTP.post_form(
@@ -115,9 +95,6 @@ class <%= provider_const %>OauthController < ApplicationController
     JSON.parse(response.body)
   end
 
-  # TODO: Adjust these helpers to match the userinfo payload shape returned by
-  # your provider. Google returns { sub:, email:, name:, … }; GitHub returns
-  # { id:, email:, login:, name:, … }.
   def identity_id(identity)
     identity.fetch("sub").to_s
   end
@@ -126,38 +103,17 @@ class <%= provider_const %>OauthController < ApplicationController
     identity.fetch("email")
   end
 
-  def identity_name(identity)
-    identity["name"].presence || identity_email(identity)
-  end
-
-  def upsert_user(identity, account: nil)
-    id    = identity_id(identity)
-    email = identity_email(identity)
-    name  = identity_name(identity)
-
-    RailsMcp::User.transaction do
-      user = RailsMcp::User.find_by(identity_id: id)
-      if user.nil?
-        account ||= RailsMcp::Account.create!(name: name)
-        user = account.users.create!(identity_id: id, email: email, name: name)
-      else
-        user.update!(email: email, name: name)
-      end
-      user
-    end
-  end
-
   # TODO: Decide what `external_id` and `name` should be for your provider's
   # Connection record. For per-tenant providers (Xero, Basecamp) it's the
   # tenant/workspace id + name. For identity-only providers (Gmail, GitHub)
-  # it's typically the user id + email.
+  # it's typically the provider user id + email.
   def upsert_connection(user, tokens, identity)
     conn = user.connections.where(type: "<%= provider_const %>Connection").find_or_initialize_by(
       external_id: identity_id(identity)
     )
     conn.assign_attributes(
       type:             "<%= provider_const %>Connection",
-      name:             identity_name(identity),
+      name:             identity_email(identity),
       access_token:     tokens[:access_token],
       refresh_token:    tokens[:refresh_token],
       token_expires_at: Time.current + tokens[:expires_in].seconds,

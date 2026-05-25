@@ -17,14 +17,17 @@ RailsMcp.configure do |c|
   # stale class references in the engine registry.
   c.tools = -> { Mcp::Registry::ALL_TOOLS }
 
-  # Unauthenticated visitors are redirected here. Sign-in is OAuth — this
-  # initiates the <%= provider_human %> OAuth dance, not a username form.
-  c.sign_in_path = ->(_request) { "<%= provider_connect_path %>" }
+  # Unauthenticated visitors sign in via Cowork Hub (SSO). The provider's
+  # OAuth controller is only used to attach per-user provider connections
+  # once a user is signed in.
+  c.sign_in_path = ->(_request) { "/cowork_hub/connect" }
 
-  # Pre-fills the onboarding "Workspace name" field with the just-connected
-  # account name when available.
+  # Pre-fills the onboarding "Workspace name" field with the user's mirrored
+  # Cowork Hub account name (falls back to the first connection's name for
+  # users that somehow ended up without an account name).
   c.suggested_account_name = ->(user) {
-    user.connections.where(type: "<%= provider_const %>Connection").first&.name
+    user.account&.name.presence ||
+      user.connections.where(type: "<%= provider_const %>Connection").first&.name
   }
 
   # Optional: map per-tool exceptions to user-facing strings. Returning nil
