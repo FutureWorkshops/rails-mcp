@@ -117,6 +117,10 @@ module RailsMcp
         template "config/initializers/exception_notification.rb.tt",   "config/initializers/exception_notification.rb"
         template "config/initializers/content_security_policy.rb.tt",  "config/initializers/content_security_policy.rb", force: true
         template "config/initializers/app_config.rb.tt",               "config/initializers/app_config.rb"
+        # Maps app/mcp/* to the Mcp:: namespace; without it the host's
+        # Mcp::Registry / Mcp::*Tool constants are never autoloaded and every
+        # request that resolves tools 500s with `uninitialized constant Mcp`.
+        template "config/initializers/zeitwerk.rb.tt",                 "config/initializers/zeitwerk.rb"
       end
 
       def copy_views

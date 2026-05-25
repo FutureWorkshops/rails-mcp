@@ -51,7 +51,7 @@ The argument is your provider's name. `Gmail`, `gmail`, `github_api`, `XeroPayro
 | Models | `app/models/<provider>_connection.rb` (STI subclass of `RailsMcp::Connection`) |
 | Services | `app/services/<provider>_client_service.rb` (Faraday with timeouts + token refresh under `with_lock` + permanent-error handling + `ReconnectRequired` exception) |
 | MCP | `app/mcp/<provider>_tool.rb` (host tool base), `app/mcp/registry.rb` (empty `ALL_TOOLS`), `app/mcp/tools/.keep` |
-| Initializers | `rails_mcp.rb`, `doorkeeper.rb`, `rack_attack.rb`, `exception_notification.rb`, `content_security_policy.rb`, `app_config.rb` |
+| Initializers | `rails_mcp.rb`, `doorkeeper.rb`, `rack_attack.rb`, `exception_notification.rb`, `content_security_policy.rb`, `app_config.rb`, `zeitwerk.rb` (maps `app/mcp/*` → `Mcp::` namespace) |
 | Views | `layouts/application.html.erb`, `shared/_cowork_tokens.html.erb`, `_fw_logo.html.erb`, `_flash.html.erb`, `sessions/new`, `connections/index`, `tools/index`, `doorkeeper/authorizations/new` |
 | Patches | `config/application.rb` (Rack::Attack middleware), `config/environments/production.rb` (HSTS, `config.hosts`, mailer host) |
 | Procfile | `release: bin/rails db:migrate`, `web: bin/rails server -p ${PORT}` |
@@ -259,3 +259,4 @@ Pick a name from a prefix; the engine sets the annotation hint that the MCP clie
 - **CSP `form-action` not updated** → the generated CSP has `policy.form_action :self, "https://TODO"`. Replace `"https://TODO"` with your provider's authorize URL host, or the OAuth redirect from the browser will be blocked.
 - **Solid Cache / Queue / Cable** on a single `DATABASE_URL` → if you use any of them, generate their schemas via `bin/rails solid_cache:install` (and `solid_queue`, `solid_cable`) then convert the generated schemas into migrations under `db/migrate/` so they land in the primary DB on `release`. See `basecamp-mcp-rails/db/migrate/20260523200001_create_solid_cache_tables.rb` for an example.
 - **Re-running the generator on an existing project** offers Thor's standard overwrite prompts. Always review the diff (`git diff`) before accepting overwrites of files you've customised — particularly the OAuth controller and registry.
+- **Deleting `config/initializers/zeitwerk.rb`** → every request that resolves the tool list 500s with `uninitialized constant Mcp`. The host's `app/mcp/*` files use the `Mcp::` namespace but live in a `app/<root>/*` autoload root by default; the generated initializer remaps the directory so Zeitwerk loads `Mcp::Registry` from `app/mcp/registry.rb` correctly. Keep it.

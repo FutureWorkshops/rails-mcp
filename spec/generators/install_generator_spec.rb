@@ -148,7 +148,10 @@ RSpec.describe RailsMcp::Generators::InstallGenerator, type: :generator do
                                                             "policy.form_action :self," ],
       "config/initializers/app_config.rb"              => [ "module AppConfig",
                                                             "def self.gmail_client_id",
-                                                            "def self.gmail_redirect_uri" ]
+                                                            "def self.gmail_redirect_uri" ],
+      "config/initializers/zeitwerk.rb"                => [ "module Mcp",
+                                                            'mcp_dir = Rails.root.join("app/mcp")',
+                                                            "Rails.autoloaders.main.push_dir(mcp_dir, namespace: Mcp)" ]
     }.each do |rel, snippets|
       expect_file(rel, *snippets)
       expect_ruby_parses(rel)

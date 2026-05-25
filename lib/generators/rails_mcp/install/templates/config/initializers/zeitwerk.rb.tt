@@ -1,0 +1,10 @@
+# Files under app/mcp namespace their constants under Mcp::, so tell Zeitwerk
+# to treat app/mcp as the Mcp namespace root instead of a top-level autoload
+# root. Without this initializer, Zeitwerk expects app/mcp/registry.rb to
+# define a top-level `Registry` constant, and the `module Mcp` namespace the
+# rails_mcp:install generator emits is never declared — every request that
+# touches the tool list 500s with `uninitialized constant Mcp`.
+module Mcp; end
+
+mcp_dir = Rails.root.join("app/mcp")
+Rails.autoloaders.main.push_dir(mcp_dir, namespace: Mcp)
