@@ -1,0 +1,52 @@
+RailsMcp.configure do |c|
+  c.server_name    = "<%= provider_slug %>-mcp-rails"
+  c.server_version = "0.1.0"
+  c.display_name   = "<%= provider_human %> MCP"
+  c.resource_name  = "<%= provider_human %> MCP Server"
+
+  c.scopes = %w[read write]
+  c.scope_descriptions = {
+    "read"  => { title: "Read your <%= provider_human %> data",
+                 detail: "TODO: short list of what read-only tools surface." },
+    "write" => { title: "Create and update <%= provider_human %> data",
+                 detail: "TODO: short list of what write tools do on your behalf." }
+  }
+
+  # Resolve the host's tool list on every call. Reading the constant lazily
+  # means app/mcp/tools/* stay autoloaded/reloadable in dev without juggling
+  # stale class references in the engine registry.
+  c.tools = -> { Mcp::Registry::ALL_TOOLS }
+
+  # Unauthenticated visitors are redirected here. Sign-in is OAuth — this
+  # initiates the <%= provider_human %> OAuth dance, not a username form.
+  c.sign_in_path = ->(_request) { "<%= provider_connect_path %>" }
+
+  # Pre-fills the onboarding "Workspace name" field with the just-connected
+  # account name when available.
+  c.suggested_account_name = ->(user) {
+    user.connections.where(type: "<%= provider_const %>Connection").first&.name
+  }
+
+  # Optional: map per-tool exceptions to user-facing strings. Returning nil
+  # falls through to the engine's "Error: <message>" default.
+  c.tool_error_handler = ->(error, **) {
+    case error
+    when <%= provider_const %>ClientService::ReconnectRequired
+      "Your <%= provider_human %> connection needs to be reconnected" +
+        (error.error_code.present? ? " (#{error.error_code})." : ".") +
+        " Visit /connections to fix it."
+    when Mcp::<%= provider_const %>ApiError
+      base = "<%= provider_human %> API error (HTTP #{error.status}) at #{error.path}"
+      case error.status
+      when 401, 403 then "#{base}: the access token doesn't have permission. Reconnect from the dashboard."
+      when 404      then "#{base}: not found."
+      when 429      then "#{base}: rate-limited. Retry in a moment."
+      else
+        body = error.body.is_a?(Hash) ? error.body.to_json : error.body.to_s
+        body.present? ? "#{base}: #{body[0, 500]}" : base
+      end
+    when ActiveRecord::RecordNotFound
+      "Not found: #{error.message}"
+    end
+  }
+end

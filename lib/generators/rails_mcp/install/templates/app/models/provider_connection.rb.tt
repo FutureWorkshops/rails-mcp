@@ -1,0 +1,15 @@
+class <%= provider_const %>Connection < RailsMcp::Connection
+  # Inherits from the engine's STI base on the shared `connections` table:
+  #   - encrypted access_token / refresh_token
+  #   - token_expires_at / token_active / token_refresh_failed_at /
+  #     token_refresh_error
+  #   - belongs_to :user
+  #   - methods: token_expired?, needs_reconnect?, mark_refresh_failed!,
+  #             mark_refresh_succeeded!
+  #
+  # Add provider-specific columns with a follow-up migration if your provider
+  # returns metadata worth surfacing (e.g. tenant_type, workspace_url):
+  #
+  #   bin/rails g migration Add<%= provider_const %>ColumnsToConnections \
+  #     workspace_url:string tenant_type:string
+end

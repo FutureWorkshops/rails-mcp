@@ -1,0 +1,170 @@
+class <%= provider_const %>OauthController < ApplicationController
+  before_action :require_sign_in, only: [ :disconnect ]
+
+  # TODO: Replace with the real authorize / token / userinfo endpoints from
+  # <%= provider_human %>'s OAuth 2.0 docs. The userinfo endpoint should return
+  # at minimum a stable identifier (sub / id) and an email address. Examples:
+  #   Google : https://accounts.google.com/o/oauth2/v2/auth
+  #            https://oauth2.googleapis.com/token
+  #            https://openidconnect.googleapis.com/v1/userinfo
+  #   GitHub : https://github.com/login/oauth/authorize
+  #            https://github.com/login/oauth/access_token
+  #            https://api.github.com/user
+  AUTHORIZE_URL = "https://TODO/authorize".freeze
+  TOKEN_URL     = "https://TODO/token".freeze
+  USERINFO_URL  = "https://TODO/userinfo".freeze
+
+  # TODO: Set the scopes the upstream provider needs (space-separated).
+  SCOPES = "TODO".freeze
+
+  def connect
+    state = SecureRandom.hex(16)
+    session[:<%= session_state_key %>] = state
+
+    query = {
+      client_id: AppConfig.<%= provider_slug %>_client_id,
+      redirect_uri: AppConfig.<%= provider_slug %>_redirect_uri,
+      response_type: "code",
+      scope: SCOPES,
+      state: state
+    }.to_query
+
+    redirect_to "#{AUTHORIZE_URL}?#{query}", allow_other_host: true
+  end
+
+  def callback
+    if params[:state] != session.delete(:<%= session_state_key %>)
+      return redirect_to root_path, alert: "Invalid OAuth state. Please try again."
+    end
+
+    if params[:error].present?
+      return redirect_to root_path, alert: "<%= provider_human %> authorisation failed: #{params[:error]}"
+    end
+
+    tokens   = exchange_code(params[:code])
+    identity = fetch_userinfo(tokens[:access_token])
+
+    invitation = consume_invitation(identity_email(identity))
+    return if performed?
+
+    user = upsert_user(identity, account: invitation&.account)
+    invitation&.accept!
+    upsert_connection(user, tokens, identity)
+
+    # Prevent session fixation: rotate the session ID at the privilege boundary
+    # (anonymous → authenticated), then write the user id into the fresh session.
+    reset_session
+    session[:user_id] = user.id
+
+    redirect_to "/connections", notice: "Signed in."
+  rescue StandardError => e
+    Rails.logger.error("<%= provider_human %> OAuth callback failed: #{e.class}: #{e.message}")
+    redirect_to root_path, alert: "Sign-in failed: #{e.message}"
+  end
+
+  def disconnect
+    conn = current_user.connections.find_by!(external_id: params[:external_id])
+    name = conn.name
+    conn.destroy
+    redirect_to "/connections", notice: "#{name} disconnected."
+  end
+
+  private
+
+  def consume_invitation(candidate_email)
+    RailsMcp::Invitation.consume_from_session!(session, candidate_email: candidate_email) do |error|
+      alert = case error
+      when :unknown        then "Invitation link is no longer valid."
+      when :not_pending    then "That invitation can no longer be claimed."
+      when :email_mismatch then "Signed in with a different email than the invitation was sent to."
+      end
+      redirect_to root_path, alert: alert
+    end
+  end
+
+  def exchange_code(code)
+    response = Net::HTTP.post_form(
+      URI(TOKEN_URL),
+      grant_type:    "authorization_code",
+      code:          code,
+      client_id:     AppConfig.<%= provider_slug %>_client_id,
+      client_secret: AppConfig.<%= provider_slug %>_client_secret,
+      redirect_uri:  AppConfig.<%= provider_slug %>_redirect_uri
+    )
+
+    body = JSON.parse(response.body)
+    raise "Token exchange failed: #{body['error'] || response.code}" if response.code != "200"
+
+    {
+      access_token:  body["access_token"],
+      refresh_token: body["refresh_token"],
+      expires_in:    body["expires_in"].to_i
+    }
+  end
+
+  def fetch_userinfo(access_token)
+    uri = URI(USERINFO_URL)
+    req = Net::HTTP::Get.new(uri,
+      "Authorization" => "Bearer #{access_token}",
+      "User-Agent"    => AppConfig.<%= provider_slug %>_user_agent,
+      "Accept"        => "application/json"
+    )
+    response = Net::HTTP.start(uri.hostname, uri.port, use_ssl: true) { |h| h.request(req) }
+    raise "Failed to fetch <%= provider_human %> identity: HTTP #{response.code}" if response.code != "200"
+
+    JSON.parse(response.body)
+  end
+
+  # TODO: Adjust these helpers to match the userinfo payload shape returned by
+  # your provider. Google returns { sub:, email:, name:, … }; GitHub returns
+  # { id:, email:, login:, name:, … }.
+  def identity_id(identity)
+    identity.fetch("sub").to_s
+  end
+
+  def identity_email(identity)
+    identity.fetch("email")
+  end
+
+  def identity_name(identity)
+    identity["name"].presence || identity_email(identity)
+  end
+
+  def upsert_user(identity, account: nil)
+    id    = identity_id(identity)
+    email = identity_email(identity)
+    name  = identity_name(identity)
+
+    RailsMcp::User.transaction do
+      user = RailsMcp::User.find_by(identity_id: id)
+      if user.nil?
+        account ||= RailsMcp::Account.create!(name: name)
+        user = account.users.create!(identity_id: id, email: email, name: name)
+      else
+        user.update!(email: email, name: name)
+      end
+      user
+    end
+  end
+
+  # TODO: Decide what `external_id` and `name` should be for your provider's
+  # Connection record. For per-tenant providers (Xero, Basecamp) it's the
+  # tenant/workspace id + name. For identity-only providers (Gmail, GitHub)
+  # it's typically the user id + email.
+  def upsert_connection(user, tokens, identity)
+    conn = user.connections.where(type: "<%= provider_const %>Connection").find_or_initialize_by(
+      external_id: identity_id(identity)
+    )
+    conn.assign_attributes(
+      type:             "<%= provider_const %>Connection",
+      name:             identity_name(identity),
+      access_token:     tokens[:access_token],
+      refresh_token:    tokens[:refresh_token],
+      token_expires_at: Time.current + tokens[:expires_in].seconds,
+      token_active:     true,
+      token_refresh_error:     nil,
+      token_refresh_failed_at: nil
+    )
+    conn.save!
+  end
+end

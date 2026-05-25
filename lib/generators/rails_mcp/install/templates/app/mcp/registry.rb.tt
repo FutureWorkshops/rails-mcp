@@ -1,0 +1,19 @@
+module Mcp
+  # List of <%= provider_human %> MCP tool classes. The engine's tools/list call
+  # reads this constant via `RailsMcp.config.tools` (wired in
+  # config/initializers/rails_mcp.rb). Add a new tool by:
+  #
+  #   1. Writing app/mcp/tools/<name>_tool.rb that inherits from
+  #      Mcp::<%= provider_const %>Tool.
+  #   2. Adding the class constant to ALL_TOOLS below.
+  #
+  # The tool name's prefix (list-, get-, delete-, update-, …) auto-derives the
+  # MCP annotation hints; see engines/rails_mcp/BUILDING_A_HOST.md → Appendix A.
+  module Registry
+    ALL_TOOLS = [
+      # Tools::List<%= provider_const %>ResourcesTool,
+      # Tools::Get<%= provider_const %>ResourceTool,
+      # Tools::Create<%= provider_const %>ResourceTool,
+    ].freeze
+  end
+end

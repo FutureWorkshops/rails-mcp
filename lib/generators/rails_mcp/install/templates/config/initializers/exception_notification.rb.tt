@@ -1,0 +1,7 @@
+if Rails.env.production? && ENV["SLACK_WEBHOOK_URL"].present?
+  RailsMcp::ExceptionNotifierDefaults.apply!(
+    webhook_url: ENV["SLACK_WEBHOOK_URL"],
+    channel:     ENV.fetch("SLACK_ERROR_CHANNEL", "#errors"),
+    username:    "<%= provider_slug %>-mcp"
+  )
+end

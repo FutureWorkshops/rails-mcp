@@ -1,0 +1,87 @@
+module Mcp
+  # Host base class for <%= provider_human %> MCP tools. Inherits the engine's
+  # framework (tool_definition, annotations, format_result) from
+  # RailsMcp::BaseTool, and adds Faraday + connection helpers + an API error
+  # class so individual tools stay short.
+  class <%= provider_const %>Tool < RailsMcp::BaseTool
+    # Shared schema fragment for tools that accept an explicit Connection id.
+    def self.<%= provider_slug %>_account_id_property
+      {
+        <%= provider_slug %>_account_id: {
+          type: "string",
+          description: "<%= provider_human %> account id identifying which connected account to use. Omit to use the user's only connected account."
+        }
+      }
+    end
+
+    private
+
+    def client(external_id = nil)
+      <%= provider_const %>ClientService.for_connection(find_connection(external_id))
+    end
+
+    def find_connection(external_id = nil)
+      scope = current_user.connections.where(type: "<%= provider_const %>Connection")
+      if external_id.blank?
+        scope.first ||
+          raise(ActiveRecord::RecordNotFound,
+                "No connected <%= provider_human %> account. Sign in again from the dashboard to connect.")
+      else
+        scope.find_by(external_id: external_id) ||
+          raise(ActiveRecord::RecordNotFound,
+                "No connected <%= provider_human %> account matches #{external_id.inspect}.")
+      end
+    end
+
+    def get_json(conn, path, params = {})
+      response = conn.get(path, params)
+      raise_for_status(response, path)
+      response.body
+    end
+
+    def post_json(conn, path, payload)
+      response = conn.post(path, payload)
+      raise_for_status(response, path)
+      response.body
+    end
+
+    def put_json(conn, path, payload)
+      response = conn.put(path, payload)
+      raise_for_status(response, path)
+      response.body
+    end
+
+    def delete_json(conn, path)
+      response = conn.delete(path)
+      raise_for_status(response, path)
+      response.body
+    end
+
+    def raise_for_status(response, path)
+      return if response.success?
+
+      raise Mcp::<%= provider_const %>ApiError.new(response.status, response.body, path)
+    end
+  end
+
+  class <%= provider_const %>ApiError < StandardError
+    attr_reader :status, :body, :path
+
+    def initialize(status, body, path)
+      @status = status
+      @body   = body
+      @path   = path
+      super("<%= provider_human %> API error (HTTP #{status}) at #{path}: #{summarize(body)}")
+    end
+
+    private
+
+    def summarize(body)
+      case body
+      when Hash   then (body["error"] || body["message"] || body).to_s[0, 500]
+      when String then body[0, 500]
+      else body.inspect[0, 500]
+      end
+    end
+  end
+end

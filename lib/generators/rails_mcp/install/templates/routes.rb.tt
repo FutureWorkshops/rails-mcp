@@ -1,0 +1,26 @@
+Rails.application.routes.draw do
+  get "up" => "rails/health#show", as: :rails_health_check
+
+  # Engine: /mcp, /oauth/register, /.well-known/*, /invite/:token, /onboarding, /team.
+  mount RailsMcp::Engine => "/"
+
+  # Doorkeeper's OAuth-provider routes (/oauth/authorize, /oauth/token, etc.).
+  # MUST be declared here at the top level, not inside the engine mount —
+  # see engines/rails_mcp/README.md → "Why use_doorkeeper isn't inside the engine".
+  use_doorkeeper
+
+  root "sessions#new"
+
+  # Host sessions
+  get    "sign_in",  to: "sessions#new",     as: :sign_in
+  delete "sign_out", to: "sessions#destroy", as: :sign_out
+
+  # Dashboard
+  get "connections", to: "connections#index", as: :connections
+  get "tools",       to: "tools#index",       as: :tools
+
+  # <%= provider_human %> OAuth (sign-in + account sync)
+  get    "<%= provider_slug.tr('_', '-') %>/connect",                       to: "<%= provider_slug %>_oauth#connect",    as: :<%= provider_slug %>_connect
+  get    "<%= provider_slug.tr('_', '-') %>/callback",                      to: "<%= provider_slug %>_oauth#callback",   as: :<%= provider_slug %>_callback
+  delete "<%= provider_slug.tr('_', '-') %>/accounts/:external_id",         to: "<%= provider_slug %>_oauth#disconnect", as: :<%= provider_slug %>_disconnect
+end

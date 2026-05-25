@@ -1,0 +1,28 @@
+# Be sure to restart your server when you modify this file.
+#
+# style-src includes :unsafe_inline because the Cowork Hub design system uses
+# many `style="…"` attributes and an inline <style> block from
+# _cowork_tokens.html.erb. Tighten by refactoring to classed CSS if/when you
+# rip out the theme.
+#
+# form-action MUST include your upstream provider's authorize URL host so the
+# OAuth handoff isn't blocked. Update the value below when you fill in
+# AUTHORIZE_URL in app/controllers/<%= provider_slug %>_oauth_controller.rb.
+Rails.application.configure do
+  config.content_security_policy do |policy|
+    policy.default_src :self, :https
+    policy.font_src    :self, :https, :data
+    policy.img_src     :self, :https, :data
+    policy.object_src  :none
+    policy.script_src  :self, :https
+    policy.style_src   :self, :https, :unsafe_inline
+    policy.connect_src :self, :https
+    policy.frame_ancestors :none
+    policy.base_uri    :self
+    # TODO: replace with your provider's authorize-URL host.
+    policy.form_action :self, "https://TODO"
+  end
+
+  config.content_security_policy_nonce_generator = ->(request) { request.session.id.to_s }
+  config.content_security_policy_nonce_directives = %w[script-src]
+end

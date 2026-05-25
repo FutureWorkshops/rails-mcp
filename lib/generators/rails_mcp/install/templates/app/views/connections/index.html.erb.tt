@@ -1,0 +1,63 @@
+<%% content_for :title, "Connection" %>
+
+<div style="display: flex; align-items: end; justify-content: space-between; gap: 24px; margin-bottom: 24px;">
+  <div>
+    <h1 class="cw-page-title">Connection</h1>
+    <p class="cw-page-lede">The <%= provider_human %> account linked to this connector.</p>
+  </div>
+  <%%= link_to "Reconnect <%= provider_human %>", main_app.<%= provider_slug %>_connect_path, class: "cw-btn cw-btn-accent" %>
+</div>
+
+<div style="display: grid; gap: 16px;">
+  <section class="cw-panel" style="padding: 24px;">
+    <h2 style="font-size: 16px; font-weight: 600; margin: 0 0 12px;">Claude Desktop Setup</h2>
+    <ol style="font-size: 14px; color: var(--cw-ink); line-height: 1.8; padding-left: 20px; margin: 0;">
+      <li>In Claude Desktop, open <strong>Settings → Custom Connectors</strong>.</li>
+      <li>Click <strong>+</strong> to add a new connector.</li>
+      <li>Enter the server URL: <code class="cw-mono" style="background: rgba(20,20,16,0.06); padding: 1px 6px; border-radius: 4px; font-size: 12px;"><%%= root_url.chomp("/") %>/mcp</code></li>
+      <li>Claude will register itself, prompt you to sign in here, and ask you to authorise the connection.</li>
+    </ol>
+    <p class="cw-form-hint" style="margin-top: 14px;">No client ID or secret to copy — the handshake is automatic.</p>
+  </section>
+
+  <section class="cw-panel" style="padding: 24px;">
+    <div style="display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 14px;">
+      <h2 style="font-size: 16px; font-weight: 600; margin: 0;"><%= provider_human %> Account</h2>
+      <span class="cw-label-mono"><%%= @connections.size %></span>
+    </div>
+
+    <%% if @needs_reconnect %>
+      <div style="background: rgba(176,42,42,0.08); border: 1px solid rgba(176,42,42,0.25); border-left: 3px solid #b02a2a; border-radius: 8px; padding: 10px 14px; margin-bottom: 14px; font-size: 13px; color: #b02a2a;">
+        Your <%= provider_human %> connection has stopped working
+        <%% if (err = @connections.detect(&:needs_reconnect?)&.token_refresh_error).present? %>(<%%= err %>)<%% end %>.
+        Click "Reconnect <%= provider_human %>" to fix it.
+      </div>
+    <%% end %>
+
+    <%% if @connections.empty? %>
+      <div style="padding: 28px; text-align: center; color: var(--cw-muted); border: 1px solid var(--cw-line); border-radius: 8px;">
+        No <%= provider_human %> account connected yet.
+      </div>
+    <%% else %>
+      <ul style="list-style: none; padding: 0; margin: 0; border: 1px solid var(--cw-line); border-radius: 8px; overflow: hidden;">
+        <%% @connections.each_with_index do |c, i| %>
+          <li style="padding: 14px 16px; <%%= 'border-top: 1px solid var(--cw-line);' unless i.zero? %>">
+            <div style="display: flex; align-items: center; justify-content: space-between; gap: 12px;">
+              <div>
+                <div style="font-size: 14px; font-weight: 600;"><%%= c.name %></div>
+                <div style="font-size: 12px; color: var(--cw-muted); margin-top: 2px;">
+                  <span class="cw-mono"><%%= c.external_id %></span>
+                </div>
+              </div>
+              <%% if c.token_active? %>
+                <span class="cw-pill cw-pill-success">Connected</span>
+              <%% else %>
+                <span class="cw-pill cw-pill-warn">Needs reconnect</span>
+              <%% end %>
+            </div>
+          </li>
+        <%% end %>
+      </ul>
+    <%% end %>
+  </section>
+</div>

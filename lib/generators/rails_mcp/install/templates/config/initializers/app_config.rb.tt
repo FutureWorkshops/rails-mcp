@@ -1,0 +1,36 @@
+# Central accessor for credentials needed by the <%= provider_human %> OAuth flow and
+# API client. Reads from Rails credentials with an APP_HOST env override for
+# the redirect URI in production.
+module AppConfig
+  def self.<%= provider_slug %>_client_id
+    Rails.application.credentials.<%= provider_slug %>[:client_id]
+  end
+
+  def self.<%= provider_slug %>_client_secret
+    Rails.application.credentials.<%= provider_slug %>[:client_secret]
+  end
+
+  def self.<%= provider_slug %>_redirect_uri
+    if ENV["APP_HOST"].present?
+      "https://#{ENV['APP_HOST']}<%= provider_callback_path %>"
+    else
+      Rails.application.credentials.<%= provider_slug %>[:redirect_uri]
+    end
+  end
+
+  def self.<%= provider_slug %>_user_agent
+    contact = Rails.application.credentials.<%= provider_slug %>[:contact_email].presence || "support@example.com"
+    "<%= provider_slug %>-mcp-rails (#{contact})"
+  end
+
+  def self.app_host
+    return ENV["APP_HOST"] if ENV["APP_HOST"].present?
+
+    redirect = <%= provider_slug %>_redirect_uri
+    return nil if redirect.blank?
+
+    URI(redirect).host
+  rescue URI::InvalidURIError, ArgumentError
+    nil
+  end
+end

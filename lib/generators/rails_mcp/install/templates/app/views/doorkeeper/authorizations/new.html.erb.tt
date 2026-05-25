@@ -1,0 +1,78 @@
+<%% content_for :title, "Authorize" %>
+
+<%%
+  scope_copy = {
+    "read"  => { title: "Read your <%= provider_human %> data",         detail: "TODO: short list of what read-only tools surface." },
+    "write" => { title: "Create and update <%= provider_human %> data", detail: "TODO: short list of what write tools do on your behalf." }
+  }
+  signed_in_user = current_user
+%>
+
+<div class="cw-panel" style="padding: 28px; display: grid; gap: 24px;">
+  <div>
+    <h1 class="cw-page-title" style="font-size: 22px;">Authorize <%%= @pre_auth.client.name %></h1>
+    <p class="cw-page-lede">
+      <strong><%%= @pre_auth.client.name %></strong> is requesting access to your <%= provider_human %> MCP account.
+    </p>
+  </div>
+
+  <%% if signed_in_user %>
+    <div style="display: flex; align-items: center; gap: 12px; padding: 12px; background: var(--cw-paper); border: 1px solid var(--cw-line); border-radius: 8px;">
+      <div style="width: 36px; height: 36px; border-radius: 8px; background: var(--cw-ink); color: var(--cw-paper); display: flex; align-items: center; justify-content: center; font-weight: 600; font-size: 14px;">
+        <%%= (signed_in_user.name.presence || signed_in_user.email)[0, 1].upcase %>
+      </div>
+      <div>
+        <div style="font-size: 13px; font-weight: 600; color: var(--cw-ink);">Signed in as <%%= signed_in_user.name.presence || signed_in_user.email %></div>
+        <div style="font-size: 12px; color: var(--cw-muted);"><%%= signed_in_user.email %></div>
+      </div>
+    </div>
+  <%% end %>
+
+  <div>
+    <h2 class="cw-label-mono" style="margin-bottom: 8px;">This connector will be able to</h2>
+    <ul style="list-style: none; padding: 0; margin: 0; display: grid; gap: 8px;">
+      <%% @pre_auth.scopes.each do |scope| %>
+        <%% copy = scope_copy[scope.to_s] || { title: scope.to_s, detail: nil } %>
+        <li style="display: flex; gap: 10px; padding: 12px; border: 1px solid var(--cw-line); border-radius: 8px; font-size: 13px;">
+          <span style="flex-shrink: 0; width: 20px; height: 20px; border-radius: 999px; background: var(--cw-accent); color: var(--cw-paper); display: inline-flex; align-items: center; justify-content: center; margin-top: 1px;">
+            <svg width="11" height="11" viewBox="0 0 16 16"><path d="M3 8l3 3 7-8" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </span>
+          <div>
+            <div style="font-weight: 600; color: var(--cw-ink);"><%%= copy[:title] %></div>
+            <%% if copy[:detail] %><div style="color: var(--cw-muted); margin-top: 2px;"><%%= copy[:detail] %></div><%% end %>
+          </div>
+        </li>
+      <%% end %>
+    </ul>
+  </div>
+
+  <div style="display: grid; gap: 8px;">
+    <%%= form_tag oauth_authorization_path, method: :post do %>
+      <%%= hidden_field_tag :client_id, @pre_auth.client.uid, id: nil %>
+      <%%= hidden_field_tag :redirect_uri, @pre_auth.redirect_uri, id: nil %>
+      <%%= hidden_field_tag :state, @pre_auth.state, id: nil %>
+      <%%= hidden_field_tag :response_type, @pre_auth.response_type, id: nil %>
+      <%%= hidden_field_tag :response_mode, @pre_auth.response_mode, id: nil %>
+      <%%= hidden_field_tag :scope, @pre_auth.scope, id: nil %>
+      <%%= hidden_field_tag :code_challenge, @pre_auth.code_challenge, id: nil %>
+      <%%= hidden_field_tag :code_challenge_method, @pre_auth.code_challenge_method, id: nil %>
+      <button type="submit" class="cw-btn cw-btn-accent" style="width: 100%; justify-content: center;">Authorize <%%= @pre_auth.client.name %></button>
+    <%% end %>
+
+    <%%= form_tag oauth_authorization_path, method: :delete do %>
+      <%%= hidden_field_tag :client_id, @pre_auth.client.uid, id: nil %>
+      <%%= hidden_field_tag :redirect_uri, @pre_auth.redirect_uri, id: nil %>
+      <%%= hidden_field_tag :state, @pre_auth.state, id: nil %>
+      <%%= hidden_field_tag :response_type, @pre_auth.response_type, id: nil %>
+      <%%= hidden_field_tag :response_mode, @pre_auth.response_mode, id: nil %>
+      <%%= hidden_field_tag :scope, @pre_auth.scope, id: nil %>
+      <%%= hidden_field_tag :code_challenge, @pre_auth.code_challenge, id: nil %>
+      <%%= hidden_field_tag :code_challenge_method, @pre_auth.code_challenge_method, id: nil %>
+      <button type="submit" class="cw-btn cw-btn-default" style="width: 100%; justify-content: center;">Cancel</button>
+    <%% end %>
+  </div>
+
+  <p class="cw-form-hint" style="text-align: center;">
+    You can revoke this connector at any time from the <%= provider_human %> MCP dashboard.
+  </p>
+</div>

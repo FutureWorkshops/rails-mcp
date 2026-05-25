@@ -1,0 +1,19 @@
+class ToolsController < ApplicationController
+  before_action :require_sign_in
+  before_action :require_onboarding
+
+  def index
+    tools = RailsMcp.config.tool_classes.map do |klass|
+      annotations = klass.tool_definition[:annotations] || {}
+      {
+        name: klass.tool_name,
+        description: klass.description,
+        read_only: annotations[:readOnlyHint] == true,
+        destructive: annotations[:destructiveHint] == true
+      }
+    end.sort_by { |t| t[:name] }
+
+    @read_only_tools = tools.select { |t| t[:read_only] }
+    @write_tools     = tools.reject { |t| t[:read_only] }
+  end
+end

@@ -1,0 +1,24 @@
+require "rack/attack"
+
+# Use Rails.cache as the throttle backend so limits work across multiple
+# Heroku dynos. (In single-dyno deployments, an in-process MemoryStore would
+# work; Rails.cache covers scale-out without extra wiring.)
+Rack::Attack.cache.store = Rails.cache
+
+# Apply the engine's recommended throttles for /oauth/register, /mcp, and
+# /team/invitations. Override individual buckets here if the production
+# workload needs different limits.
+RailsMcp::RackAttackDefaults.apply!
+
+# Standard 429 body for rate-limited requests.
+Rack::Attack.throttled_responder = lambda do |request|
+  retry_after = (request.env["rack.attack.match_data"] || {})[:period] || 60
+  [
+    429,
+    { "content-type" => "application/json", "retry-after" => retry_after.to_s },
+    [ { error: "rate_limited", error_description: "Too many requests; retry after #{retry_after}s." }.to_json ]
+  ]
+end
+
+# Skip throttling entirely for the platform health check.
+Rack::Attack.safelist("allow /up") { |req| req.path == "/up" }

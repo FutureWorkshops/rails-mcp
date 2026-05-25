@@ -1,0 +1,95 @@
+require "faraday"
+require "faraday/retry"
+
+# Builds a Faraday connection to the <%= provider_human %> API scoped to one
+# Connection. Handles automatic OAuth token refresh under a row-level lock and
+# raises ReconnectRequired if the refresh_token is permanently invalid.
+class <%= provider_const %>ClientService
+  # TODO: Set the upstream API + token endpoint URLs.
+  API_BASE  = "https://TODO.example.com".freeze
+  TOKEN_URL = "https://TODO/token".freeze
+
+  # TODO: Replace with the error codes your provider returns for permanently
+  # revoked credentials. Google returns "invalid_grant"; GitHub returns
+  # "bad_refresh_token"; Xero returns "invalid_grant" / "unauthorized_client".
+  PERMANENT_REFRESH_ERRORS = %w[invalid_grant invalid_client unauthorized_client].freeze
+
+  OPEN_TIMEOUT  = 5
+  READ_TIMEOUT  = 10
+  WRITE_TIMEOUT = 5
+
+  class ReconnectRequired < StandardError
+    attr_reader :connection, :error_code
+
+    def initialize(connection, error_code = nil)
+      @connection = connection
+      @error_code = error_code
+      label = connection.user.email.inspect
+      super(error_code ? "<%= provider_human %> connection for #{label} needs to be reconnected (#{error_code})"
+                        : "<%= provider_human %> connection for #{label} needs to be reconnected")
+    end
+  end
+
+  def self.for_connection(connection)
+    new(connection).faraday
+  end
+
+  def initialize(connection)
+    @connection = connection
+  end
+
+  def faraday
+    raise ReconnectRequired.new(@connection, @connection.token_refresh_error) if @connection.needs_reconnect?
+    refresh_if_needed
+
+    Faraday.new(url: API_BASE) do |f|
+      f.request :json
+      f.request :retry, max: 2, interval: 0.2, backoff_factor: 2,
+                        exceptions: [ Faraday::TimeoutError, Faraday::ConnectionFailed ]
+      f.response :json, content_type: /\bjson$/
+      f.headers["Authorization"] = "Bearer #{@connection.access_token}"
+      f.headers["User-Agent"]    = AppConfig.<%= provider_slug %>_user_agent
+      f.headers["Accept"]        = "application/json"
+      f.options.open_timeout  = OPEN_TIMEOUT
+      f.options.read_timeout  = READ_TIMEOUT
+      f.options.write_timeout = WRITE_TIMEOUT
+      f.adapter Faraday.default_adapter
+    end
+  end
+
+  private
+
+  def refresh_if_needed
+    permanent_error = nil
+
+    @connection.with_lock do
+      return unless @connection.token_expired?
+
+      response = Net::HTTP.post_form(
+        URI(TOKEN_URL),
+        grant_type:    "refresh_token",
+        refresh_token: @connection.refresh_token,
+        client_id:     AppConfig.<%= provider_slug %>_client_id,
+        client_secret: AppConfig.<%= provider_slug %>_client_secret
+      )
+      body = JSON.parse(response.body) rescue {}
+
+      if response.code == "200"
+        @connection.mark_refresh_succeeded!(
+          access_token:  body["access_token"],
+          refresh_token: body["refresh_token"] || @connection.refresh_token,
+          expires_in:    body["expires_in"]
+        )
+      elsif PERMANENT_REFRESH_ERRORS.include?(body["error"])
+        permanent_error = body["error"]
+      else
+        raise "Token refresh failed: #{body['error_description'] || body['error'] || response.code}"
+      end
+    end
+
+    return unless permanent_error
+
+    @connection.mark_refresh_failed!(permanent_error)
+    raise ReconnectRequired.new(@connection, permanent_error)
+  end
+end

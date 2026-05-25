@@ -1,0 +1,12 @@
+class SessionsController < ApplicationController
+  def new
+    return redirect_to(main_app.connections_path) if signed_in?
+
+    render :new
+  end
+
+  def destroy
+    reset_session
+    redirect_to main_app.root_path, notice: "Signed out."
+  end
+end

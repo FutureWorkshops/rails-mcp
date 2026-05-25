@@ -6,9 +6,17 @@ This README is aimed at engineers wiring the engine into a new host app. The sin
 
 ## Building a new host
 
-If you're bootstrapping a brand-new MCP server on top of this engine (Gmail, GitHub, Microsoft Graph, …), **start at [`BUILDING_A_HOST.md`](BUILDING_A_HOST.md)**. It's a numbered 25-step guide — Gemfile through Heroku deploy — with code templates for the identity-provider OAuth controller, the API client service, the tool base class, security wiring, and the production env. The doc is structured so you can paste a single prompt into Claude Code and have it follow the steps mechanically.
+If you're bootstrapping a brand-new MCP server on top of this engine (Gmail, GitHub, Microsoft Graph, …), use the install generator:
 
-This README describes the engine's API surface and the security boundary; the build guide describes the *sequence* of steps to wire a new host onto it.
+```sh
+# In a fresh Rails app, after adding `gem "rails_mcp"` to the Gemfile:
+bundle install
+bin/rails generate rails_mcp:install <Provider>
+```
+
+The generator writes routes, controllers, models, the API client skeleton, the host tool base class, every security initializer, the views, the Procfile, and patches `application.rb` + `production.rb`. After it runs you fill in 4 `# TODO` markers (OAuth URLs + scopes + API base), add credentials, write your tools, and deploy.
+
+The full walkthrough lives at [`BUILDING_A_HOST.md`](BUILDING_A_HOST.md). This README describes the engine's API surface and the security boundary; the build guide describes how to use the generator and what's left to do afterwards.
 
 ## What's in the engine
 

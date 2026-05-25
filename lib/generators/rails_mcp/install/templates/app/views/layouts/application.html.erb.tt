@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html class="h-full">
+  <head>
+    <title><%%= content_for(:title) || "<%= provider_human %> MCP" %></title>
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <%%= csrf_meta_tags %>
+    <%%= csp_meta_tag %>
+    <%%= yield :head %>
+    <link rel="icon" href="/icon.png" type="image/png">
+    <link rel="icon" href="/icon.svg" type="image/svg+xml">
+    <%%= render "shared/cowork_tokens" %>
+    <%%= stylesheet_link_tag :app, "data-turbo-track": "reload" %>
+    <%%= javascript_importmap_tags %>
+  </head>
+
+  <body class="h-full">
+    <div style="min-height: 100vh; display: flex; flex-direction: column;">
+      <nav style="position: sticky; top: 0; z-index: 50; background: var(--cw-paper); border-bottom: 1px solid var(--cw-line);">
+        <div class="cw-wrap" style="height: 56px; display: flex; align-items: center; justify-content: space-between; gap: 24px;">
+          <div style="display: flex; align-items: center; gap: 20px;">
+            <%%= link_to main_app.root_path, style: "display: flex; align-items: center; gap: 10px; color: var(--cw-ink); text-decoration: none;" do %>
+              <%%= render "shared/fw_logo" %>
+              <span style="font-weight: 700; font-size: 15px; letter-spacing: -0.01em;"><%= provider_human %> MCP</span>
+            <%% end %>
+            <%% if signed_in? %>
+              <div style="display: flex; align-items: center; gap: 4px;">
+                <%%= link_to "Connection", main_app.connections_path,
+                      class: "cw-nav-link #{'cw-nav-link-active' if current_page?(main_app.connections_path)}" %>
+                <%%= link_to "Tools", main_app.tools_path,
+                      class: "cw-nav-link #{'cw-nav-link-active' if current_page?(main_app.tools_path)}" %>
+              </div>
+            <%% end %>
+          </div>
+          <%% if signed_in? %>
+            <%%
+              team_path = RailsMcp::Engine.routes.url_helpers.team_path
+            %>
+            <div style="display: flex; align-items: center; gap: 12px;">
+              <%%= link_to current_user.account.name, team_path,
+                    class: "cw-nav-link #{'cw-nav-link-active' if current_page?(team_path)}" %>
+              <span style="font-size: 13px; color: var(--cw-muted);"><%%= current_user.email %></span>
+              <%%= button_to "Sign out", main_app.sign_out_path, method: :delete,
+                    class: "cw-text-btn",
+                    form: { style: "display: inline;" } %>
+            </div>
+          <%% end %>
+        </div>
+      </nav>
+
+      <main class="cw-wrap" style="padding-top: 32px; padding-bottom: 48px; flex: 1;">
+        <%%= render "shared/flash" %>
+        <%%= yield %>
+      </main>
+    </div>
+  </body>
+</html>

@@ -2,5 +2,9 @@
 spec/dummy/log/*.log
 spec/dummy/tmp/
 
+# Generator-spec scratch dir.
+spec/tmp/
+tmp/
+
 # Local bundler config.
 .bundle/

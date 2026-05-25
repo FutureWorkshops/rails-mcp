@@ -1,0 +1,53 @@
+<%% content_for :title, "Tools" %>
+
+<div style="margin-bottom: 24px;">
+  <h1 class="cw-page-title">Available Tools</h1>
+  <p class="cw-page-lede">
+    <%%= pluralize(@read_only_tools.size + @write_tools.size, "tool") %> exposed to Claude Desktop via this MCP server.
+  </p>
+</div>
+
+<div style="display: grid; gap: 16px;">
+  <%% [
+    { title: "Read-only tools", subtitle: "Fetch data from <%= provider_human %> without modifying anything.",
+      tools: @read_only_tools, pill_class: "cw-pill cw-pill-success" },
+    { title: "Write tools", subtitle: "Create, update, or remove records in <%= provider_human %>.",
+      tools: @write_tools, pill_class: "cw-pill cw-pill-warn" }
+  ].each do |section| %>
+    <section class="cw-panel" style="overflow: hidden;">
+      <div style="padding: 16px 20px; border-bottom: 1px solid var(--cw-line); display: flex; align-items: center; justify-content: space-between;">
+        <div>
+          <h2 style="font-size: 16px; font-weight: 600; margin: 0;"><%%= section[:title] %></h2>
+          <p class="cw-form-hint" style="margin-top: 2px;"><%%= section[:subtitle] %></p>
+        </div>
+        <span class="<%%= section[:pill_class] %>"><%%= section[:tools].size %></span>
+      </div>
+
+      <%% if section[:tools].empty? %>
+        <p style="padding: 24px; text-align: center; color: var(--cw-muted); font-size: 13px; margin: 0;">No tools in this category.</p>
+      <%% else %>
+        <table style="width: 100%; border-collapse: collapse; font-size: 13px;">
+          <thead>
+            <tr>
+              <th class="cw-label-mono" style="text-align: left; padding: 10px 20px; border-bottom: 1px solid var(--cw-line); width: 35%;">Name</th>
+              <th class="cw-label-mono" style="text-align: left; padding: 10px 20px; border-bottom: 1px solid var(--cw-line);">Description</th>
+            </tr>
+          </thead>
+          <tbody>
+            <%% section[:tools].each_with_index do |tool, i| %>
+              <tr>
+                <td class="cw-mono" style="padding: 10px 20px; font-size: 12px; vertical-align: top; <%%= 'border-top: 1px solid var(--cw-line);' unless i.zero? %>">
+                  <%%= tool[:name] %>
+                  <%% if tool[:destructive] %>
+                    <span class="cw-pill" style="background: rgba(176,42,42,0.08); color: #b02a2a; margin-left: 4px;">destructive</span>
+                  <%% end %>
+                </td>
+                <td style="padding: 10px 20px; color: var(--cw-ink); <%%= 'border-top: 1px solid var(--cw-line);' unless i.zero? %>"><%%= tool[:description] %></td>
+              </tr>
+            <%% end %>
+          </tbody>
+        </table>
+      <%% end %>
+    </section>
+  <%% end %>
+</div>

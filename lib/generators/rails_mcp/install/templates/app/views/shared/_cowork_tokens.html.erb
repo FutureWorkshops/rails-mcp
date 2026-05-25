@@ -1,0 +1,126 @@
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;600;700&family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+<style>
+  :root {
+    --cw-ink: #141410;
+    --cw-paper: #f2ede2;
+    --cw-panel: #fbf8ef;
+    --cw-accent: #ff5c2e;
+    --cw-green: #2f7a3e;
+    --cw-amber: #b8791c;
+    --cw-muted: rgba(20,20,16,0.58);
+    --cw-line: rgba(20,20,16,0.14);
+    --cw-line2: rgba(20,20,16,0.25);
+  }
+  html, body { background: var(--cw-paper); color: var(--cw-ink); font-family: "Inter Tight", system-ui, sans-serif; -webkit-font-smoothing: antialiased; }
+  ::selection { background: var(--cw-accent); color: var(--cw-paper); }
+  .cw-mono { font-family: "JetBrains Mono", ui-monospace, monospace; }
+  .cw-serif { font-family: "Instrument Serif", Georgia, serif; }
+
+  .cw-page-title { font-size: 28px; font-weight: 700; letter-spacing: -0.01em; margin: 0; color: var(--cw-ink); }
+  .cw-page-lede { font-size: 14px; color: var(--cw-muted); margin-top: 4px; }
+
+  .cw-panel { background: var(--cw-panel); border: 1px solid var(--cw-line); border-radius: 10px; }
+
+  .cw-btn { display: inline-flex; align-items: center; gap: 6px; padding: 9px 18px; font-size: 14px; font-weight: 500; border-radius: 8px; border: 1px solid transparent; line-height: 1.2; cursor: pointer; white-space: nowrap; font-family: inherit; }
+  .cw-btn-sm { padding: 6px 14px; font-size: 13px; }
+  .cw-btn-default { background: var(--cw-paper); color: var(--cw-ink); border-color: var(--cw-line2); }
+  .cw-btn-default:hover { background: rgba(20,20,16,0.04); }
+  .cw-btn-primary { background: var(--cw-ink); color: var(--cw-paper); }
+  .cw-btn-primary:hover { background: #000; }
+  .cw-btn-accent { background: var(--cw-accent); color: var(--cw-paper); }
+  .cw-btn-accent:hover { filter: brightness(1.05); }
+  .cw-btn-danger { background: transparent; color: #b02a2a; border-color: rgba(176,42,42,0.35); }
+  .cw-btn-danger:hover { background: rgba(176,42,42,0.06); }
+  .cw-btn-ghost { background: transparent; color: var(--cw-ink); }
+  .cw-btn-ghost:hover { background: rgba(20,20,16,0.04); }
+  .cw-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+  .cw-pill { display: inline-flex; align-items: center; font-size: 11px; font-weight: 500; padding: 2px 8px; border-radius: 999px; }
+  .cw-pill-default { background: rgba(20,20,16,0.06); color: var(--cw-ink); }
+  .cw-pill-success { background: rgba(47,122,62,0.12); color: var(--cw-green); }
+  .cw-pill-warn { background: rgba(184,121,28,0.14); color: var(--cw-amber); }
+  .cw-pill-accent { background: rgba(255,92,46,0.12); color: var(--cw-accent); }
+
+  .cw-input { padding: 8px 12px; border: 1px solid var(--cw-line2); border-radius: 8px; background: var(--cw-paper); font-size: 13px; color: var(--cw-ink); outline: none; font-family: inherit; }
+  .cw-input:focus { border-color: var(--cw-ink); }
+
+  .cw-form-field { margin-bottom: 14px; }
+  .cw-form-label { display: block; font-size: 12px; font-weight: 500; color: var(--cw-ink); margin-bottom: 6px; }
+  .cw-form-input {
+    width: 100%; padding: 10px 12px; font-size: 14px; color: var(--cw-ink);
+    background: var(--cw-paper); border: 1px solid var(--cw-line2); border-radius: 8px;
+    outline: none; transition: border-color .15s, box-shadow .15s; font-family: inherit;
+  }
+  .cw-form-input:focus { border-color: var(--cw-ink); box-shadow: 0 0 0 3px rgba(20,20,16,0.08); }
+  .cw-form-input::placeholder { color: rgba(20,20,16,0.38); }
+  .cw-form-input--error { border-color: #b02a2a; }
+  .cw-form-input--error:focus { box-shadow: 0 0 0 3px rgba(176,42,42,0.12); }
+  textarea.cw-form-input { resize: vertical; line-height: 1.5; }
+  select.cw-form-input { appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 10 10'%3E%3Cpath d='M1 3l4 4 4-4' stroke='%23141410' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 12px center; padding-right: 32px; }
+  .cw-form-hint { font-size: 12px; color: var(--cw-muted); margin-top: 6px; }
+  .cw-form-error { font-size: 12px; color: #b02a2a; margin-top: 6px; }
+  .cw-form-check { display: inline-flex; align-items: center; gap: 8px; font-size: 13px; color: var(--cw-ink); cursor: pointer; }
+  .cw-form-check input[type="checkbox"] {
+    appearance: none; -webkit-appearance: none;
+    width: 16px; height: 16px; border: 1px solid var(--cw-line2); border-radius: 4px;
+    background: var(--cw-paper) center / 11px 11px no-repeat;
+    cursor: pointer; margin: 0; flex-shrink: 0; display: inline-block; vertical-align: middle;
+  }
+  .cw-form-check input[type="checkbox"]:checked {
+    background-color: var(--cw-ink); border-color: var(--cw-ink);
+    background-image: url("data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath d='M2 6l3 3 5-6' stroke='%23f2ede2' stroke-width='2' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  }
+
+  .cw-label-mono { font-family: "JetBrains Mono", ui-monospace, monospace; font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--cw-muted); }
+
+  .cw-wrap { max-width: 1080px; margin: 0 auto; padding: 0 32px; }
+
+  .cw-link { color: var(--cw-ink); text-decoration: underline; text-underline-offset: 3px; }
+  .cw-link:hover { color: var(--cw-accent); }
+
+  .cw-nav-link { padding: 6px 12px; font-size: 13px; font-weight: 500; border-radius: 6px; color: var(--cw-muted); text-decoration: none; white-space: nowrap; }
+  .cw-nav-link:hover { color: var(--cw-ink); background: rgba(20,20,16,0.04); }
+  .cw-nav-link-active { color: var(--cw-ink); background: rgba(20,20,16,0.06); }
+
+  .cw-account-pill { display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px; background: transparent; border: 1px solid var(--cw-line2); border-radius: 999px; cursor: pointer; font-size: 12px; color: var(--cw-ink); font-family: inherit; }
+  .cw-account-pill:hover { background: rgba(20,20,16,0.04); }
+  .cw-account-menu { position: absolute; top: 100%; left: 0; margin-top: 6px; background: var(--cw-paper); border: 1px solid var(--cw-line2); border-radius: 8px; padding: 4px; min-width: 200px; z-index: 100; box-shadow: 0 8px 20px rgba(20,20,16,0.08); }
+  .cw-account-menu-item { padding: 7px 10px; border-radius: 6px; font-size: 13px; color: var(--cw-ink); display: block; width: 100%; text-align: left; background: transparent; border: none; cursor: pointer; font-family: inherit; }
+  .cw-account-menu-item:hover { background: rgba(20,20,16,0.04); }
+  .cw-account-menu-item-current { display: flex; align-items: center; justify-content: space-between; gap: 8px; background: rgba(20,20,16,0.05); font-weight: 600; cursor: default; color: var(--cw-ink); }
+  .cw-account-menu-item-current:hover { background: rgba(20,20,16,0.05); }
+  .cw-account-menu-divider { height: 1px; background: var(--cw-line); margin: 4px 0; }
+
+  .cw-text-btn {
+    display: inline-flex; align-items: center; gap: 4px;
+    background: transparent; border: none; padding: 0; cursor: pointer;
+    font-family: inherit; font-size: 13px; color: var(--cw-muted);
+    transition: color .15s;
+  }
+  .cw-text-btn:hover { color: var(--cw-ink); }
+
+  .cw-todo-check {
+    margin-top: 1px; flex-shrink: 0; background: transparent; border: none; padding: 0;
+    cursor: pointer;
+  }
+  .cw-todo-check span {
+    width: 18px; height: 18px; border-radius: 4px;
+    border: 1px solid var(--cw-line2); display: inline-block;
+    transition: border-color .15s;
+  }
+  .cw-todo-check:hover span { border-color: var(--cw-ink); }
+
+  .cw-banner-btn {
+    background: var(--cw-paper); color: var(--cw-ink); border: none; border-radius: 6px;
+    padding: 6px 14px; font-size: 13px; font-weight: 500; cursor: pointer;
+    white-space: nowrap; font-family: inherit;
+    transition: background-color .15s, box-shadow .15s;
+  }
+  .cw-banner-btn:hover {
+    background: #fffaf0;
+    box-shadow: 0 1px 2px rgba(20,20,16,0.18);
+  }
+</style>
