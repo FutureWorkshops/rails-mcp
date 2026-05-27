@@ -3,16 +3,16 @@
 <div style="max-width: 420px; margin: 48px auto 0; text-align: center;">
   <h1 class="cw-page-title" style="font-size: 32px;"><%= provider_human %> MCP</h1>
   <p class="cw-page-lede" style="margin-top: 8px; font-size: 15px;">
-    Sign in with <%= provider_human %> to connect Claude Desktop to your account.
+    Sign in with Cowork Hub to connect Claude Desktop to your account.
   </p>
 
   <div style="margin-top: 32px;">
-    <%%= link_to "Sign in with <%= provider_human %>", main_app.<%= provider_slug %>_connect_path,
+    <%%= link_to "Sign in with Cowork Hub", main_app.cowork_hub_connect_path,
           class: "cw-btn cw-btn-accent",
           style: "width: 100%; justify-content: center; padding: 12px 18px; font-size: 15px;" %>
   </div>
 
   <p class="cw-form-hint" style="margin-top: 24px;">
-    New here? Signing in with <%= provider_human %> will create your account automatically.
+    You'll need a Cowork Hub account. <%= provider_human %> accounts get connected after signing in.
   </p>
 </div>
