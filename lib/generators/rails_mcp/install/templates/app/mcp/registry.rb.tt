@@ -7,8 +7,11 @@ module Mcp
   #      Mcp::<%= provider_const %>Tool.
   #   2. Adding the class constant to ALL_TOOLS below.
   #
-  # The tool name's prefix (list-, get-, delete-, update-, …) auto-derives the
-  # MCP annotation hints; see engines/rails_mcp/BUILDING_A_HOST.md → Appendix A.
+  # Name tools kebab-case, verb-first: list-things, get-thing, create-thing,
+  # update-thing, delete-thing. The leading verb auto-derives the MCP
+  # annotation hints (read-only / idempotent / destructive) — see
+  # BUILDING_A_HOST.md → Appendix A. A name that doesn't start with a known
+  # prefix is treated as a non-idempotent write.
   module Registry
     ALL_TOOLS = [
       # Tools::List<%= provider_const %>ResourcesTool,

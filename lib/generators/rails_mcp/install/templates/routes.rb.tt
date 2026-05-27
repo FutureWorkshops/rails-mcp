@@ -19,7 +19,11 @@ Rails.application.routes.draw do
   get "connections", to: "connections#index", as: :connections
   get "tools",       to: "tools#index",       as: :tools
 
-  # <%= provider_human %> OAuth (sign-in + account sync)
+  # Identity / SSO via Cowork Hub.
+  get "cowork_hub/connect",  to: "cowork_hub_oauth#connect",  as: :cowork_hub_connect
+  get "cowork_hub/callback", to: "cowork_hub_oauth#callback", as: :cowork_hub_callback
+
+  # <%= provider_human %> OAuth (per-user provider connection — requires a signed-in session).
   get    "<%= provider_slug.tr('_', '-') %>/connect",                       to: "<%= provider_slug %>_oauth#connect",    as: :<%= provider_slug %>_connect
   get    "<%= provider_slug.tr('_', '-') %>/callback",                      to: "<%= provider_slug %>_oauth#callback",   as: :<%= provider_slug %>_callback
   delete "<%= provider_slug.tr('_', '-') %>/accounts/:external_id",         to: "<%= provider_slug %>_oauth#disconnect", as: :<%= provider_slug %>_disconnect

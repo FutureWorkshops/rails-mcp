@@ -62,7 +62,9 @@ RSpec.describe RailsMcp::Generators::InstallGenerator, type: :generator do
       "mount RailsMcp::Engine",
       "use_doorkeeper",
       'to: "gmail_oauth#connect"',
-      'as: :gmail_connect'
+      'as: :gmail_connect',
+      'to: "cowork_hub_oauth#connect"',
+      'as: :cowork_hub_connect'
     # Critical gotcha: use_doorkeeper must NOT be inside the engine mount.
     expect(body.index("use_doorkeeper")).to be > body.index("mount RailsMcp::Engine")
     expect_ruby_parses "config/routes.rb"
@@ -87,19 +89,33 @@ RSpec.describe RailsMcp::Generators::InstallGenerator, type: :generator do
       "require_onboarding"
   end
 
-  it "creates the provider OAuth controller with reset_session in the callback" do
+  it "creates the provider OAuth controller as a connection-only flow (no identity)" do
     body = expect_file "app/controllers/gmail_oauth_controller.rb",
       "class GmailOauthController",
+      "before_action :require_sign_in",
       "AUTHORIZE_URL",
       "TOKEN_URL",
       "USERINFO_URL",
-      "reset_session",
-      "session[:user_id] = user.id",
-      "RailsMcp::Invitation.consume_from_session!",
+      "upsert_connection",
       "session[:gmail_oauth_state]"
-    # reset_session MUST come before session[:user_id] (defeats session fixation).
-    expect(body.index("reset_session")).to be < body.index("session[:user_id] = user.id")
+    # Identity is owned by CoworkHubOauthController. The provider controller
+    # must NOT create users, consume invitations, or rotate sessions.
+    expect(body).not_to include("reset_session")
+    expect(body).not_to include("session[:user_id] = user.id")
+    expect(body).not_to include("RailsMcp::Invitation.consume_from_session!")
+    expect(body).not_to include("upsert_user")
     expect_ruby_parses "app/controllers/gmail_oauth_controller.rb"
+  end
+
+  it "creates the Cowork Hub SSO controller as a thin subclass of the engine base" do
+    body = expect_file "app/controllers/cowork_hub_oauth_controller.rb",
+      "class CoworkHubOauthController < RailsMcp::OauthClientController",
+      "AppConfig.cowork_hub_base_url",
+      "AppConfig.cowork_hub_client_id",
+      "AppConfig.cowork_hub_client_secret",
+      "AppConfig.cowork_hub_redirect_uri",
+      ":cowork_hub_oauth_state"
+    expect_ruby_parses "app/controllers/cowork_hub_oauth_controller.rb"
   end
 
   it "creates the connection STI subclass" do
@@ -138,7 +154,7 @@ RSpec.describe RailsMcp::Generators::InstallGenerator, type: :generator do
     {
       "config/initializers/rails_mcp.rb"               => [ "RailsMcp.configure", 'c.server_name    = "gmail-mcp-rails"',
                                                             'c.display_name   = "Gmail MCP"', "Mcp::Registry::ALL_TOOLS",
-                                                            'c.sign_in_path = ->(_request) { "/gmail/connect" }' ],
+                                                            'c.sign_in_path = ->(_request) { "/cowork_hub/connect" }' ],
       "config/initializers/doorkeeper.rb"              => [ "Doorkeeper.configure", "RailsMcp.config.sign_in_path",
                                                             "RailsMcp::OauthBaseController", "pkce_code_challenge_methods" ],
       "config/initializers/rack_attack.rb"             => [ "RailsMcp::RackAttackDefaults.apply!", "allow /up" ],
@@ -148,7 +164,9 @@ RSpec.describe RailsMcp::Generators::InstallGenerator, type: :generator do
                                                             "policy.form_action :self," ],
       "config/initializers/app_config.rb"              => [ "module AppConfig",
                                                             "def self.gmail_client_id",
-                                                            "def self.gmail_redirect_uri" ],
+                                                            "def self.gmail_redirect_uri",
+                                                            "def self.cowork_hub_client_id",
+                                                            "def self.cowork_hub_redirect_uri" ],
       "config/initializers/zeitwerk.rb"                => [ "module Mcp",
                                                             'mcp_dir = Rails.root.join("app/mcp")',
                                                             "Rails.autoloaders.main.push_dir(mcp_dir, namespace: Mcp)" ]
@@ -171,7 +189,8 @@ RSpec.describe RailsMcp::Generators::InstallGenerator, type: :generator do
     ].each { |path| expect_file(path) }
 
     expect_file "app/views/layouts/application.html.erb", "Gmail MCP"
-    expect_file "app/views/sessions/new.html.erb",        "Sign in with Gmail"
+    expect_file "app/views/sessions/new.html.erb",        "Sign in with Cowork Hub",
+                                                          "main_app.cowork_hub_connect_path"
     expect_file "app/views/connections/index.html.erb",   "Gmail Account",
                                                           "main_app.gmail_connect_path"
     expect_file "app/views/doorkeeper/authorizations/new.html.erb",

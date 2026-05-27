@@ -35,7 +35,24 @@ RSpec.describe RailsMcp::BaseTool do
     defn = tool.tool_definition
     expect(defn).to include(name: "get-thing", description: "Test tool")
     expect(defn[:inputSchema]).to eq(type: "object", properties: {})
-    expect(defn[:annotations][:title]).to eq("Get thing")
+    expect(defn[:annotations][:title]).to eq("Get Thing")
+  end
+
+  describe ".human_title" do
+    it "title-cases kebab-case tool names" do
+      expect(make_tool("get-thing").human_title).to eq("Get Thing")
+      expect(make_tool("list-card-table-columns").human_title).to eq("List Card Table Columns")
+    end
+
+    it "title-cases snake_case tool names (cli-mcp convention)" do
+      expect(make_tool("cards_step_complete").human_title).to eq("Cards Step Complete")
+      expect(make_tool("assignments_overdue").human_title).to eq("Assignments Overdue")
+    end
+
+    it "handles mixed and single-word names" do
+      expect(make_tool("search").human_title).to eq("Search")
+      expect(make_tool("api_get").human_title).to eq("Api Get")
+    end
   end
 
   it "subclasses can override prefix constants" do

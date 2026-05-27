@@ -41,8 +41,12 @@ module RailsMcp
       }
     end
 
+    # Turn `cards_step_complete` or `cards-step-complete` into
+    # `Cards Step Complete`. Handles both snake_case (cli-mcp convention) and
+    # kebab-case (legacy MCP naming) consistently. MCP clients render this as
+    # the tool's display label in their UI.
     def self.human_title
-      tool_name.to_s.tr("-", " ").capitalize
+      tool_name.to_s.tr("-_", "  ").split.map(&:capitalize).join(" ")
     end
 
     # Overridable in subclasses (without redefining annotations).

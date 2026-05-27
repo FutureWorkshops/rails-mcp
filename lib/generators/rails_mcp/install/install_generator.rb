@@ -94,6 +94,11 @@ module RailsMcp
                  "app/controllers/#{provider_slug}_oauth_controller.rb"
       end
 
+      def copy_cowork_hub_controller
+        template "app/controllers/cowork_hub_oauth_controller.rb.tt",
+                 "app/controllers/cowork_hub_oauth_controller.rb"
+      end
+
       def copy_models
         template "app/models/provider_connection.rb.tt",
                  "app/models/#{provider_slug}_connection.rb"
