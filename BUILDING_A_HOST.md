@@ -118,6 +118,8 @@ Production overrides the redirect URI to `https://$APP_HOST/<provider>/callback`
 
 Write each tool as a separate file under `app/mcp/tools/`, inheriting from the host tool base class (`Mcp::<Provider>Tool`). Then add it to `Mcp::Registry::ALL_TOOLS`.
 
+**Name tools in kebab-case, verb-first: `list-threads`, `get-thread`, `create-card`, `update-todo`, `delete-message`.** This is the engine's native convention — `RailsMcp::BaseTool` auto-derives each tool's MCP annotation hints (read-only / idempotent / destructive) from the leading verb, so a correctly-named tool needs no annotation boilerplate. The mapping is in [Appendix A](#appendix-a--tool-naming--annotation-cheat-sheet). If you name tools any other way (e.g. snake_case `threads_list`), the prefix match fails and **every tool is treated as a destructive write** unless you override `self.annotations` in your host base class — don't, unless you have a deliberate reason.
+
 ```ruby
 # app/mcp/tools/list_threads_tool.rb
 module Mcp::Tools
@@ -247,6 +249,8 @@ See `engines/rails_mcp/README.md` → **Security responsibilities of the host** 
 | `update-`, `complete-`, `uncomplete-`, `approve-`, `revert-`, `archive-`, `restore-` | `idempotentHint: true` | `update-label`, `approve-timesheet` |
 
 Pick a name from a prefix; the engine sets the annotation hint that the MCP client uses to decide whether the call is safe to retry / commits side-effects.
+
+**Use kebab-case verb-first names** so this works automatically. A name that doesn't start with one of the prefixes above gets `readOnlyHint: false` + `destructiveHint: false` + `idempotentHint: false` — i.e. it's treated as a non-idempotent write, and the engine's per-tool OAuth scope check will demand the `write` scope. If you must use a different convention (basecamp-mcp-rails mirrors its `basecamp-cli-mcp` sibling with snake_case `domain_action` names), override `self.annotations` in your host `Mcp::<Provider>Tool` base class to map your scheme onto the same hints. That's a deliberate, documented deviation — not the default path.
 
 ---
 

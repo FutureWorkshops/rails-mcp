@@ -26,7 +26,7 @@ The full walkthrough lives at [`BUILDING_A_HOST.md`](BUILDING_A_HOST.md). This R
 - **Identity model** — `RailsMcp::Account`, `User`, `Connection` (STI parent for host-specific concrete subclasses), `Invitation`.
 - **Authentication** + **OnboardingGate** controller concerns.
 - **InvitationsController**, **OnboardingController**, **TeamController** with views + mailer.
-- **`RailsMcp::BaseTool`** framework for host-specific MCP tools, with `RailsMcp::Registry` for discovery.
+- **`RailsMcp::BaseTool`** framework for host-specific MCP tools, with `RailsMcp::Registry` for discovery. Name tools **kebab-case, verb-first** (`list-todos`, `create-card`, `update-todo`) — the base class derives each tool's read-only / idempotent / destructive annotation from the leading verb, so correctly-named tools need no annotation code.
 - **Defaults helpers**: `RailsMcp::RackAttackDefaults.apply!`, `RailsMcp::ExceptionNotifierDefaults.apply!`.
 
 ## Mounting the engine
