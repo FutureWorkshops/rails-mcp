@@ -158,8 +158,6 @@ RSpec.describe RailsMcp::Generators::InstallGenerator, type: :generator do
       "config/initializers/doorkeeper.rb"              => [ "Doorkeeper.configure", "RailsMcp.config.sign_in_path",
                                                             "RailsMcp::OauthBaseController", "pkce_code_challenge_methods" ],
       "config/initializers/rack_attack.rb"             => [ "RailsMcp::RackAttackDefaults.apply!", "allow /up" ],
-      "config/initializers/exception_notification.rb"  => [ "RailsMcp::ExceptionNotifierDefaults.apply!",
-                                                            'username:    "gmail-mcp"' ],
       "config/initializers/content_security_policy.rb" => [ "content_security_policy",
                                                             "policy.form_action :self," ],
       "config/initializers/app_config.rb"              => [ "module AppConfig",

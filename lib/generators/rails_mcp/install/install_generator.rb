@@ -63,10 +63,6 @@ module RailsMcp
           gem "rspec-rails", "~> 8.0"
           gem "webmock"
         end
-
-        say "\n  Optional: add `gem \"exception_notification\"` + `gem \"slack-notifier\"`",
-            :yellow
-        say "  to your Gemfile to enable the Slack error reporter (initializer is already wired).", :yellow
       end
 
       def copy_procfile
@@ -119,7 +115,6 @@ module RailsMcp
         template "config/initializers/rails_mcp.rb.tt",                "config/initializers/rails_mcp.rb"
         template "config/initializers/doorkeeper.rb.tt",               "config/initializers/doorkeeper.rb", force: true
         template "config/initializers/rack_attack.rb.tt",              "config/initializers/rack_attack.rb"
-        template "config/initializers/exception_notification.rb.tt",   "config/initializers/exception_notification.rb"
         template "config/initializers/content_security_policy.rb.tt",  "config/initializers/content_security_policy.rb", force: true
         template "config/initializers/app_config.rb.tt",               "config/initializers/app_config.rb"
         # Maps app/mcp/* to the Mcp:: namespace; without it the host's
@@ -215,7 +210,11 @@ module RailsMcp
             7. bin/rails server  →  visit /sign_in, complete the OAuth dance,
                smoke test from Claude Desktop at https://<APP_HOST>/mcp.
 
-            8. Heroku deploy — see engines/rails_mcp/BUILDING_A_HOST.md → Deploy.
+            8. (Recommended) Wire up error monitoring. Add `gem "sentry-rails"`
+               and configure it per the Sentry Rails docs — see
+               engines/rails_mcp/BUILDING_A_HOST.md → Error monitoring.
+
+            9. Heroku deploy — see engines/rails_mcp/BUILDING_A_HOST.md → Deploy.
 
         NEXT
       end

@@ -51,7 +51,7 @@ The argument is your provider's name. `Gmail`, `gmail`, `github_api`, `XeroPayro
 | Models | `app/models/<provider>_connection.rb` (STI subclass of `RailsMcp::Connection`) |
 | Services | `app/services/<provider>_client_service.rb` (Faraday with timeouts + token refresh under `with_lock` + permanent-error handling + `ReconnectRequired` exception) |
 | MCP | `app/mcp/<provider>_tool.rb` (host tool base), `app/mcp/registry.rb` (empty `ALL_TOOLS`), `app/mcp/tools/.keep` |
-| Initializers | `rails_mcp.rb`, `doorkeeper.rb`, `rack_attack.rb`, `exception_notification.rb`, `content_security_policy.rb`, `app_config.rb`, `zeitwerk.rb` (maps `app/mcp/*` → `Mcp::` namespace) |
+| Initializers | `rails_mcp.rb`, `doorkeeper.rb`, `rack_attack.rb`, `content_security_policy.rb`, `app_config.rb`, `zeitwerk.rb` (maps `app/mcp/*` → `Mcp::` namespace) |
 | Views | `layouts/application.html.erb`, `shared/_cowork_tokens.html.erb`, `_fw_logo.html.erb`, `_flash.html.erb`, `sessions/new`, `connections/index`, `tools/index`, `doorkeeper/authorizations/new` |
 | Patches | `config/application.rb` (Rack::Attack middleware), `config/environments/production.rb` (HSTS, `config.hosts`, mailer host) |
 | Procfile | `release: bin/rails db:migrate`, `web: bin/rails server -p ${PORT}` |
@@ -175,6 +175,29 @@ bin/rails server
 
 Visit `http://localhost:3000`, sign in via the provider OAuth, claim onboarding, see your connection listed. From Claude Desktop, add a connector at `http://localhost:3000/mcp` and confirm `tools/list` returns your tools.
 
+### 7. Error monitoring
+
+The engine ships no error reporter — wire one up here. [Sentry](https://docs.sentry.io/platforms/ruby/guides/rails/) is the recommended choice:
+
+```ruby
+# Gemfile
+gem "sentry-rails"
+```
+
+```ruby
+# config/initializers/sentry.rb
+Sentry.init do |config|
+  config.dsn = ENV["SENTRY_DSN"]
+  config.send_default_pii = false   # don't ship request bodies / headers by default
+  config.before_send = lambda do |event, _hint|
+    # Scrub anything that looks like a bearer token before it leaves the box.
+    event
+  end
+end
+```
+
+MCP requests carry bearer tokens in headers and tool arguments can contain secrets — keep `send_default_pii` off and scrub in `before_send` so credentials never reach Sentry. Set `SENTRY_DSN` in each environment that should report (see Heroku deploy below).
+
 ---
 
 ## Heroku deploy
@@ -185,8 +208,7 @@ heroku addons:create heroku-postgresql:essential-0
 heroku config:set RAILS_MASTER_KEY=$(cat config/master.key)
 heroku config:set APP_HOST=<provider>-mcp-rails.herokuapp.com
 heroku config:set SOLID_QUEUE_IN_PUMA=true
-heroku config:set SLACK_WEBHOOK_URL=https://hooks.slack.com/...   # optional
-heroku config:set SLACK_ERROR_CHANNEL="#<provider>-mcp-errors"   # optional
+heroku config:set SENTRY_DSN=https://...@...ingest.sentry.io/...   # recommended (if you wire up Sentry)
 
 git push heroku main
 ```
@@ -230,7 +252,7 @@ After every code change, `bin/ci` must pass — rspec + rubocop + brakeman + bun
 
 ## Reference: host security responsibilities
 
-The engine ships defenses for: OAuth scopes per tool, dynamic-client-registration URI validation, RFC 9728 `WWW-Authenticate`, onboarding gate on `/mcp`, OAuth log redaction. The generator wires in: Faraday timeouts, `reset_session` at sign-in, `APP_HOST`-backed mailer host, CSP, DNS rebinding (`config.hosts`), HSTS preload, `force_ssl + assume_ssl`, Rack::Attack throttles, and the exception notifier defaults.
+The engine ships defenses for: OAuth scopes per tool, dynamic-client-registration URI validation, RFC 9728 `WWW-Authenticate`, onboarding gate on `/mcp`, OAuth log redaction. The generator wires in: Faraday timeouts, `reset_session` at sign-in, `APP_HOST`-backed mailer host, CSP, DNS rebinding (`config.hosts`), HSTS preload, `force_ssl + assume_ssl`, and Rack::Attack throttles.
 
 What you still own: identity-provider OAuth state validation (already in the generated controller — just don't delete it), token refresh locking (`with_lock` — already in the client service), credentials-key hygiene (`config/master.key` + `config/credentials/*.key` must be `.gitignore`d — Rails generators do this by default), running `bin/ci` before each commit.
 

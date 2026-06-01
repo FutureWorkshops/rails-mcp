@@ -27,7 +27,7 @@ The full walkthrough lives at [`BUILDING_A_HOST.md`](BUILDING_A_HOST.md). This R
 - **Authentication** + **OnboardingGate** controller concerns.
 - **InvitationsController**, **OnboardingController**, **TeamController** with views + mailer.
 - **`RailsMcp::BaseTool`** framework for host-specific MCP tools, with `RailsMcp::Registry` for discovery. Name tools **kebab-case, verb-first** (`list-todos`, `create-card`, `update-todo`) — the base class derives each tool's read-only / idempotent / destructive annotation from the leading verb, so correctly-named tools need no annotation code.
-- **Defaults helpers**: `RailsMcp::RackAttackDefaults.apply!`, `RailsMcp::ExceptionNotifierDefaults.apply!`.
+- **Defaults helpers**: `RailsMcp::RackAttackDefaults.apply!`.
 
 ## Mounting the engine
 
@@ -92,18 +92,7 @@ Defaults (override by passing kwargs to `apply!`):
 - `POST /mcp` — 120/min per token + 300/min per IP (fallback)
 - `POST /team/invitations` — 20/hour per user
 
-**Exception reporting to Slack:** the engine wraps the `exception_notification` + `slack-notifier` gems (which the host adds to its own Gemfile) and ships hardened defaults — only `backtrace` + `data` sections are sent, values starting with `Bearer ` or longer than 200 chars are redacted, and routing/bad-request errors are ignored.
-
-```ruby
-# config/initializers/exception_notification.rb
-if Rails.env.production? && ENV["SLACK_WEBHOOK_URL"].present?
-  RailsMcp::ExceptionNotifierDefaults.apply!(
-    webhook_url: ENV["SLACK_WEBHOOK_URL"],
-    channel:     ENV.fetch("SLACK_ERROR_CHANNEL", "#errors"),
-    username:    "basecamp-mcp"
-  )
-end
-```
+**Error monitoring:** the engine doesn't ship an error reporter. Wire one up in the host as part of project setup — [Sentry](https://docs.sentry.io/platforms/ruby/guides/rails/) is the recommended choice. Add `gem "sentry-rails"` to the host Gemfile and configure it in an initializer. Be mindful of what reaches the reporter: scrub bearer tokens and other secrets (Sentry's `config.before_send` / `send_default_pii = false`) so request data and breadcrumbs don't leak credentials.
 
 ### Host-only — the engine can't do these for you
 
@@ -120,7 +109,7 @@ These are environment- or identity-provider-specific, so they have to live in th
 | 7 | **Force SSL + assume SSL** when behind a TLS-terminating proxy (Heroku router, Cloudflare, etc.). `config.assume_ssl = true; config.force_ssl = true`. | host `config/environments/production.rb` |
 | 8 | **Doorkeeper `force_ssl_in_redirect_uri`.** Use `{ Rails.env.production? }` for the simple case. If you ever introduce a staging environment with `RAILS_ENV` != `production`, switch to an explicit allowlist so staging doesn't accept plain-`http://` redirect URIs. | host `config/initializers/doorkeeper.rb` |
 | 9 | **Rate limit middleware** (Rack::Attack) — see *Opt-in helpers* above. | host `config/application.rb` + initializer |
-| 10 | **Slack exception notifier** — see *Opt-in helpers* above. Add `exception_notification` and `slack-notifier` to the host Gemfile. | host `Gemfile` + initializer |
+| 10 | **Error monitoring.** Add an error reporter (Sentry recommended — `gem "sentry-rails"`) and configure it to scrub bearer tokens / secrets before send. The engine ships no reporter. | host `Gemfile` + initializer |
 | 11 | **Identity-provider OAuth state validation.** Generate `SecureRandom.hex(16)` (or larger) into `session[:<provider>_oauth_state]` on `/connect`, compare on callback (and `session.delete` the key — single use). | host `app/controllers/<provider>_oauth_controller.rb` |
 | 12 | **Token refresh locking on the host's connection model.** Wrap the refresh attempt in `connection.with_lock` so concurrent MCP requests don't both hit the identity provider's token endpoint. | host `app/services/<provider>_client_service.rb` |
 | 13 | **Production credentials key not in git.** `config/master.key` and `config/credentials/production.key` must be `.gitignore`d. Active Record encryption keys live in the credentials file, not committed. | host `.gitignore` + `config/credentials/` |
@@ -134,8 +123,7 @@ Required environment variables for a host using this engine on Heroku:
 - `APP_HOST` — public hostname (required by mailer + DNS rebinding protection; the host's `production.rb` calls `ENV.fetch("APP_HOST")` and will fail boot if missing)
 - `DATABASE_URL` — provided by the Heroku Postgres add-on
 - `SOLID_QUEUE_IN_PUMA=true` — run jobs inside the web dyno (or split out a worker dyno)
-- `SLACK_WEBHOOK_URL` (optional) — enables the Slack exception notifier
-- `SLACK_ERROR_CHANNEL` (optional, default `#errors`)
+- `SENTRY_DSN` (recommended) — if you wire up Sentry for error monitoring
 
 ## Why `use_doorkeeper` isn't inside the engine
 
