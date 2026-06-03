@@ -55,7 +55,53 @@ RSpec.describe RailsMcp::OauthClientController, type: :request do
       expect(user.email).to eq("matt@example.com")
       expect(user.account.cowork_account_id).to eq("100")
       expect(user.account.name).to eq("Acme")
+      expect(user.role).to eq("member")
       expect(response).to redirect_to("/connections")
+    end
+
+    it "captures the role from the user's current account entry" do
+      state = primed_state
+      stub_token_and_userinfo(
+        sub: "admin-1", email: "boss@example.com", name: "Boss",
+        accounts: [
+          { "id" => "100", "name" => "Acme", "role" => "admin" },
+          { "id" => "200", "name" => "Other", "role" => "member" }
+        ],
+        current_account_id: "100"
+      )
+
+      get "/test_sso/callback", params: { code: "code", state: state }
+
+      user = RailsMcp::User.find_by!(identity_id: "admin-1")
+      expect(user.admin?).to be(true)
+      expect(user.account.cowork_account_id).to eq("100")
+    end
+
+    it "refreshes the role on a returning user when it changes upstream" do
+      account = RailsMcp::Account.create!(cowork_account_id: "100", name: "Acme")
+      account.users.create!(identity_id: "user-4", email: "u@x.com", name: "U", role: "admin")
+
+      state = primed_state
+      stub_token_and_userinfo(
+        sub: "user-4", email: "u@x.com", name: "U",
+        accounts: [ { "id" => "100", "name" => "Acme", "role" => "member" } ]
+      )
+
+      get "/test_sso/callback", params: { code: "code", state: state }
+
+      expect(RailsMcp::User.find_by!(identity_id: "user-4").role).to eq("member")
+    end
+
+    it "defaults an unrecognised role to member" do
+      state = primed_state
+      stub_token_and_userinfo(
+        sub: "user-5", email: "weird@example.com", name: "W",
+        accounts: [ { "id" => "100", "name" => "Acme", "role" => "superuser" } ]
+      )
+
+      get "/test_sso/callback", params: { code: "code", state: state }
+
+      expect(RailsMcp::User.find_by!(identity_id: "user-5").role).to eq("member")
     end
 
     it "re-uses an existing mirrored account when a teammate signs in" do

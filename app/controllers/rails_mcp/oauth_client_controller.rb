@@ -114,34 +114,48 @@ module RailsMcp
     end
 
     def upsert_user(identity)
-      sub   = identity.fetch("sub").to_s
-      email = identity.fetch("email")
-      name  = identity["name"].presence || email
+      sub     = identity.fetch("sub").to_s
+      email   = identity.fetch("email")
+      name    = identity["name"].presence || email
+      payload = current_account_payload(identity)
+      role    = normalize_role(payload&.dig("role"))
 
       RailsMcp::User.transaction do
-        account = mirror_account(identity)
+        account = mirror_account(identity, payload)
         user    = RailsMcp::User.find_by(identity_id: sub)
 
         if user.nil?
-          account.users.create!(identity_id: sub, email: email, name: name)
+          account.users.create!(identity_id: sub, email: email, name: name, role: role)
         else
-          user.update!(email: email, name: name, account: account)
+          user.update!(email: email, name: name, account: account, role: role)
           user
         end
       end
     end
 
+    # The account entry the user is currently acting under, picked from the
+    # userinfo `accounts` list by `current_account_id` (falling back to the
+    # first). Returns nil if the IdP sent no accounts.
+    def current_account_payload(identity)
+      current_id = identity["current_account_id"].to_s
+      (identity["accounts"] || []).find { |a| a["id"].to_s == current_id } ||
+        identity["accounts"]&.first
+    end
+
+    # Coerce the IdP-supplied role to a known value, defaulting to member for
+    # anything missing or unrecognised.
+    def normalize_role(role)
+      RailsMcp::User::ROLES.include?(role) ? role : RailsMcp::User::DEFAULT_ROLE
+    end
+
     # Find-or-create a local Account by the IdP's account id. Falls back to an
     # anonymous local account if the IdP didn't include accounts in userinfo —
     # the user can still onboard and be reassigned later.
-    def mirror_account(identity)
+    def mirror_account(identity, payload = current_account_payload(identity))
       column     = self.class.mirror_account_column
       current_id = identity["current_account_id"].to_s
-      payload    = (identity["accounts"] || []).find { |a| a["id"].to_s == current_id } ||
-                   identity["accounts"]&.first
-
-      mirror_id = payload&.dig("id")&.to_s.presence || current_id.presence
-      name      = payload&.dig("name").presence || identity["email"]
+      mirror_id  = payload&.dig("id")&.to_s.presence || current_id.presence
+      name       = payload&.dig("name").presence || identity["email"]
 
       if mirror_id.present?
         account = RailsMcp::Account.find_or_initialize_by(column => mirror_id)
