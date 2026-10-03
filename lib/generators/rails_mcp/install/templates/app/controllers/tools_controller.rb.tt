@@ -1,6 +1,5 @@
 class ToolsController < ApplicationController
   before_action :require_sign_in
-  before_action :require_onboarding
 
   def index
     tools = RailsMcp.config.tool_classes.map do |klass|

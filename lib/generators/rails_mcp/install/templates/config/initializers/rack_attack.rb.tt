@@ -5,8 +5,8 @@ require "rack/attack"
 # work; Rails.cache covers scale-out without extra wiring.)
 Rack::Attack.cache.store = Rails.cache
 
-# Apply the engine's recommended throttles for /oauth/register, /mcp, and
-# /team/invitations. Override individual buckets here if the production
+# Apply the engine's recommended throttles for /oauth/register and /mcp.
+# Override individual buckets here if the production
 # workload needs different limits.
 RailsMcp::RackAttackDefaults.apply!
 

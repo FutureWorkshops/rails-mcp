@@ -71,9 +71,9 @@ RSpec.describe RailsMcp::Generators::InstallGenerator, type: :generator do
   end
 
   it "creates ApplicationController with engine concerns included" do
-    expect_file "app/controllers/application_controller.rb",
-      "include RailsMcp::Authentication",
-      "include RailsMcp::OnboardingGate"
+    body = expect_file "app/controllers/application_controller.rb",
+      "include RailsMcp::Authentication"
+    expect(body).not_to include("OnboardingGate")
     expect_ruby_parses "app/controllers/application_controller.rb"
   end
 
@@ -85,8 +85,8 @@ RSpec.describe RailsMcp::Generators::InstallGenerator, type: :generator do
 
     expect_file "app/controllers/connections_controller.rb",
       'type: "GmailConnection"',
-      "require_sign_in",
-      "require_onboarding"
+      "require_sign_in"
+    expect(File.read(File.join(destination_root, "app/controllers/connections_controller.rb"))).not_to include("require_onboarding")
   end
 
   it "creates the provider OAuth controller as a connection-only flow (no identity)" do
@@ -99,10 +99,9 @@ RSpec.describe RailsMcp::Generators::InstallGenerator, type: :generator do
       "upsert_connection",
       "session[:gmail_oauth_state]"
     # Identity is owned by CoworkHubOauthController. The provider controller
-    # must NOT create users, consume invitations, or rotate sessions.
+    # must NOT create users or rotate sessions.
     expect(body).not_to include("reset_session")
     expect(body).not_to include("session[:user_id] = user.id")
-    expect(body).not_to include("RailsMcp::Invitation.consume_from_session!")
     expect(body).not_to include("upsert_user")
     expect_ruby_parses "app/controllers/gmail_oauth_controller.rb"
   end

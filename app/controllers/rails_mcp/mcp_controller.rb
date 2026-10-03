@@ -5,7 +5,6 @@ module RailsMcp
     # check inside handle_tool_call decides which of the two is actually needed.
     before_action -> { doorkeeper_authorize! :read, :write }
     before_action :require_existing_user
-    before_action :require_onboarded_account
 
     PROTOCOL_VERSION = "2024-11-05"
 
@@ -51,13 +50,6 @@ module RailsMcp
              status: :unauthorized
     end
 
-    def require_onboarded_account
-      return if mcp_user.account.onboarded?
-
-      render json: json_error(nil, -32001,
-        "Account onboarding is incomplete. Sign in at the web dashboard to finish setup before using MCP tools."),
-        status: :forbidden
-    end
 
     def mcp_user
       @mcp_user ||= RailsMcp::User.find_by(id: doorkeeper_token.resource_owner_id)

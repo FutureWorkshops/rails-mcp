@@ -1,7 +1,7 @@
 Rails.application.routes.draw do
   get "up" => "rails/health#show", as: :rails_health_check
 
-  # Engine: /mcp, /oauth/register, /.well-known/*, /invite/:token, /onboarding, /team.
+  # Engine: /mcp, /oauth/register, /.well-known/*.
   mount RailsMcp::Engine => "/"
 
   # Doorkeeper's OAuth-provider routes (/oauth/authorize, /oauth/token, etc.).

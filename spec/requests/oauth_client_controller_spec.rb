@@ -64,6 +64,50 @@ RSpec.describe RailsMcp::OauthClientController, type: :request do
       expect(session[:user_id]).to be_nil
     end
 
+    it "mirrors the home account rather than the account the user last switched to" do
+      state = primed_state
+      allow_any_instance_of(TestSsoController).to receive(:exchange_code).and_return(access_token: "at")
+      allow_any_instance_of(TestSsoController).to receive(:fetch_userinfo).and_return(
+        "sub" => "coach-1", "email" => "coach@example.com", "name" => "Coach",
+        "accounts" => [
+          { "id" => "100", "name" => "Future Workshops", "role" => "admin" },
+          { "id" => "200", "name" => "Client Org", "role" => "member" }
+        ],
+        "current_account_id" => "200",
+        "home_account_id"    => "100"
+      )
+
+      get "/test_sso/callback", params: { code: "code", state: state }
+
+      user = RailsMcp::User.find_by!(identity_id: "coach-1")
+      expect(user.account.groundwork_account_id).to eq("100")
+      expect(user.account.name).to eq("Future Workshops")
+      expect(user.role).to eq("admin")
+    end
+
+    it "falls back to the current account when no home account is sent" do
+      state = primed_state
+      stub_token_and_userinfo(
+        sub: "user-9", email: "u9@example.com", name: "U9",
+        accounts: [ { "id" => "100", "name" => "A" }, { "id" => "200", "name" => "B" } ],
+        current_account_id: "200"
+      )
+
+      get "/test_sso/callback", params: { code: "code", state: state }
+      expect(RailsMcp::User.find_by!(identity_id: "user-9").account.groundwork_account_id).to eq("200")
+    end
+
+    it "keeps the user's local account when the IdP sends no accounts" do
+      account = RailsMcp::Account.create!(name: "Local")
+      account.users.create!(identity_id: "lonely", email: "lonely@example.com", name: "L")
+      state = primed_state
+      stub_token_and_userinfo(sub: "lonely", email: "lonely@example.com", name: "L", accounts: [])
+
+      expect {
+        get "/test_sso/callback", params: { code: "code", state: state }
+      }.not_to change(RailsMcp::Account, :count)
+    end
+
     it "creates a user + mirrored account, signs the user in, and redirects" do
       state = primed_state
       stub_token_and_userinfo(

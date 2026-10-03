@@ -20,14 +20,9 @@ RailsMcp::Engine.routes.draw do
   get "/.well-known/oauth-protected-resource/*resource_path",
       to: "well_known#oauth_protected_resource"
 
-  # User-facing
-  get "invite/:token", to: "invitations#show", as: :invitation
-
-  get  "onboarding", to: "onboarding#new",    as: :onboarding
-  post "onboarding", to: "onboarding#create"
-
-  get   "team",                  to: "team#index",              as: :team
-  patch "team/account",          to: "team#update_account",     as: :team_update_account
-  post  "team/invitations",      to: "team#create_invitation",  as: :team_invitations
-  delete "team/invitations/:id", to: "team#destroy_invitation", as: :team_invitation
+  # Workspace naming, team management and invitations were removed: accounts
+  # and membership come from the identity provider (Groundwork). Old links
+  # land on the host's Setup page.
+  get "onboarding", to: redirect("/connections")
+  get "team",       to: redirect("/connections")
 end

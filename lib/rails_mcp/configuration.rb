@@ -44,13 +44,9 @@ module RailsMcp
       @tool_error_handler
     end
 
-    def mailer_from
-      @mailer_from || "#{display_name} <no-reply@example.com>"
-    end
-
-    def suggested_account_name
-      @suggested_account_name || ->(_user) { nil }
-    end
+    # Deprecated no-ops: `mailer_from` and `suggested_account_name` only fed
+    # the removed invitation mailer and onboarding page. The writers stay so
+    # existing host initializers don't break.
 
     def sign_in_path
       @sign_in_path || ->(_request) { "/sign_in" }

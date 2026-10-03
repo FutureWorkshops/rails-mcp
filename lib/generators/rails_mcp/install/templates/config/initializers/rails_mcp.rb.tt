@@ -22,13 +22,6 @@ RailsMcp.configure do |c|
   # once a user is signed in.
   c.sign_in_path = ->(_request) { "/cowork_hub/connect" }
 
-  # Pre-fills the onboarding "Workspace name" field with the user's mirrored
-  # Cowork Hub account name (falls back to the first connection's name for
-  # users that somehow ended up without an account name).
-  c.suggested_account_name = ->(user) {
-    user.account&.name.presence ||
-      user.connections.where(type: "<%= provider_const %>Connection").first&.name
-  }
 
   # Optional: map per-tool exceptions to user-facing strings. Returning nil
   # falls through to the engine's "Error: <message>" default.
