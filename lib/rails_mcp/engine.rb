@@ -34,8 +34,13 @@ module RailsMcp
       access_token refresh_token client_secret authorization bearer code
     ].freeze
 
+    # MCP tool arguments carry user content (email bodies, event descriptions,
+    # invoices). POST /mcp is JSON, so Rails would log them in full on every
+    # call; filter the whole arguments hash.
+    MCP_FILTER_PARAMETERS = %i[arguments].freeze
+
     initializer :append_filter_parameters, before: :load_config_initializers do |app|
-      app.config.filter_parameters += OAUTH_FILTER_PARAMETERS
+      app.config.filter_parameters += OAUTH_FILTER_PARAMETERS + MCP_FILTER_PARAMETERS
     end
   end
 end

@@ -9,10 +9,19 @@ module RailsMcp
 
     PROTOCOL_VERSION = "2024-11-05"
 
+    # Rack::Attack counts HTTP requests, so an unbounded JSON-RPC batch would
+    # turn one throttled request into any number of upstream API calls.
+    MAX_BATCH_SIZE = 20
+
     def handle
       body = JSON.parse(request.raw_post)
 
       if body.is_a?(Array)
+        if body.size > MAX_BATCH_SIZE
+          return render json: json_error(nil, -32600, "Batch too large (max #{MAX_BATCH_SIZE} messages)"),
+                        status: :bad_request
+        end
+
         results = body.filter_map { |msg| dispatch_message(msg) }
         render json: results
       else

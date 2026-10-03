@@ -39,6 +39,31 @@ RSpec.describe RailsMcp::OauthClientController, type: :request do
       Rack::Utils.parse_query(URI.parse(response.location).query).fetch("state")
     end
 
+    it "rejects a callback with no state even when none is pending (login CSRF)" do
+      stub_token_and_userinfo(
+        sub: "attacker", email: "attacker@example.com", name: "Attacker",
+        accounts: [ { "id" => "666", "name" => "Evil" } ]
+      )
+
+      expect {
+        get "/test_sso/callback", params: { code: "attacker-code" }
+      }.not_to change(RailsMcp::User, :count)
+      expect(flash[:alert]).to match(/Invalid SSO state/)
+      expect(session[:user_id]).to be_nil
+    end
+
+    it "rejects a callback whose state doesn't match" do
+      primed_state
+      stub_token_and_userinfo(
+        sub: "attacker", email: "attacker@example.com", name: "Attacker",
+        accounts: [ { "id" => "666", "name" => "Evil" } ]
+      )
+
+      get "/test_sso/callback", params: { code: "attacker-code", state: "forged" }
+      expect(flash[:alert]).to match(/Invalid SSO state/)
+      expect(session[:user_id]).to be_nil
+    end
+
     it "creates a user + mirrored account, signs the user in, and redirects" do
       state = primed_state
       stub_token_and_userinfo(

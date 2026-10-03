@@ -4,7 +4,8 @@ module RailsMcp
   class Configuration
     attr_writer :server_name, :server_version, :display_name, :resource_name,
                 :scopes, :scope_descriptions, :tools, :tool_error_handler,
-                :mailer_from, :suggested_account_name, :sign_in_path
+                :mailer_from, :suggested_account_name, :sign_in_path,
+                :trusted_redirect_hosts
 
     def server_name
       @server_name || Rails.application.class.module_parent_name.underscore
@@ -53,6 +54,12 @@ module RailsMcp
 
     def sign_in_path
       @sign_in_path || ->(_request) { "/sign_in" }
+    end
+
+    # Redirect hosts the consent screen treats as known MCP clients. Anything
+    # else (bar loopback) is shown as unverified. Subdomains match.
+    def trusted_redirect_hosts
+      @trusted_redirect_hosts || %w[claude.ai claude.com]
     end
   end
 end

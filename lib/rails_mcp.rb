@@ -1,5 +1,7 @@
 require "rails_mcp/version"
 require "rails_mcp/configuration"
+require "rails_mcp/oauth_state"
+require "rails_mcp/client_trust"
 require "rails_mcp/engine"
 require "rails_mcp/rack_attack_defaults"
 

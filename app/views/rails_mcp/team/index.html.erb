@@ -8,6 +8,7 @@
 <div style="display: grid; gap: 16px;">
   <section class="cw-panel" style="padding: 24px;">
     <h2 style="font-size: 16px; font-weight: 600; margin: 0 0 14px;">Workspace name</h2>
+    <% if can_manage_team? %>
     <%= form_with url: RailsMcp::Engine.routes.url_helpers.team_update_account_path,
                   method: :patch, local: true,
                   data: { turbo: false } do |f| %>
@@ -16,6 +17,10 @@
               class: "cw-form-input", style: "flex: 1;" %>
         <%= f.submit "Save", class: "cw-btn cw-btn-default" %>
       </div>
+    <% end %>
+    <% else %>
+      <p style="font-size: 14px; margin: 0;"><%= @account.name %></p>
+      <p class="cw-form-hint">Only workspace admins can rename the workspace or invite people.</p>
     <% end %>
   </section>
 
@@ -40,6 +45,7 @@
     </ul>
   </section>
 
+  <% if can_manage_team? %>
   <section class="cw-panel" style="padding: 24px;">
     <h2 style="font-size: 16px; font-weight: 600; margin: 0 0 14px;">Invite a teammate</h2>
     <%= form_with url: RailsMcp::Engine.routes.url_helpers.team_invitations_path,
@@ -54,6 +60,7 @@
       Invites expire after <%= RailsMcp::Invitation::EXPIRY_WINDOW.inspect %>.
     </p>
   </section>
+  <% end %>
 
   <section class="cw-panel" style="padding: 24px;">
     <div style="display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 14px;">
@@ -74,11 +81,13 @@
                 Invited by <%= inv.invited_by&.email %> · expires <%= inv.expires_at.strftime("%-d %b %Y") %>
               </div>
             </div>
+            <% if can_manage_team? %>
             <%= button_to "Revoke",
                   RailsMcp::Engine.routes.url_helpers.team_invitation_path(inv),
                   method: :delete,
                   form: { data: { turbo_confirm: "Revoke this invite?" } },
                   class: "cw-btn cw-btn-danger cw-btn-sm" %>
+            <% end %>
           </li>
         <% end %>
       </ul>

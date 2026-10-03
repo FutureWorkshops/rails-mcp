@@ -4,6 +4,9 @@ module RailsMcp
 
     before_action :require_sign_in
     before_action :require_onboarding
+    before_action :require_team_manager, only: %i[update_account create_invitation destroy_invitation]
+
+    helper_method :can_manage_team?
 
     def index
       account = current_user.account
@@ -59,6 +62,22 @@ module RailsMcp
       invitation.revoke! if invitation.pending?
       redirect_to RailsMcp::Engine.routes.url_helpers.team_path,
                   notice: "Invitation revoked."
+    end
+
+    private
+
+    # Admins manage the team. Accounts with no admin at all (roles predate the
+    # SSO role claim, or the IdP sent none) stay manageable by their members so
+    # nobody is locked out; the next SSO sign-in fills in roles.
+    def can_manage_team?
+      current_user.admin? || !current_user.account.users.exists?(role: "admin")
+    end
+
+    def require_team_manager
+      return if can_manage_team?
+
+      redirect_to RailsMcp::Engine.routes.url_helpers.team_path,
+                  alert: "Only workspace admins can change the team."
     end
   end
 end

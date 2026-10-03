@@ -23,4 +23,17 @@ RSpec.describe "RailsMcp::Engine filter_parameters" do
     expect(filtered["code"]).to eq("[FILTERED]")
     expect(filtered["name"]).to eq("Alice")
   end
+
+  it "redacts MCP tool arguments, including the wrapped copy" do
+    filter = ActiveSupport::ParameterFilter.new(Rails.application.config.filter_parameters)
+    filtered = filter.filter(
+      "method" => "tools/call",
+      "params" => { "name" => "create-draft", "arguments" => { "body" => "secret email" } },
+      "mcp"    => { "params" => { "arguments" => { "body" => "secret email" } } }
+    )
+
+    expect(filtered.dig("params", "arguments")).to eq("[FILTERED]")
+    expect(filtered.dig("mcp", "params", "arguments")).to eq("[FILTERED]")
+    expect(filtered.dig("params", "name")).to eq("create-draft")
+  end
 end
