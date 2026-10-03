@@ -169,9 +169,11 @@ module RailsMcp
             protocol: "https"
           }
 
+          # Only the public host (plus explicit extras). A wildcard such as
+          # *.herokuapp.com would let any app on that domain be used as the
+          # Host, and the OAuth issuer is built from the request host.
           config.hosts = [
-            ENV.fetch("APP_HOST"),
-            /.*\\.herokuapp\\.com/
+            ENV.fetch("APP_HOST")
           ] + ENV.fetch("EXTRA_ALLOWED_HOSTS", "").split(",").map(&:strip).reject(&:blank?)
 
           config.host_authorization = { exclude: ->(request) { request.path == "/up" } }

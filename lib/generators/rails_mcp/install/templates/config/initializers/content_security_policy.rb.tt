@@ -11,13 +11,17 @@
 # means we cannot enumerate clients ahead of time; restricting to :self would
 # block every legitimate OAuth handshake at the 302 step because browsers
 # enforce form-action across redirect chains.
+#
+# script-src is limited to this origin plus a per-request nonce (importmap and
+# Turbo tags pick it up automatically). Allowing any https: script would let
+# an injected <script src> run, so the CSP would do nothing against XSS.
 Rails.application.configure do
   config.content_security_policy do |policy|
     policy.default_src :self, :https
     policy.font_src    :self, :https, :data
     policy.img_src     :self, :https, :data
     policy.object_src  :none
-    policy.script_src  :self, :https
+    policy.script_src  :self
     policy.style_src   :self, :https, :unsafe_inline
     policy.connect_src :self, :https
     policy.frame_ancestors :none
@@ -25,6 +29,8 @@ Rails.application.configure do
     policy.form_action :self, :https
   end
 
-  config.content_security_policy_nonce_generator = ->(request) { request.session.id.to_s }
+  # A fresh random nonce per request; the session id never changes within a
+  # session, so it is not a nonce.
+  config.content_security_policy_nonce_generator = ->(_request) { SecureRandom.base64(16) }
   config.content_security_policy_nonce_directives = %w[script-src]
 end

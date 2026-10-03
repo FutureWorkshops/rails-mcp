@@ -177,4 +177,25 @@ RSpec.describe "MCP JSON-RPC dispatcher", type: :request do
       expect(result["content"].first["text"]).to include("requires 'read'")
     end
   end
+
+  describe "token storage" do
+    let(:user) { make_user }
+
+    it "stores only a hash of new access tokens and still authenticates them" do
+      token = issue_access_token_for(user)
+      expect(token.reload.token).not_to eq(token.plaintext_token)
+
+      mcp_call({ jsonrpc: "2.0", id: 1, method: "initialize" }, token: token)
+      expect(response).to have_http_status(:ok)
+    end
+
+    it "still accepts a token stored in plain text before hashing was enabled" do
+      token = issue_access_token_for(user)
+      token.update_column(:token, "legacy-plain-token")
+
+      post "/mcp", params: { jsonrpc: "2.0", id: 1, method: "initialize" }.to_json,
+                   headers: { "CONTENT_TYPE" => "application/json", "Authorization" => "Bearer legacy-plain-token" }
+      expect(response).to have_http_status(:ok)
+    end
+  end
 end
