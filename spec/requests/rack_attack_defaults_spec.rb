@@ -59,7 +59,7 @@ RSpec.describe "Rack::Attack defaults", type: :request do
 
     it "throttles to the per-token limit" do
       body = { jsonrpc: "2.0", id: 1, method: "initialize" }.to_json
-      headers = { "CONTENT_TYPE" => "application/json", "Authorization" => "Bearer #{token.token}" }
+      headers = { "CONTENT_TYPE" => "application/json", "Authorization" => "Bearer #{token.plaintext_token}" }
 
       2.times { post "/mcp", params: body, headers: headers }
       post "/mcp", params: body, headers: headers

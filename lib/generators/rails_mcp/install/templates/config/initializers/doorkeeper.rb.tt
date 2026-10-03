@@ -14,6 +14,12 @@ Doorkeeper.configure do
 
   use_refresh_token
 
+  # Store only a hash of access and refresh tokens, so a database leak doesn't
+  # hand out live bearer tokens. `fallback: :plain` keeps tokens issued before
+  # this change working until they expire or are refreshed. Hashed tokens can't
+  # be returned again, so access tokens aren't reused (reuse_access_token).
+  hash_token_secrets fallback: :plain
+
   default_scopes  :read
   optional_scopes :write
   enforce_configured_scopes
@@ -25,7 +31,6 @@ Doorkeeper.configure do
   force_pkce
 
   access_token_expires_in 8.hours
-  reuse_access_token
 
   force_ssl_in_redirect_uri { Rails.env.production? }
 

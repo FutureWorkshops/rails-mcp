@@ -155,10 +155,13 @@ RSpec.describe RailsMcp::Generators::InstallGenerator, type: :generator do
                                                             'c.display_name   = "Gmail MCP"', "Mcp::Registry::ALL_TOOLS",
                                                             'c.sign_in_path = ->(_request) { "/cowork_hub/connect" }' ],
       "config/initializers/doorkeeper.rb"              => [ "Doorkeeper.configure", "RailsMcp.config.sign_in_path",
-                                                            "RailsMcp::OauthBaseController", "pkce_code_challenge_methods" ],
+                                                            "RailsMcp::OauthBaseController", "pkce_code_challenge_methods",
+                                                            "force_pkce", "hash_token_secrets fallback: :plain" ],
       "config/initializers/rack_attack.rb"             => [ "RailsMcp::RackAttackDefaults.apply!", "allow /up" ],
       "config/initializers/content_security_policy.rb" => [ "content_security_policy",
-                                                            "policy.form_action :self," ],
+                                                            "policy.form_action :self,",
+                                                            "policy.script_src  :self\n",
+                                                            "SecureRandom.base64(16)" ],
       "config/initializers/app_config.rb"              => [ "module AppConfig",
                                                             "def self.gmail_client_id",
                                                             "def self.gmail_redirect_uri",
@@ -209,6 +212,7 @@ RSpec.describe RailsMcp::Generators::InstallGenerator, type: :generator do
       "preload: true",
       'ENV.fetch("APP_HOST")',
       "config.host_authorization"
+    expect(File.read(File.join(destination_root, "config/environments/production.rb"))).not_to include('/.*\\.herokuapp')
   end
 
   describe "with a snake_cased provider argument" do

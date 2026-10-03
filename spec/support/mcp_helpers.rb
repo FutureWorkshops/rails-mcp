@@ -17,7 +17,7 @@ module McpHelpers
 
   def mcp_call(body, token: nil)
     headers = { "CONTENT_TYPE" => "application/json" }
-    headers["Authorization"] = "Bearer #{token.token}" if token
+    headers["Authorization"] = "Bearer #{token.plaintext_token}" if token
     post "/mcp", params: body.to_json, headers: headers
   end
 end
