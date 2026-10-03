@@ -56,6 +56,18 @@ end
 
 See `basecamp-mcp-rails`' `config/initializers/rails_mcp.rb` for a working reference configuration.
 
+### Migrations
+
+**Do not run `rails_mcp:install:migrations`.** The engine appends its own `db/migrate` to the host's migration paths (see `append_migrations` in `lib/rails_mcp/engine.rb`), so engine migrations run straight from the gem:
+
+```sh
+bin/rails db:migrate
+```
+
+That's all a host needs, for first install and for every later engine bump. Copying the migrations into the host's `db/migrate` would duplicate them (they'd run once from the gem and again from the copy) and the host would then own files it has to keep in sync by hand. The host's `db/migrate` should contain only host-specific migrations (e.g. provider columns on `connections`); engine tables like `accounts` / `users` / `invitations` show up in `db/schema.rb` without ever being copied.
+
+On deploy, the generated `Procfile`'s `release: bin/rails db:migrate` applies any new engine migrations automatically, so bumping the `rails_mcp` gem and pushing is enough; no manual migration step.
+
 ## Security responsibilities of the host
 
 The engine handles the protocol-level security; the host owns the runtime environment. Both layers have to be wired up correctly or the deployed app has gaps.

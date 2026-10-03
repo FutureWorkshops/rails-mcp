@@ -14,9 +14,11 @@ module RailsMcp
       g.orm :active_record
     end
 
-    # Make engine migrations runnable from the host without requiring the
-    # standard `rails_mcp:install:migrations` copy step. Host apps can still
-    # opt into copying if they prefer migrations live in db/migrate locally.
+    # Make engine migrations runnable straight from the gem via the host's
+    # `bin/rails db:migrate`. Hosts must NOT run `rails_mcp:install:migrations`:
+    # copying the migrations into the host's db/migrate would double-run them
+    # (once from the gem, once from the copy) and leave the host owning files it
+    # has to hand-sync on every engine bump. See README → Migrations.
     initializer :append_migrations do |app|
       next if app.root.to_s == root.to_s
       config.paths["db/migrate"].expanded.each do |path|
