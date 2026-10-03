@@ -4,7 +4,7 @@ module RailsMcp
   # against an upstream OAuth provider (typically Cowork Hub), then upsert
   # a local RailsMcp::User keyed by the provider's stable `sub` claim and
   # mirror the user's current account onto a local RailsMcp::Account
-  # keyed by a `cowork_account_id`-style column.
+  # keyed by a `groundwork_account_id`-style column.
   #
   # Subclasses must override:
   #   - .authorize_url, .token_url, .userinfo_url
@@ -16,7 +16,7 @@ module RailsMcp
   # The default routes layout is `/<provider>/connect` → #connect and
   # `/<provider>/callback` → #callback, but subclasses choose their own.
   #
-  # The mirrored-account column defaults to `cowork_account_id`. Override
+  # The mirrored-account column defaults to `groundwork_account_id`. Override
   # `mirror_account_column` if your IdP names accounts differently.
   class OauthClientController < ::ApplicationController
     # ---- Subclass hooks (defaults are Cowork Hub conventions) ------------
@@ -29,7 +29,7 @@ module RailsMcp
     def self.redirect_uri       = raise NotImplementedError, "#{name}.redirect_uri must be defined"
     def self.scope              = "openid"
     def self.state_session_key  = :rails_mcp_oauth_client_state
-    def self.mirror_account_column = :cowork_account_id
+    def self.mirror_account_column = :groundwork_account_id
 
     # ---- Actions ----------------------------------------------------------
 

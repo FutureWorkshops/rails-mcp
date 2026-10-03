@@ -53,7 +53,7 @@ RSpec.describe RailsMcp::OauthClientController, type: :request do
 
       user = RailsMcp::User.find_by!(identity_id: "user-1")
       expect(user.email).to eq("matt@example.com")
-      expect(user.account.cowork_account_id).to eq("100")
+      expect(user.account.groundwork_account_id).to eq("100")
       expect(user.account.name).to eq("Acme")
       expect(user.role).to eq("member")
       expect(response).to redirect_to("/connections")
@@ -74,11 +74,11 @@ RSpec.describe RailsMcp::OauthClientController, type: :request do
 
       user = RailsMcp::User.find_by!(identity_id: "admin-1")
       expect(user.admin?).to be(true)
-      expect(user.account.cowork_account_id).to eq("100")
+      expect(user.account.groundwork_account_id).to eq("100")
     end
 
     it "refreshes the role on a returning user when it changes upstream" do
-      account = RailsMcp::Account.create!(cowork_account_id: "100", name: "Acme")
+      account = RailsMcp::Account.create!(groundwork_account_id: "100", name: "Acme")
       account.users.create!(identity_id: "user-4", email: "u@x.com", name: "U", role: "admin")
 
       state = primed_state
@@ -105,7 +105,7 @@ RSpec.describe RailsMcp::OauthClientController, type: :request do
     end
 
     it "re-uses an existing mirrored account when a teammate signs in" do
-      RailsMcp::Account.create!(cowork_account_id: "100", name: "Stale name")
+      RailsMcp::Account.create!(groundwork_account_id: "100", name: "Stale name")
 
       state = primed_state
       stub_token_and_userinfo(
@@ -118,13 +118,13 @@ RSpec.describe RailsMcp::OauthClientController, type: :request do
       }.to change(RailsMcp::User, :count).by(1)
        .and change(RailsMcp::Account, :count).by(0)
 
-      account = RailsMcp::Account.find_by!(cowork_account_id: "100")
+      account = RailsMcp::Account.find_by!(groundwork_account_id: "100")
       expect(account.name).to eq("Acme")
       expect(account.users.pluck(:email)).to include("newhire@example.com")
     end
 
     it "moves the user to a new mirror when their current_account_id changes" do
-      account = RailsMcp::Account.create!(cowork_account_id: "100", name: "Acme")
+      account = RailsMcp::Account.create!(groundwork_account_id: "100", name: "Acme")
       account.users.create!(identity_id: "user-3", email: "m@x.com", name: "M")
 
       state = primed_state
@@ -136,7 +136,7 @@ RSpec.describe RailsMcp::OauthClientController, type: :request do
       get "/test_sso/callback", params: { code: "code", state: state }
 
       user = RailsMcp::User.find_by!(identity_id: "user-3")
-      expect(user.account.cowork_account_id).to eq("200")
+      expect(user.account.groundwork_account_id).to eq("200")
     end
 
     it "rejects a mismatched state and does not create a user" do
