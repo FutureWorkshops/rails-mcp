@@ -24,7 +24,7 @@ That's it. The generator handles routes, controllers, models, the API client ske
 
 ## Prerequisites
 
-- Ruby `4.0.1` (`.ruby-version` in the engine repo).
+- Ruby `4.0.6` (`.ruby-version` in the engine repo).
 - PostgreSQL.
 - Heroku CLI (`heroku login`).
 - A fresh Rails 8 app: `rails new <provider>-mcp-rails -d=postgresql --skip-jbuilder`.
