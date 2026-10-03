@@ -23,9 +23,8 @@ The full walkthrough lives at [`BUILDING_A_HOST.md`](BUILDING_A_HOST.md). This R
 - **MCP JSON-RPC dispatcher** at `POST /mcp` (initialize, tools/list, tools/call, batched arrays, notifications).
 - **OAuth provider** via Doorkeeper, plus RFC 7591 dynamic client registration at `POST /oauth/register`.
 - **RFC 8414 + RFC 9728 discovery documents** under `/.well-known/...`.
-- **Identity model** — `RailsMcp::Account`, `User`, `Connection` (STI parent for host-specific concrete subclasses), `Invitation`.
-- **Authentication** + **OnboardingGate** controller concerns.
-- **InvitationsController**, **OnboardingController**, **TeamController** with views + mailer.
+- **Identity model**: `RailsMcp::Account` (mirrored from the identity provider, preferring the user's home account), `User`, `Connection` (STI parent for host-specific concrete subclasses). There is no workspace setup, team management or invitation flow: accounts and membership come from Groundwork.
+- **Authentication** controller concern and the `RailsMcp::OauthClientController` SSO base class.
 - **`RailsMcp::BaseTool`** framework for host-specific MCP tools, with `RailsMcp::Registry` for discovery. Name tools **kebab-case, verb-first** (`list-todos`, `create-card`, `update-todo`) — the base class derives each tool's read-only / idempotent / destructive annotation from the leading verb, so correctly-named tools need no annotation code.
 - **Defaults helpers**: `RailsMcp::RackAttackDefaults.apply!`.
 
@@ -78,7 +77,6 @@ The engine handles the protocol-level security; the host owns the runtime enviro
 |---|---|---|
 | Dynamic client registration validation | Rejects non-`https` (except loopback in non-prod), `javascript:`/`mailto:`/`file:`/`data:`, missing host, userinfo, fragments. Caps `client_name` at 100 chars. | `app/controllers/rails_mcp/oauth/clients_controller.rb` |
 | OAuth scope enforcement per tool | Read-only tools (`readOnlyHint: true`) require `:read`; everything else requires `:write`. Before-action accepts either; per-tool check refines. | `app/controllers/rails_mcp/mcp_controller.rb` |
-| Onboarding gate on `/mcp` | Returns JSON-RPC error (HTTP 403) until the resolved user's account is `onboarded?`. | `app/controllers/rails_mcp/mcp_controller.rb` |
 | Doorkeeper authorize CSRF / PKCE | Doorkeeper config in the host's initializer pins `pkce_code_challenge_methods %w[S256]`; engine ships the matching base controller. | host `config/initializers/doorkeeper.rb` + `app/controllers/rails_mcp/oauth_base_controller.rb` |
 | HEAD/GET verb confusion | `Authentication` concern stashes `session[:return_to]` on both verbs. | `app/controllers/concerns/rails_mcp/authentication.rb` |
 | OAuth key log redaction | `:access_token`, `:refresh_token`, `:client_secret`, `:authorization`, `:bearer`, `:code` are auto-appended to `config.filter_parameters` at boot. | `lib/rails_mcp/engine.rb` (`OAUTH_FILTER_PARAMETERS`) |
@@ -102,7 +100,6 @@ Rack::Attack.safelist("allow /up") { |req| req.path == "/up" }
 Defaults (override by passing kwargs to `apply!`):
 - `POST /oauth/register` — 5 per 15 min per IP
 - `POST /mcp` — 120/min per token + 300/min per IP (fallback)
-- `POST /team/invitations` — 20/hour per user
 
 **Error monitoring:** the engine doesn't ship an error reporter. Wire one up in the host as part of project setup — [Sentry](https://docs.sentry.io/platforms/ruby/guides/rails/) is the recommended choice. Add `gem "sentry-rails"` to the host Gemfile and configure it in an initializer. Be mindful of what reaches the reporter: scrub bearer tokens and other secrets (Sentry's `config.before_send` / `send_default_pii = false`) so request data and breadcrumbs don't leak credentials.
 

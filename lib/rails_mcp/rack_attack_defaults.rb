@@ -17,7 +17,6 @@ module RailsMcp
       register_per_ip:        { limit: 5,   period: 15 * 60 },   # /oauth/register
       mcp_per_token:          { limit: 120, period: 60 },        # POST /mcp by access token
       mcp_per_ip:             { limit: 300, period: 60 },        # POST /mcp by IP (fallback)
-      invitations_per_user:   { limit: 20,  period: 60 * 60 },   # POST /team/invitations
       basecamp_connect_per_ip: { limit: 30, period: 60 }         # GET /basecamp/connect, host-side
     }.freeze
 
@@ -39,11 +38,6 @@ module RailsMcp
         req.ip if req.post? && req.path == "/mcp"
       end
 
-      throttle("rails_mcp/team/invitations by user", **limits[:invitations_per_user]) do |req|
-        if req.post? && req.path == "/team/invitations"
-          req.env["rack.session"]&.[]("user_id") || req.ip
-        end
-      end
 
       true
     end

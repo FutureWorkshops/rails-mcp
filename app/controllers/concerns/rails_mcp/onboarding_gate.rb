@@ -1,12 +1,11 @@
 module RailsMcp
+  # Deprecated: the workspace-naming onboarding step was removed (accounts are
+  # mirrored from the identity provider). Kept as a no-op so hosts that still
+  # `include RailsMcp::OnboardingGate` and `before_action :require_onboarding`
+  # keep working; remove both from the host, then this module can go.
   module OnboardingGate
     extend ActiveSupport::Concern
 
-    def require_onboarding
-      return unless signed_in?
-      return if current_user.account.onboarded?
-
-      redirect_to RailsMcp::Engine.routes.url_helpers.onboarding_path
-    end
+    def require_onboarding; end
   end
 end

@@ -1,6 +1,5 @@
 class ConnectionsController < ApplicationController
   before_action :require_sign_in
-  before_action :require_onboarding
 
   def index
     @connections = current_user.connections.where(type: "<%= provider_const %>Connection").order(:name)

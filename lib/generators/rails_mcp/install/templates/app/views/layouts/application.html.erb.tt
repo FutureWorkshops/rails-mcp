@@ -32,12 +32,7 @@
             <%% end %>
           </div>
           <%% if signed_in? %>
-            <%%
-              team_path = RailsMcp::Engine.routes.url_helpers.team_path
-            %>
             <div style="display: flex; align-items: center; gap: 12px;">
-              <%%= link_to current_user.account.name, team_path,
-                    class: "cw-nav-link #{'cw-nav-link-active' if current_page?(team_path)}" %>
               <span style="font-size: 13px; color: var(--cw-muted);"><%%= current_user.email %></span>
               <%%= button_to "Sign out", main_app.sign_out_path, method: :delete,
                     class: "cw-text-btn",

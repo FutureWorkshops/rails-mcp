@@ -1,6 +1,5 @@
 class ApplicationController < ActionController::Base
   include RailsMcp::Authentication
-  include RailsMcp::OnboardingGate
 
   allow_browser versions: :modern
 end

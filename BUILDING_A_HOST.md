@@ -173,7 +173,7 @@ bin/rails db:create db:migrate
 bin/rails server
 ```
 
-Visit `http://localhost:3000`, sign in via the provider OAuth, claim onboarding, see your connection listed. From Claude Desktop, add a connector at `http://localhost:3000/mcp` and confirm `tools/list` returns your tools.
+Visit `http://localhost:3000`, sign in via Groundwork, connect the provider account, see your connection listed. From Claude Desktop, add a connector at `http://localhost:3000/mcp` and confirm `tools/list` returns your tools.
 
 ### 7. Error monitoring
 
@@ -230,7 +230,7 @@ curl -i -X POST https://<APP_HOST>/mcp -d '{}' -H 'Content-Type: application/jso
 # → 401, WWW-Authenticate: Bearer resource_metadata="https://<APP_HOST>/.well-known/oauth-protected-resource"
 ```
 
-Then sign in via the browser, finish onboarding, and reconnect from Claude Desktop at `https://<APP_HOST>/mcp`. The OAuth dance should complete and `tools/list` should return your tool count.
+Then sign in via the browser and reconnect from Claude Desktop at `https://<APP_HOST>/mcp`. The OAuth dance should complete and `tools/list` should return your tool count.
 
 ---
 
@@ -252,7 +252,7 @@ After every code change, `bin/ci` must pass — rspec + rubocop + brakeman + bun
 
 ## Reference: host security responsibilities
 
-The engine ships defenses for: OAuth scopes per tool, dynamic-client-registration URI validation, RFC 9728 `WWW-Authenticate`, onboarding gate on `/mcp`, OAuth log redaction. The generator wires in: Faraday timeouts, `reset_session` at sign-in, `APP_HOST`-backed mailer host, CSP, DNS rebinding (`config.hosts`), HSTS preload, `force_ssl + assume_ssl`, and Rack::Attack throttles.
+The engine ships defenses for: OAuth scopes per tool, dynamic-client-registration URI validation, RFC 9728 `WWW-Authenticate`, OAuth log redaction. The generator wires in: Faraday timeouts, `reset_session` at sign-in, `APP_HOST`-backed mailer host, CSP, DNS rebinding (`config.hosts`), HSTS preload, `force_ssl + assume_ssl`, and Rack::Attack throttles.
 
 What you still own: identity-provider OAuth state validation (already in the generated controller — just don't delete it), token refresh locking (`with_lock` — already in the client service), credentials-key hygiene (`config/master.key` + `config/credentials/*.key` must be `.gitignore`d — Rails generators do this by default), running `bin/ci` before each commit.
 

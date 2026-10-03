@@ -9,7 +9,6 @@ RSpec.describe "Rack::Attack defaults", type: :request do
       register_per_ip:        { limit: 2, period: 60 },
       mcp_per_token:          { limit: 2, period: 60 },
       mcp_per_ip:             { limit: 100, period: 60 },
-      invitations_per_user:   { limit: 2, period: 60 }
     )
   end
 
