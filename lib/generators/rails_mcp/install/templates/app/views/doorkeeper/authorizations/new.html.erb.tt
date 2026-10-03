@@ -27,6 +27,15 @@
     </div>
   <%% end %>
 
+  <%% redirect_host = RailsMcp::ClientTrust.redirect_host(@pre_auth.redirect_uri) %>
+  <%% trusted_client = RailsMcp::ClientTrust.trusted?(@pre_auth.redirect_uri) %>
+  <div style="padding: 12px 14px; margin-bottom: 20px; border: 1px solid <%%= trusted_client ? "var(--cw-line)" : "rgba(184,121,28,0.45)" %>; border-radius: 8px; font-size: 13px; line-height: 1.5; background: <%%= trusted_client ? "var(--cw-paper)" : "rgba(184,121,28,0.08)" %>;">
+    Access will be sent to <strong class="cw-mono" style="overflow-wrap: anywhere;"><%%= redirect_host.presence || "an unknown address" %></strong>.
+    <%% unless trusted_client %>
+      <div style="margin-top: 6px; color: var(--cw-amber); font-weight: 600;">Unverified app. Anyone can register an app with any name. Only continue if you started this connection yourself and recognise this address.</div>
+    <%% end %>
+  </div>
+
   <div>
     <h2 class="cw-label-mono" style="margin-bottom: 8px;">This connector will be able to</h2>
     <ul style="list-style: none; padding: 0; margin: 0; display: grid; gap: 8px;">

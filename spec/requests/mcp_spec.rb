@@ -110,6 +110,13 @@ RSpec.describe "MCP JSON-RPC dispatcher", type: :request do
       expect(results.map { |r| r["id"] }).to eq([ 10, 11 ])
     end
 
+    it "rejects batches larger than MAX_BATCH_SIZE" do
+      batch = Array.new(RailsMcp::McpController::MAX_BATCH_SIZE + 1) { |i| { jsonrpc: "2.0", id: i, method: "tools/list" } }
+      mcp_call(batch, token: token)
+      expect(response).to have_http_status(:bad_request)
+      expect(response.parsed_body.dig("error", "message")).to match(/Batch too large/)
+    end
+
     it "swallows notifications (no id, notifications/* method) with 204" do
       mcp_call({ jsonrpc: "2.0", method: "notifications/initialized" }, token: token)
       expect(response).to have_http_status(:no_content)

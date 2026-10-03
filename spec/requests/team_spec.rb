@@ -78,4 +78,41 @@ RSpec.describe "Team management", type: :request do
       expect(response).to have_http_status(:not_found)
     end
   end
+
+  describe "admin-only changes" do
+    before do
+      account.users.create!(email: "admin@example.com", identity_id: "adm", role: "admin")
+    end
+
+    it "lets an admin invite" do
+      user.update!(role: "admin")
+      expect { post "/team/invitations", params: { email: "new@example.com" } }
+        .to change(RailsMcp::Invitation, :count).by(1)
+    end
+
+    it "stops a member from inviting, renaming or revoking when the account has an admin" do
+      invite = account.invitations.create!(email: "guest@example.com", invited_by: user)
+
+      expect { post "/team/invitations", params: { email: "new@example.com" } }
+        .not_to change(RailsMcp::Invitation, :count)
+      expect(flash[:alert]).to match(/Only workspace admins/)
+
+      patch "/team/account", params: { name: "Pwned" }
+      expect(account.reload.name).to eq("Acme")
+
+      delete "/team/invitations/#{invite.id}"
+      expect(invite.reload).to be_pending
+    end
+
+    it "hides the management controls from members" do
+      get "/team"
+      expect(response.body).not_to include("Send invite")
+      expect(response.body).to include("Only workspace admins")
+    end
+  end
+
+  it "rejects an over-long workspace name" do
+    patch "/team/account", params: { name: "x" * 101 }
+    expect(account.reload.name).to eq("Acme")
+  end
 end

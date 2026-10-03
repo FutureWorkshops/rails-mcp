@@ -5,7 +5,7 @@ module RailsMcp
     has_many :users,       class_name: "RailsMcp::User",       dependent: :destroy
     has_many :invitations, class_name: "RailsMcp::Invitation", dependent: :destroy
 
-    validates :name, presence: true
+    validates :name, presence: true, length: { maximum: 100 }
 
     def onboarded?
       onboarded_at.present?

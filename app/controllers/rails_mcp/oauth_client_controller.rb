@@ -49,7 +49,7 @@ module RailsMcp
     end
 
     def callback
-      if params[:state] != session.delete(self.class.state_session_key)
+      unless RailsMcp::OauthState.valid?(session.delete(self.class.state_session_key), params[:state])
         return redirect_to root_path, alert: "Invalid SSO state. Please try again."
       end
 

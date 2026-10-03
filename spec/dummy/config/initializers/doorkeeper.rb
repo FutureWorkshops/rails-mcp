@@ -17,6 +17,7 @@ Doorkeeper.configure do
 
   grant_flows %w[authorization_code refresh_token]
   pkce_code_challenge_methods %w[S256]
+  force_pkce
 
   access_token_expires_in 8.hours
   reuse_access_token

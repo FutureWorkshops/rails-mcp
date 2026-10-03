@@ -35,7 +35,7 @@ class <%= provider_const %>OauthController < ApplicationController
   end
 
   def callback
-    if params[:state] != session.delete(:<%= session_state_key %>)
+    unless RailsMcp::OauthState.valid?(session.delete(:<%= session_state_key %>), params[:state])
       return redirect_to "/connections", alert: "Invalid OAuth state. Please try again."
     end
 
@@ -115,7 +115,8 @@ class <%= provider_const %>OauthController < ApplicationController
       type:             "<%= provider_const %>Connection",
       name:             identity_email(identity),
       access_token:     tokens[:access_token],
-      refresh_token:    tokens[:refresh_token],
+      # Providers often omit refresh_token on re-consent; keep the stored one.
+      refresh_token:    tokens[:refresh_token].presence || conn.refresh_token,
       token_expires_at: Time.current + tokens[:expires_in].seconds,
       token_active:     true,
       token_refresh_error:     nil,

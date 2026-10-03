@@ -20,6 +20,9 @@ Doorkeeper.configure do
 
   grant_flows %w[authorization_code refresh_token]
   pkce_code_challenge_methods %w[S256]
+  # Dynamically registered clients are public (no secret), so the PKCE
+  # verifier is the only thing binding a code to the client that asked for it.
+  force_pkce
 
   access_token_expires_in 8.hours
   reuse_access_token
