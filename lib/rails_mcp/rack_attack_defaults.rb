@@ -1,4 +1,5 @@
 require "rack/attack"
+require "digest"
 
 module RailsMcp
   # Recommended Rack::Attack throttles for an MCP server. The host opts in by
@@ -30,7 +31,9 @@ module RailsMcp
       throttle("rails_mcp/mcp by token", **limits[:mcp_per_token]) do |req|
         if req.post? && req.path == "/mcp"
           header = req.get_header("HTTP_AUTHORIZATION").to_s
-          header.start_with?("Bearer ") ? header.split(" ", 2).last : nil
+          # Key on a digest, not the bearer token itself, so live tokens don't
+          # sit in the cache store.
+          header.start_with?("Bearer ") ? Digest::SHA256.hexdigest(header.split(" ", 2).last) : nil
         end
       end
 

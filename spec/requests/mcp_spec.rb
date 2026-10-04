@@ -97,7 +97,7 @@ RSpec.describe "MCP JSON-RPC dispatcher", type: :request do
       mcp_call({ jsonrpc: "2.0", id: 7, method: "tools/call",
                  params: { name: "explode" } }, token: token)
       content = response.parsed_body["result"]["content"].first
-      expect(content["text"]).to eq("Error: kaboom")
+      expect(content["text"]).to eq("Error: the tool failed unexpectedly.")
     end
 
     it "dispatches a batched JSON-RPC array" do
@@ -189,13 +189,44 @@ RSpec.describe "MCP JSON-RPC dispatcher", type: :request do
       expect(response).to have_http_status(:ok)
     end
 
-    it "still accepts a token stored in plain text before hashing was enabled" do
+    it "rejects a stored hash presented as the bearer token" do
       token = issue_access_token_for(user)
-      token.update_column(:token, "legacy-plain-token")
+      stored = token.reload.token
 
       post "/mcp", params: { jsonrpc: "2.0", id: 1, method: "initialize" }.to_json,
-                   headers: { "CONTENT_TYPE" => "application/json", "Authorization" => "Bearer legacy-plain-token" }
+                   headers: { "CONTENT_TYPE" => "application/json", "Authorization" => "Bearer #{stored}" }
+      expect(response).to have_http_status(:unauthorized)
+    end
+  end
+
+  describe "hardening" do
+    let(:user) { make_user }
+    let(:token) { issue_access_token_for(user) }
+
+    it "has no /mcp.json route around the /mcp throttle" do
+      post "/mcp.json", params: { jsonrpc: "2.0", id: 1, method: "initialize" }.to_json,
+                        headers: { "CONTENT_TYPE" => "application/json", "Authorization" => "Bearer #{token.plaintext_token}" }
+      expect(response).to have_http_status(:not_found)
+    end
+
+    it "answers malformed batch entries with Invalid Request instead of a 500" do
+      mcp_call([ 5, "x" ], token: token)
       expect(response).to have_http_status(:ok)
+      expect(response.parsed_body.map { |r| r.dig("error", "code") }).to eq([ -32600, -32600 ])
+    end
+
+    it "rejects an empty batch" do
+      mcp_call([], token: token)
+      expect(response).to have_http_status(:bad_request)
+    end
+
+    it "rejects non-object params and arguments without leaking internals" do
+      mcp_call({ jsonrpc: "2.0", id: 1, method: "tools/call", params: [ 1 ] }, token: token)
+      expect(response.parsed_body.dig("error", "code")).to eq(-32602)
+
+      mcp_call({ jsonrpc: "2.0", id: 2, method: "tools/call", params: { name: "list-greetings", arguments: [ 1 ] } }, token: token)
+      expect(response.parsed_body.dig("error", "code")).to eq(-32602)
+      expect(response.body).not_to include("symbolize_keys")
     end
   end
 end

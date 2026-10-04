@@ -156,7 +156,7 @@ RSpec.describe RailsMcp::Generators::InstallGenerator, type: :generator do
                                                             'c.sign_in_path = ->(_request) { "/cowork_hub/connect" }' ],
       "config/initializers/doorkeeper.rb"              => [ "Doorkeeper.configure", "RailsMcp.config.sign_in_path",
                                                             "RailsMcp::OauthBaseController", "pkce_code_challenge_methods",
-                                                            "force_pkce", "hash_token_secrets fallback: :plain" ],
+                                                            "force_pkce", "  hash_token_secrets\n" ],
       "config/initializers/rack_attack.rb"             => [ "RailsMcp::RackAttackDefaults.apply!", "allow /up" ],
       "config/initializers/content_security_policy.rb" => [ "content_security_policy",
                                                             "policy.form_action :self,",
@@ -213,6 +213,7 @@ RSpec.describe RailsMcp::Generators::InstallGenerator, type: :generator do
       'ENV.fetch("APP_HOST")',
       "config.host_authorization"
     expect(File.read(File.join(destination_root, "config/environments/production.rb"))).not_to include('/.*\\.herokuapp')
+    expect(File.read(File.join(destination_root, "config/initializers/doorkeeper.rb"))).not_to include("fallback: :plain")
   end
 
   describe "with a snake_cased provider argument" do

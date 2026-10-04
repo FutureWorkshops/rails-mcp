@@ -16,6 +16,8 @@ module RailsMcp
       body = JSON.parse(request.raw_post)
 
       if body.is_a?(Array)
+        return render(json: json_error(nil, -32600, "Invalid Request: empty batch"), status: :bad_request) if body.empty?
+
         if body.size > MAX_BATCH_SIZE
           return render json: json_error(nil, -32600, "Batch too large (max #{MAX_BATCH_SIZE} messages)"),
                         status: :bad_request
@@ -56,9 +58,12 @@ module RailsMcp
     end
 
     def dispatch_message(msg)
+      return json_error(nil, -32600, "Invalid Request") unless msg.is_a?(Hash)
+
       id     = msg["id"]
       method = msg["method"]
       params = msg["params"] || {}
+      return json_error(id, -32602, "Invalid params: expected an object") unless params.is_a?(Hash)
 
       return nil if id.nil? && method&.start_with?("notifications/")
 
@@ -97,7 +102,10 @@ module RailsMcp
         })
       end
 
-      arguments = (params["arguments"] || {}).symbolize_keys
+      raw_arguments = params["arguments"] || {}
+      return json_error(id, -32602, "Invalid params: arguments must be an object") unless raw_arguments.is_a?(Hash)
+
+      arguments = raw_arguments.symbolize_keys
       if (unknown = unknown_arguments(tool_class, arguments)).any?
         message = unknown_argument_message(tool_class, unknown)
         return json_success(id, { content: [ { type: "text", text: message } ], isError: true })
@@ -106,7 +114,7 @@ module RailsMcp
       result = tool_class.new(current_user: mcp_user).call(**arguments)
       json_success(id, { content: [ { type: "text", text: result.to_s } ], isError: false })
     rescue StandardError => e
-      text = host_error_text(e, tool_class) || "Error: #{e.message}"
+      text = host_error_text(e, tool_class) || default_error_text(e)
       Rails.logger.error("MCP tool call failed: #{e.class}: #{e.message}\n#{e.backtrace&.first(5)&.join("\n")}") unless host_error_text(e, tool_class)
       json_success(id, { content: [ { type: "text", text: text } ], isError: true })
     end
@@ -126,6 +134,13 @@ module RailsMcp
 
     def insufficient_scope_message(tool_class)
       "Insufficient OAuth scope for tool #{tool_class.tool_name}: requires '#{required_scope_for(tool_class)}'."
+    end
+
+    # ArgumentError is how tools report bad input ("Invalid id", "confirm:
+    # true required"), so its message is meant for the caller. Anything else
+    # is an internal failure whose message can expose implementation details.
+    def default_error_text(error)
+      error.is_a?(ArgumentError) ? "Error: #{error.message}" : "Error: the tool failed unexpectedly."
     end
 
     def host_error_text(error, tool_class)
