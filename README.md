@@ -67,6 +67,16 @@ That's all a host needs, for first install and for every later engine bump. Copy
 
 On deploy, the generated `Procfile`'s `release: bin/rails db:migrate` applies any new engine migrations automatically, so bumping the `rails_mcp` gem and pushing is enough; no manual migration step.
 
+### Refresh tokens and leavers
+
+Every `refresh_token` grant goes through `RailsMcp::RefreshTokenPolicy`:
+
+- **Idle expiry:** refresh tokens unused for `config.refresh_token_idle_days` (default 30; nil disables) are refused, so the client asks the user to reconnect.
+- **Leavers:** `config.identity_status` is asked whether the user is still active at the identity provider. Set it to `->(user) { GroundworkOauthController.identity_status(user) }` (which calls Groundwork `POST /oauth/user_status` with the app's client credentials). `:inactive` refuses the refresh and revokes all of the user's tokens; `:unknown` (IdP unreachable) lets it through.
+- **Reuse detection:** replaying a refresh token that has already been rotated away revokes every token that user holds for that client.
+
+Manual offboarding: `bin/rails rails_mcp:revoke_user[email]` revokes the user's tokens and deletes their provider connections.
+
 ## Security responsibilities of the host
 
 The engine handles the protocol-level security; the host owns the runtime environment. Both layers have to be wired up correctly or the deployed app has gaps.
