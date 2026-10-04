@@ -22,6 +22,11 @@ RailsMcp.configure do |c|
   # once a user is signed in.
   c.sign_in_path = ->(_request) { "/cowork_hub/connect" }
 
+  # Refresh-token policy: tokens unused for 30 days are refused, and each
+  # refresh asks the identity provider whether the user is still active.
+  c.refresh_token_idle_days = 30
+  c.identity_status = ->(user) { CoworkHubOauthController.identity_status(user) }
+
 
   # Optional: map per-tool exceptions to user-facing strings. Returning nil
   # falls through to the engine's "Error: <message>" default.

@@ -1,3 +1,5 @@
+require "net/http"
+
 module RailsMcp
   # Abstract base class for OAuth-client SSO controllers in MCP host apps.
   # Subclasses sign visitors in by doing an authorization-code round-trip
@@ -30,6 +32,30 @@ module RailsMcp
     def self.scope              = "openid"
     def self.state_session_key  = :rails_mcp_oauth_client_state
     def self.mirror_account_column = :groundwork_account_id
+
+    # IdP endpoint for the "is this user still active?" check (Groundwork:
+    # POST /oauth/user_status). nil disables the check.
+    def self.user_status_url = nil
+
+    # :active / :inactive per the IdP, or :unknown when the check isn't
+    # configured or the IdP can't be reached (callers let :unknown through).
+    def self.identity_status(user)
+      return :unknown if user_status_url.blank? || user.identity_id.blank?
+
+      uri = URI(user_status_url)
+      request = Net::HTTP::Post.new(uri)
+      request.basic_auth(client_id, client_secret)
+      request.set_form_data(sub: user.identity_id)
+      response = Net::HTTP.start(uri.hostname, uri.port, use_ssl: uri.scheme == "https",
+                                 open_timeout: 3, read_timeout: 5) { |http| http.request(request) }
+
+      return :unknown unless response.code == "200"
+
+      JSON.parse(response.body)["active"] == true ? :active : :inactive
+    rescue StandardError => e
+      Rails.logger.warn("[rails_mcp] identity status check failed: #{e.class}: #{e.message}")
+      :unknown
+    end
 
     # ---- Actions ----------------------------------------------------------
 

@@ -39,6 +39,15 @@ module RailsMcp
     # call; filter the whole arguments hash.
     MCP_FILTER_PARAMETERS = %i[arguments].freeze
 
+    # Refresh-token policy (idle expiry, leaver check, reuse detection) on
+    # every refresh_token grant. See RailsMcp::RefreshTokenPolicy.
+    config.to_prepare do
+      require "rails_mcp/refresh_token_policy"
+      request_class = Doorkeeper::OAuth::RefreshTokenRequest
+      hooks = RailsMcp::RefreshTokenPolicy::RequestHooks
+      request_class.prepend(hooks) unless request_class.ancestors.include?(hooks)
+    end
+
     initializer :append_filter_parameters, before: :load_config_initializers do |app|
       app.config.filter_parameters += OAUTH_FILTER_PARAMETERS + MCP_FILTER_PARAMETERS
     end

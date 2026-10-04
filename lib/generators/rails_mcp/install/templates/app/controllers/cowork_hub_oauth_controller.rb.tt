@@ -17,4 +17,8 @@ class CoworkHubOauthController < RailsMcp::OauthClientController
   def self.redirect_uri   = AppConfig.cowork_hub_redirect_uri
 
   def self.state_session_key = :cowork_hub_oauth_state
+
+  # "Is this user still active?" check used on every MCP token refresh, so a
+  # leaver loses access within the access token lifetime.
+  def self.user_status_url = "#{AppConfig.cowork_hub_base_url}/oauth/user_status"
 end
