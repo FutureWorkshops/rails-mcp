@@ -7,7 +7,10 @@ module RailsMcp
   # (HTTP client, API error class, account/tenant lookup, etc.) and have their
   # concrete tools inherit from that.
   class BaseTool
-    READ_ONLY_PREFIXES   = %w[list- get- search].freeze
+    # "search" only as an exact name or a "search-" / "search_" prefix: a bare
+    # "search" prefix would make e.g. "search_and_replace" read-only.
+    READ_ONLY_PREFIXES   = %w[list- get- search- search_].freeze
+    READ_ONLY_NAMES      = %w[search].freeze
     DESTRUCTIVE_PREFIXES = %w[delete- trash- archive-].freeze
     IDEMPOTENT_PREFIXES  = %w[update- complete- uncomplete- approve- revert- archive- restore-].freeze
 
@@ -28,7 +31,7 @@ module RailsMcp
 
     def self.annotations
       name = tool_name.to_s
-      read_only   = read_only_prefixes.any?   { |p| name.start_with?(p) }
+      read_only   = read_only_prefixes.any? { |p| name.start_with?(p) } || READ_ONLY_NAMES.include?(name)
       destructive = destructive_prefixes.any? { |p| name.start_with?(p) }
       idempotent  = idempotent_prefixes.any?  { |p| name.start_with?(p) }
 

@@ -12,10 +12,11 @@ Doorkeeper.configure do
   use_refresh_token
 
   # Store only a hash of access and refresh tokens, so a database leak doesn't
-  # hand out live bearer tokens. `fallback: :plain` keeps tokens issued before
-  # this change working until they expire or are refreshed. Hashed tokens can't
-  # be returned again, so access tokens aren't reused (reuse_access_token).
-  hash_token_secrets fallback: :plain
+  # hand out live bearer tokens. No plain-text fallback: with one, a stored
+  # hash would itself work as a bearer token. The engine migration
+  # HashExistingOauthTokens converts tokens issued before hashing. Hashed
+  # tokens can't be handed back, so access tokens aren't reused.
+  hash_token_secrets
 
   default_scopes  :read
   optional_scopes :write
