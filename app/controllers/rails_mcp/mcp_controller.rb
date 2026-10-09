@@ -88,11 +88,11 @@ module RailsMcp
     end
 
     def handle_tools_list(id)
-      json_success(id, { tools: RailsMcp.config.tool_classes.map(&:tool_definition) })
+      json_success(id, { tools: RailsMcp.config.tool_classes(mcp_user).map(&:tool_definition) })
     end
 
     def handle_tool_call(id, params)
-      tool_class = RailsMcp.config.tool_classes.find { |t| t.tool_name == params["name"] }
+      tool_class = RailsMcp.config.tool_classes(mcp_user).find { |t| t.tool_name == params["name"] }
       return json_error(id, -32601, "Unknown tool: #{params['name']}") unless tool_class
 
       unless authorized_for_tool?(tool_class)
