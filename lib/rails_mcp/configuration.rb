@@ -35,8 +35,16 @@ module RailsMcp
       @tools || -> { RailsMcp::Registry.all_tools }
     end
 
-    def tool_classes
-      list = tools.respond_to?(:call) ? tools.call : tools
+    # `tools` may be a list, a zero-arity proc (same tools for everyone), or a
+    # proc taking the MCP user, so a host can expose a different tool set per
+    # user. The MCP controller resolves both tools/list and tools/call through
+    # this, so a tool left out for a user is neither listed nor callable.
+    def tool_classes(user = nil)
+      list =
+        if !tools.respond_to?(:call) then tools
+        elsif tools.arity.zero?      then tools.call
+        else                              tools.call(user)
+        end
       Array(list)
     end
 

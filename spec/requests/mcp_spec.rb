@@ -220,6 +220,28 @@ RSpec.describe "MCP JSON-RPC dispatcher", type: :request do
       expect(response).to have_http_status(:bad_request)
     end
 
+    it "resolves a per-user tools proc for both tools/list and tools/call" do
+      RailsMcp.configure { |c| c.tools = ->(u) { u.email == "u@example.com" ? [ GreetTool ] : [] } }
+
+      mcp_call({ jsonrpc: "2.0", id: 1, method: "tools/list" }, token: token)
+      expect(response.parsed_body["result"]["tools"].map { |t| t["name"] }).to eq([ "list-greetings" ])
+
+      other = issue_access_token_for(make_user(email: "other@example.com", identity_id: "id-2"))
+      mcp_call({ jsonrpc: "2.0", id: 2, method: "tools/list" }, token: other)
+      expect(response.parsed_body["result"]["tools"]).to eq([])
+
+      mcp_call({ jsonrpc: "2.0", id: 3, method: "tools/call",
+                 params: { name: "list-greetings", arguments: {} } }, token: other)
+      expect(response.parsed_body.dig("error", "code")).to eq(-32601)
+    end
+
+    it "still accepts a zero-arity tools proc" do
+      RailsMcp.configure { |c| c.tools = -> { [ GreetTool ] } }
+
+      mcp_call({ jsonrpc: "2.0", id: 1, method: "tools/list" }, token: token)
+      expect(response.parsed_body["result"]["tools"].map { |t| t["name"] }).to eq([ "list-greetings" ])
+    end
+
     it "rejects non-object params and arguments without leaking internals" do
       mcp_call({ jsonrpc: "2.0", id: 1, method: "tools/call", params: [ 1 ] }, token: token)
       expect(response.parsed_body.dig("error", "code")).to eq(-32602)

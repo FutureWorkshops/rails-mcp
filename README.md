@@ -47,7 +47,7 @@ RailsMcp.configure do |c|
   c.display_name   = "Basecamp MCP"
   c.resource_name  = "Basecamp MCP Server"
   c.scopes         = %w[read write]
-  c.tools          = -> { Mcp::Registry::ALL_TOOLS }
+  c.tools          = -> { Mcp::Registry::ALL_TOOLS }    # or ->(user) { … } for per-user tool sets
   c.sign_in_path   = ->(_request) { "/basecamp/connect" }
   c.tool_error_handler = ->(error, **) { … }   # optional
 end
