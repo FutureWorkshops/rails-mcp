@@ -7,6 +7,7 @@ Rails.application.routes.draw do
   # Dummy sign-in stub for specs.
   get  "sign_in",      to: "sessions#new", as: :sign_in
   post "test_sign_in", to: "sessions#test_sign_in"
+  get  "protected",    to: "sessions#protected_page"
 
   # Concrete subclass of RailsMcp::OauthClientController for spec coverage.
   get "test_sso/connect",  to: "test_sso#connect",  as: :test_sso_connect

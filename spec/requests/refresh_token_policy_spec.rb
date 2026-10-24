@@ -61,9 +61,22 @@ RSpec.describe "Refresh token policy", type: :request do
     expect(other.reload).to be_revoked
   end
 
-  it "lets the refresh through when the identity provider can't be reached" do
+  it "fails closed, without revoking, when the identity provider can't be reached" do
     RailsMcp.config.identity_status = ->(_user) { :unknown }
-    refresh(issue_token.plaintext_refresh_token)
+    token = issue_token
+    allow(Rails.error).to receive(:report)
+
+    expect(Rails.logger).to receive(:warn).with(/refresh refused for user #{user.id}: identity provider could not confirm/)
+    refresh(token.plaintext_refresh_token)
+
+    expect(response).to have_http_status(:service_unavailable)
+    expect(response.parsed_body["error"]).to eq("temporarily_unavailable")
+    expect(token.reload).not_to be_revoked
+    expect(Rails.error).to have_received(:report).with(instance_of(RailsMcp::IdentityUnavailable), hash_including(handled: true))
+
+    # Once the IdP answers again, the same refresh token works.
+    RailsMcp.config.identity_status = ->(_user) { :active }
+    refresh(token.plaintext_refresh_token)
     expect(response).to have_http_status(:ok)
   end
 
@@ -78,5 +91,65 @@ RSpec.describe "Refresh token policy", type: :request do
 
     expect(response.parsed_body["error"]).to eq("invalid_grant")
     expect(new_token.reload).to be_revoked
+  end
+
+  describe "standing re-read from the identity provider (ENG-02)" do
+    let(:account) { RailsMcp::Account.create!(name: "Acme", groundwork_account_id: "100") }
+    let(:user) { account.users.create!(email: "u@example.com", identity_id: "gw-1", role: "admin") }
+
+    def groundwork_says(**kwargs)
+      RailsMcp.config.identity_status = ->(_user) { RailsMcp::IdentityStanding.new(:active, **kwargs) }
+    end
+
+    it "downgrades a demoted admin on this refresh" do
+      groundwork_says(accounts: [ { "id" => "100", "name" => "Acme", "role" => "member" } ])
+
+      refresh(issue_token.plaintext_refresh_token)
+
+      expect(response).to have_http_status(:ok)
+      expect(user.reload).not_to be_admin
+    end
+
+    it "moves someone removed from the mirrored organisation to one they still belong to" do
+      groundwork_says(home_account_id: "200", accounts: [ { "id" => "200", "name" => "Other", "role" => "member" } ])
+
+      refresh(issue_token.plaintext_refresh_token)
+
+      expect(response).to have_http_status(:ok)
+      expect(user.reload.account.groundwork_account_id).to eq("200")
+      expect(user.role).to eq("member")
+    end
+
+    it "revokes everything, and runs the host hook, when no membership is left" do
+      groundwork_says(accounts: [])
+      removed = nil
+      RailsMcp.config.on_user_deactivated = ->(u) { removed = u }
+      token = issue_token
+      other = issue_token
+
+      refresh(token.plaintext_refresh_token)
+
+      expect(response.parsed_body["error"]).to eq("invalid_grant")
+      expect([ token.reload, other.reload ]).to all(be_revoked)
+      expect(removed).to eq(user)
+    end
+
+    it "keeps today's behaviour against a Groundwork that sends no memberships" do
+      groundwork_says
+      refresh(issue_token.plaintext_refresh_token)
+
+      expect(response).to have_http_status(:ok)
+      expect(user.reload).to be_admin
+    end
+
+    it "refuses and revokes when the user no longer exists locally" do
+      groundwork_says
+      token = issue_token
+      user.delete
+
+      refresh(token.plaintext_refresh_token)
+      expect(response.parsed_body["error"]).to eq("invalid_grant")
+      expect(token.reload).to be_revoked
+    end
   end
 end

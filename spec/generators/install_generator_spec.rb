@@ -153,8 +153,13 @@ RSpec.describe RailsMcp::Generators::InstallGenerator, type: :generator do
     {
       "config/initializers/rails_mcp.rb"               => [ "RailsMcp.configure", 'c.server_name    = "gmail-mcp-rails"',
                                                             'c.display_name   = "Gmail MCP"', "Mcp::Registry::ALL_TOOLS",
-                                                            'c.sign_in_path = ->(_request) { "/cowork_hub/connect" }' ],
-      "config/initializers/doorkeeper.rb"              => [ "Doorkeeper.configure", "RailsMcp.config.sign_in_path",
+                                                            'c.sign_in_path = ->(_request) { "/cowork_hub/connect" }',
+                                                            "c.identity_status = ->(user) { CoworkHubOauthController.identity_status(user) }",
+                                                            "c.on_user_deactivated = ->(user) { user.connections.destroy_all }" ],
+      "config/initializers/doorkeeper.rb"              => [ "Doorkeeper.configure",
+                                                            "resource_owner_authenticator { RailsMcp::Authentication.resource_owner(self) }",
+                                                            "access_token_methods :from_bearer_authorization",
+                                                            "RailsMcp::RedirectUris.force_ssl?(uri)",
                                                             "RailsMcp::OauthBaseController", "pkce_code_challenge_methods",
                                                             "force_pkce", "  hash_token_secrets\n" ],
       "config/initializers/rack_attack.rb"             => [ "RailsMcp::RackAttackDefaults.apply!", "allow /up" ],
@@ -206,7 +211,6 @@ RSpec.describe RailsMcp::Generators::InstallGenerator, type: :generator do
 
   it "patches config/environments/production.rb with HSTS, hosts, mailer" do
     expect_file "config/environments/production.rb",
-      "config.assume_ssl = true",
       "config.force_ssl  = true",
       "hsts:",
       "preload: true",
@@ -214,6 +218,18 @@ RSpec.describe RailsMcp::Generators::InstallGenerator, type: :generator do
       "config.host_authorization"
     expect(File.read(File.join(destination_root, "config/environments/production.rb"))).not_to include('/.*\\.herokuapp')
     expect(File.read(File.join(destination_root, "config/initializers/doorkeeper.rb"))).not_to include("fallback: :plain")
+  end
+
+  # assume_ssl makes every request look like https, so force_ssl never
+  # redirects and the app serves plain http behind Heroku's router.
+  it "does not set assume_ssl, which would turn force_ssl into a no-op" do
+    body = File.read(File.join(destination_root, "config/environments/production.rb"))
+    expect(body).not_to match(/^\s*config\.assume_ssl/)
+    expect(body).to include("config.force_ssl  = true", 'redirect: { exclude: ->(request) { request.path == "/up" } }')
+  end
+
+  it "does not read session[:user_id] raw in the Doorkeeper authenticator" do
+    expect(File.read(File.join(destination_root, "config/initializers/doorkeeper.rb"))).not_to include("find_by(id: session[:user_id])")
   end
 
   describe "with a snake_cased provider argument" do

@@ -1,13 +1,16 @@
 Doorkeeper.configure do
   orm :active_record
 
-  resource_owner_authenticator do
-    if session[:user_id] && (user = RailsMcp::User.find_by(id: session[:user_id]))
-      user
-    else
-      redirect_to "/sign_in"
-    end
-  end
+  # Resolve the signed-in user the way every other page does, session
+  # lifetime included, instead of reading session[:user_id] raw. Sends
+  # anyone not signed in to config.sign_in_path.
+  resource_owner_authenticator { RailsMcp::Authentication.resource_owner(self) }
+
+  # Accept the access token only from the Authorization header. Doorkeeper's
+  # default also takes ?access_token= in the URL, which ends up in router
+  # and proxy logs. (The engine refuses a token in the query string on /mcp
+  # anyway; this covers every other Doorkeeper-protected endpoint.)
+  access_token_methods :from_bearer_authorization
 
   use_refresh_token
 
@@ -28,7 +31,9 @@ Doorkeeper.configure do
 
   access_token_expires_in 8.hours
 
-  force_ssl_in_redirect_uri { Rails.env.production? }
+  # https everywhere in production except loopback, where native clients
+  # such as Claude Code listen over plain http on a local port.
+  force_ssl_in_redirect_uri { |uri| RailsMcp::RedirectUris.force_ssl?(uri) }
 
   base_controller "RailsMcp::OauthBaseController"
 end

@@ -3,6 +3,12 @@ module RailsMcp
     # RFC 7591 dynamic client registration. Claude Desktop POSTs here on first
     # connection with its redirect URI; we create a Doorkeeper::Application and
     # return its public client_id. PKCE means no secret is issued.
+    #
+    # Registration needs no authentication, so where a client may have its
+    # codes sent is restricted (RailsMcp::RedirectUris): Claude's own
+    # callbacks, plain-http loopback, and https hosts the operator lists in
+    # allowed_redirect_hosts. OauthBaseController checks the same rule again
+    # at /oauth/authorize.
     class ClientsController < RailsMcp::ApplicationController
       skip_before_action :verify_authenticity_token, raise: false
 
@@ -12,24 +18,39 @@ module RailsMcp
       # Hard cap on client_name to bound the OAuth authorize page.
       MAX_CLIENT_NAME_LENGTH = 100
 
-      # Loopback hosts that we accept over plain http in non-production environments
-      # (Claude Desktop sometimes registers `http://localhost:NNNN/callback`).
-      LOOPBACK_HOSTS = %w[localhost 127.0.0.1 ::1].freeze
+      # Bounds on what one unauthenticated registration may store.
+      MAX_REDIRECT_URIS = 5
+      MAX_REDIRECT_URI_LENGTH = 2048
 
       def create
         attrs = registration_params
+        return render_error("invalid_client_metadata", "the request body must be a JSON object") unless attrs
 
-        redirect_uris = Array(attrs["redirect_uris"]).reject(&:blank?)
+        raw_uris = attrs["redirect_uris"]
+        raw_uris = [ raw_uris ] if raw_uris.is_a?(String)
+        unless raw_uris.nil? || (raw_uris.is_a?(Array) && raw_uris.all? { |uri| uri.is_a?(String) })
+          return render_error("invalid_redirect_uri", "redirect_uris must be a list of strings")
+        end
+
+        redirect_uris = Array(raw_uris).reject(&:blank?)
         return render_error("invalid_redirect_uri", "redirect_uris is required") if redirect_uris.empty?
 
-        if (invalid = invalid_redirect_uris(redirect_uris)).any?
+        if redirect_uris.size > MAX_REDIRECT_URIS || redirect_uris.any? { |uri| uri.length > MAX_REDIRECT_URI_LENGTH }
           return render_error(
             "invalid_redirect_uri",
-            "redirect_uris must be absolute https:// URLs with a host (#{invalid.join(', ')} rejected)"
+            "at most #{MAX_REDIRECT_URIS} redirect_uris of up to #{MAX_REDIRECT_URI_LENGTH} characters each"
           )
         end
 
-        client_name = attrs["client_name"].to_s.strip
+        if redirect_uris.any? { |uri| !RailsMcp::RedirectUris.allowed?(uri) }
+          return render_error(
+            "invalid_redirect_uri",
+            "redirect_uris must be Claude's connector callback, a loopback address over http, " \
+            "or an https URL on a host this server allows"
+          )
+        end
+
+        client_name = attrs["client_name"].is_a?(String) ? attrs["client_name"].strip : ""
         if client_name.length > MAX_CLIENT_NAME_LENGTH
           return render_error(
             "invalid_client_metadata",
@@ -45,7 +66,7 @@ module RailsMcp
           )
         end
 
-        scope = attrs["scope"].presence || RailsMcp.config.scopes.join(" ")
+        scope = (attrs["scope"].is_a?(String) && attrs["scope"].presence) || RailsMcp.config.scopes.join(" ")
 
         application = Doorkeeper::Application.new(
           name:         client_name.presence || "MCP client",
@@ -64,41 +85,16 @@ module RailsMcp
 
       private
 
+      # The parsed body, {} when there is none, or nil when it isn't a JSON
+      # object (an array or a bare value used to raise and answer 500).
       def registration_params
         body = request.raw_post
         return {} if body.blank?
 
-        JSON.parse(body)
+        parsed = JSON.parse(body)
+        parsed.is_a?(Hash) ? parsed : nil
       rescue JSON::ParserError
-        {}
-      end
-
-      # Returns the subset of uris that fail validation. A uri is valid when:
-      # - it parses
-      # - scheme is `https` (any environment), or `http` with a loopback host
-      #   (development/test only — never accepted in production)
-      # - host is present
-      # - no userinfo / fragment
-      def invalid_redirect_uris(uris)
-        uris.reject { |uri| valid_redirect_uri?(uri) }
-      end
-
-      def valid_redirect_uri?(raw)
-        uri = URI.parse(raw.to_s)
-        return false if uri.host.blank?
-        return false if uri.userinfo.present?
-        return false if uri.fragment.present?
-
-        case uri.scheme
-        when "https"
-          true
-        when "http"
-          !Rails.env.production? && LOOPBACK_HOSTS.include?(uri.host.downcase)
-        else
-          false
-        end
-      rescue URI::InvalidURIError
-        false
+        nil
       end
 
       def registration_response(application, redirect_uris, grant_types, scope)

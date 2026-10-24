@@ -9,7 +9,9 @@ This README is aimed at engineers wiring the engine into a new host app. The sin
 If you're bootstrapping a brand-new MCP server on top of this engine (Gmail, GitHub, Microsoft Graph, …), use the install generator:
 
 ```sh
-# In a fresh Rails app, after adding `gem "rails_mcp"` to the Gemfile:
+# In a fresh Rails app, after adding the engine to the Gemfile pinned to a
+# release tag (see Versioning):
+#   gem "rails_mcp", git: "https://github.com/FutureWorkshops/rails-mcp.git", tag: "v1.0.0"
 bundle install
 bin/rails generate rails_mcp:install <Provider>
 ```
@@ -28,11 +30,30 @@ The full walkthrough lives at [`BUILDING_A_HOST.md`](BUILDING_A_HOST.md). This R
 - **`RailsMcp::BaseTool`** framework for host-specific MCP tools, with `RailsMcp::Registry` for discovery. Name tools **kebab-case, verb-first** (`list-todos`, `create-card`, `update-todo`) — the base class derives each tool's read-only / idempotent / destructive annotation from the leading verb, so correctly-named tools need no annotation code.
 - **Defaults helpers**: `RailsMcp::RackAttackDefaults.apply!`.
 
-## Mounting the engine
+## Versioning
+
+The engine follows [Semantic Versioning](https://semver.org). Every release is a git tag (`vX.Y.Z`) with a GitHub release and an entry in [`CHANGELOG.md`](CHANGELOG.md), and `RailsMcp::VERSION` matches the tag.
+
+- **Major** (`2.0.0`): a change a host must act on when upgrading (an initializer or config change, a migration with a manual step, a removed API), or one that refuses something the previous release accepted (a client registration, a sign-in, a token). The CHANGELOG entry carries an "Upgrading" checklist.
+- **Minor** (`1.1.0`): backward-compatible features. A host can upgrade without changing anything.
+- **Patch** (`1.0.1`): backward-compatible fixes only.
+
+Hosts pin the engine **by tag**, never by branch:
 
 ```ruby
 # Gemfile
-gem "rails_mcp", path: "engines/rails_mcp"
+gem "rails_mcp", git: "https://github.com/FutureWorkshops/rails-mcp.git", tag: "v1.0.0"
+```
+
+`branch: "main"` (or no ref at all) means whatever was last merged reaches production on the host's next `bundle update`, unreviewed by the host and with no record of which engine a deploy ran. A tag makes each engine upgrade a deliberate, reviewable Gemfile change in the host. To upgrade, read the CHANGELOG entries between your tag and the new one, follow any "Upgrading" steps, bump the tag and run `bundle update rails_mcp`.
+
+Releasing: merge the release PR (it bumps `lib/rails_mcp/version.rb` and moves the CHANGELOG's Unreleased entries under the new version), then tag the merge commit `git tag -a vX.Y.Z -m "rails_mcp vX.Y.Z"`, push the tag, and create the GitHub release from the CHANGELOG entry.
+
+## Mounting the engine
+
+```ruby
+# Gemfile (pin to a release tag, see Versioning)
+gem "rails_mcp", git: "https://github.com/FutureWorkshops/rails-mcp.git", tag: "v1.0.0"
 
 # config/routes.rb
 mount RailsMcp::Engine => "/"
@@ -67,15 +88,54 @@ That's all a host needs, for first install and for every later engine bump. Copy
 
 On deploy, the generated `Procfile`'s `release: bin/rails db:migrate` applies any new engine migrations automatically, so bumping the `rails_mcp` gem and pushing is enough; no manual migration step.
 
-### Refresh tokens and leavers
+### Which OAuth clients may connect
 
-Every `refresh_token` grant goes through `RailsMcp::RefreshTokenPolicy`:
+Dynamic client registration (`POST /oauth/register`) needs no authentication, so where a self-registered client may have its authorization codes sent is restricted (`RailsMcp::RedirectUris`, the same rules as Groundwork's `Oauth::RedirectUris`):
 
-- **Idle expiry:** refresh tokens unused for `config.refresh_token_idle_days` (default 30; nil disables) are refused, so the client asks the user to reconnect.
-- **Leavers:** `config.identity_status` is asked whether the user is still active at the identity provider. Set it to `->(user) { GroundworkOauthController.identity_status(user) }` (which calls Groundwork `POST /oauth/user_status` with the app's client credentials). `:inactive` refuses the refresh and revokes all of the user's tokens; `:unknown` (IdP unreachable) lets it through.
-- **Reuse detection:** replaying a refresh token that has already been rotated away revokes every token that user holds for that client.
+- Claude's own connector callbacks, matched exactly: `https://claude.ai/api/mcp/auth_callback` and `https://claude.com/api/mcp/auth_callback`.
+- Loopback over plain http on any port (`http://127.0.0.1`, `http://localhost`, `http://[::1]`), where Claude Code and other native clients listen. Allowed in production too.
+- Any https URL (port 443) on a host listed in `config.allowed_redirect_hosts`, which defaults to the comma-separated `OAUTH_DCR_ALLOWED_REDIRECT_HOSTS` environment variable. The operator vouches for the whole host, so this is never a default.
+
+Anything else is refused at registration with `invalid_redirect_uri`, and checked again at `/oauth/authorize` (`RailsMcp::OauthBaseController`) for every public client, so a client registered before the rule, or a host removed from the list, is stopped at once. That check answers with its own page and never redirects to the refused URI. Confidential (operator-created) clients are not held to the list. Registration also refuses a body that isn't a JSON object, more than 5 redirect URIs, or one longer than 2,048 characters.
+
+To allow another connector, for example Grok:
+
+```sh
+heroku config:set -a <app> OAUTH_DCR_ALLOWED_REDIRECT_HOSTS=grok.com
+```
+
+or `c.allowed_redirect_hosts = %w[grok.com]` in `config/initializers/rails_mcp.rb` (which replaces the environment variable rather than adding to it).
+
+### Standing at the identity provider (leavers, demotions, sessions)
+
+The engine asks the identity provider about a user, through `config.identity_status`, whenever access is gained or renewed:
+
+- on every **refresh** grant (`RailsMcp::RefreshTokenPolicy`),
+- at the **consent screen**, `GET` and `POST /oauth/authorize` (`RailsMcp::OauthBaseController`),
+- at **SSO sign-in** (`RailsMcp::OauthClientController#callback`).
+
+Set it to `->(user) { GroundworkOauthController.identity_status(user) }`. That calls Groundwork `POST /oauth/user_status` with the app's client credentials, asking for the user's memberships (`include=memberships`), and returns a `RailsMcp::IdentityStanding`. What happens with the answer (`RailsMcp::IdentityCheck`):
+
+| Groundwork says | Engine does |
+|---|---|
+| Active, and sends memberships | Updates the local role and mirrored account. A demotion takes effect on that refresh. Someone removed from the account they are mirrored into moves to their home account (or the first one they still belong to), with that account's role. |
+| Active, no memberships (a Groundwork from before October 2026) | Nothing more: today's behaviour. |
+| Inactive (deleted, a member of nothing, or 404: no record of the user authorising this app) | Refuses, revokes every token and grant the user holds, signs them out, and calls `config.on_user_deactivated`. |
+| No usable answer (timeout, 401, 5xx) | Fails closed: the refresh gets 503 `temporarily_unavailable` with the refresh token left intact, so the client can retry; the consent screen says to try again in a few minutes. Logged as a warning and reported through `Rails.error` (`RailsMcp::IdentityUnavailable`). At sign-in alone it is let through, since the person has just authenticated at the IdP. |
+
+`config.on_user_deactivated = ->(user) { user.connections.destroy_all }` deletes the leaver's stored upstream tokens (Google, Xero, Basecamp and so on). The engine never deletes them on its own. Revoke at the provider too in the hook if the provider supports it. A failing hook is reported and never stops the revocation.
+
+Hosts that return a bare `:active` / `:inactive` / `:unknown` from their own `identity_status` still work; an `IdentityStanding` compares equal to its status symbol.
+
+**Session lifetime.** The browser session the engine signs people in with lasts at most `config.session_lifetime` (default 12 hours; nil disables), measured from SSO sign-in. After that, or for a cookie from before 1.0 with no sign-in stamp, the session is reset and the person signs in through the IdP again. This is what stops a leaver's old cookie minting fresh tokens at `/oauth/authorize`. In the host's Doorkeeper initializer, `resource_owner_authenticator { RailsMcp::Authentication.resource_owner(self) }` resolves the user the same way (the base controller enforces the lifetime even for hosts that haven't switched).
+
+**Refresh tokens.** Unused for `config.refresh_token_idle_days` (default 30; nil disables) they are refused. Replaying one that has already been rotated away revokes every token that user holds for that client.
 
 Manual offboarding: `bin/rails rails_mcp:revoke_user[email]` revokes the user's tokens and deletes their provider connections.
+
+### The MCP endpoint
+
+`POST /mcp` never lets Rails parse the JSON body into params: the body is parsed only after the bearer token is checked, so an unauthenticated request costs nothing in proportion to its size. Bodies over `config.mcp_max_body_bytes` (default 1 MB) get 413 before anything else. An access token in the query string (`?access_token=`, `?bearer_token=`) is refused with 400, whatever the host's `access_token_methods`; send it in the `Authorization` header.
 
 ## Security responsibilities of the host
 
@@ -85,12 +145,15 @@ The engine handles the protocol-level security; the host owns the runtime enviro
 
 | Item | What the engine does | Where |
 |---|---|---|
-| Dynamic client registration validation | Rejects non-`https` (except loopback in non-prod), `javascript:`/`mailto:`/`file:`/`data:`, missing host, userinfo, fragments. Caps `client_name` at 100 chars. | `app/controllers/rails_mcp/oauth/clients_controller.rb` |
+| Dynamic client registration validation | Redirect URIs must be Claude's callbacks, http loopback or an allowed https host; userinfo and fragments refused; at most 5 URIs of 2,048 chars; non-object bodies get 400. Caps `client_name` at 100 chars. | `app/controllers/rails_mcp/oauth/clients_controller.rb`, `lib/rails_mcp/redirect_uris.rb` |
+| Authorize-time checks | Re-checks a public client's redirect URI, and the user's standing at the IdP, before Doorkeeper's consent screen. | `app/controllers/rails_mcp/oauth_base_controller.rb` |
+| Standing on refresh | Role and account re-mirrored, leavers revoked, fail closed when the IdP can't answer. | `lib/rails_mcp/refresh_token_policy.rb`, `lib/rails_mcp/identity_check.rb` |
+| Session lifetime | Engine browser sessions expire after `session_lifetime` (12 hours). | `app/controllers/concerns/rails_mcp/authentication.rb` |
+| MCP body and token handling | Body not parsed before auth, 1 MB cap, no tokens in the query string. | `app/controllers/rails_mcp/mcp_controller.rb` |
 | OAuth scope enforcement per tool | Read-only tools (`readOnlyHint: true`) require `:read`; everything else requires `:write`. Before-action accepts either; per-tool check refines. | `app/controllers/rails_mcp/mcp_controller.rb` |
 | Doorkeeper authorize CSRF / PKCE | Doorkeeper config in the host's initializer pins `pkce_code_challenge_methods %w[S256]`; engine ships the matching base controller. | host `config/initializers/doorkeeper.rb` + `app/controllers/rails_mcp/oauth_base_controller.rb` |
 | HEAD/GET verb confusion | `Authentication` concern stashes `session[:return_to]` on both verbs. | `app/controllers/concerns/rails_mcp/authentication.rb` |
 | OAuth key log redaction | `:access_token`, `:refresh_token`, `:client_secret`, `:authorization`, `:bearer`, `:code` are auto-appended to `config.filter_parameters` at boot. | `lib/rails_mcp/engine.rb` (`OAUTH_FILTER_PARAMETERS`) |
-| Mailer no-host fail-loudly | `RailsMcp::UserMailer#invite_email` raises if `default_url_options[:host]` is blank (no silent fallback to `localhost`). | `app/mailers/rails_mcp/user_mailer.rb` |
 
 ### Opt-in helpers — host calls them, engine provides them
 
@@ -125,8 +188,9 @@ These are environment- or identity-provider-specific, so they have to live in th
 | 4 | **Content Security Policy.** Enable `config.content_security_policy`. At minimum: `default-src :self :https`, `object-src :none`, `frame-ancestors :none`, `base_uri :self`, `form-action` including the identity provider's authorize endpoint. Add nonce on `script-src` if you use inline scripts. | host `config/initializers/content_security_policy.rb` |
 | 5 | **DNS rebinding protection.** Set `config.hosts = [ENV.fetch("APP_HOST"), …]`; exclude `/up` via `config.host_authorization`. | host `config/environments/production.rb` |
 | 6 | **HSTS preload.** `config.ssl_options = { hsts: { expires: 2.years, subdomains: true, preload: true }, redirect: { exclude: ->(r) { r.path == "/up" } } }`. | host `config/environments/production.rb` |
-| 7 | **Force SSL + assume SSL** when behind a TLS-terminating proxy (Heroku router, Cloudflare, etc.). `config.assume_ssl = true; config.force_ssl = true`. | host `config/environments/production.rb` |
-| 8 | **Doorkeeper `force_ssl_in_redirect_uri`.** Use `{ Rails.env.production? }` for the simple case. If you ever introduce a staging environment with `RAILS_ENV` != `production`, switch to an explicit allowlist so staging doesn't accept plain-`http://` redirect URIs. | host `config/initializers/doorkeeper.rb` |
+| 7 | **Force SSL, without `assume_ssl`.** `config.force_ssl = true`. Do **not** set `config.assume_ssl = true` behind Heroku's router: it tells Rails every request arrived over https, so `force_ssl` never redirects and the app serves plain http. The router's `X-Forwarded-Proto` already tells Rails the truth. | host `config/environments/production.rb` |
+| 8 | **Doorkeeper `force_ssl_in_redirect_uri`.** `{ \|uri\| RailsMcp::RedirectUris.force_ssl?(uri) }`: https in production except loopback, where Claude Code listens. If you ever introduce a staging environment with `RAILS_ENV` != `production`, switch to an explicit rule so staging doesn't accept plain-`http://` redirect URIs. | host `config/initializers/doorkeeper.rb` |
+| 8a | **Doorkeeper `access_token_methods :from_bearer_authorization`**, so no Doorkeeper-protected endpoint accepts a token in the URL. | host `config/initializers/doorkeeper.rb` |
 | 9 | **Rate limit middleware** (Rack::Attack) — see *Opt-in helpers* above. | host `config/application.rb` + initializer |
 | 10 | **Error monitoring.** Add an error reporter (Sentry recommended — `gem "sentry-rails"`) and configure it to scrub bearer tokens / secrets before send. The engine ships no reporter. | host `Gemfile` + initializer |
 | 11 | **Identity-provider OAuth state validation.** Generate `SecureRandom.hex(16)` (or larger) into `session[:<provider>_oauth_state]` on `/connect`, compare on callback (and `session.delete` the key — single use). | host `app/controllers/<provider>_oauth_controller.rb` |
@@ -160,7 +224,6 @@ When `xero-mcp-rails` (or any future host) adopts the engine, it must add `use_d
 The engine has its own RSpec suite with a minimal Rails dummy app under `spec/dummy`.
 
 ```sh
-cd engines/rails_mcp
 cd spec/dummy && bin/rails db:create db:migrate RAILS_ENV=test && cd ../..
 bundle exec rspec
 ```

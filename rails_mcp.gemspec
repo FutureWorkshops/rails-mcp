@@ -5,7 +5,7 @@ Gem::Specification.new do |spec|
   spec.version     = RailsMcp::VERSION
   spec.authors     = [ "Future Workshops" ]
   spec.email       = [ "dev@futureworkshops.com" ]
-  spec.summary     = "Rails engine providing MCP server scaffolding, OAuth provider, identity model, invitations, onboarding, and team management."
+  spec.summary     = "Rails engine providing MCP server scaffolding, an OAuth provider with dynamic client registration, and Groundwork SSO with identity mirroring."
   spec.license     = "MIT"
 
   spec.files       = Dir["{app,config,db,lib}/**/*", "README.md"].reject { |f| File.directory?(f) }

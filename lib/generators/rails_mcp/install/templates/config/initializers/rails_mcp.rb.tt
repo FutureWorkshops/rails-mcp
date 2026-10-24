@@ -23,9 +23,26 @@ RailsMcp.configure do |c|
   c.sign_in_path = ->(_request) { "/cowork_hub/connect" }
 
   # Refresh-token policy: tokens unused for 30 days are refused, and each
-  # refresh asks the identity provider whether the user is still active.
+  # refresh (and each consent screen, and each sign-in) asks the identity
+  # provider about the user. A leaver is refused and has every token
+  # revoked; a demotion or a removal from one organisation updates the
+  # local role and account; if the identity provider can't be asked, the
+  # request is refused for now and reported.
   c.refresh_token_idle_days = 30
   c.identity_status = ->(user) { CoworkHubOauthController.identity_status(user) }
+
+  # When a leaver is detected, delete the upstream <%= provider_human %> tokens
+  # they connected, so nothing of theirs can be used again.
+  c.on_user_deactivated = ->(user) { user.connections.destroy_all }
+
+  # Browser sessions last at most this long before the person signs in
+  # through Cowork Hub again (the engine default is 12 hours).
+  # c.session_lifetime = 12.hours
+
+  # Self-registered OAuth clients may only send codes to Claude's own
+  # callbacks, loopback, and https hosts listed here. Defaults to the
+  # comma-separated OAUTH_DCR_ALLOWED_REDIRECT_HOSTS environment variable.
+  # c.allowed_redirect_hosts = %w[grok.com]
 
 
   # Optional: map per-tool exceptions to user-facing strings. Returning nil

@@ -15,6 +15,12 @@ RSpec.describe RailsMcp::ClientTrust do
     expect(described_class.trusted?("not a uri")).to be(false)
   end
 
+  it "does not trust loopback over https, or loopback lists, as a known client (ENG-08)" do
+    expect(described_class.trusted?("https://localhost/cb")).to be(false)
+    expect(described_class.trusted?("https://127.0.0.1:8443/cb")).to be(false)
+    expect(described_class.trusted?("http://claude.ai/api/mcp/auth_callback")).to be(false)
+  end
+
   it "reports the redirect host" do
     expect(described_class.redirect_host("https://Claude.AI/cb")).to eq("claude.ai")
   end
