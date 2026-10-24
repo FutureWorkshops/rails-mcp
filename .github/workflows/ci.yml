@@ -1,0 +1,69 @@
+name: CI
+
+on:
+  workflow_call:
+  pull_request:
+  push:
+    branches: [ main ]
+
+jobs:
+  scan_ruby:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v7
+
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          bundler-cache: true
+
+      # Every host app inherits this gem's dependency tree, so a vulnerable
+      # gem here is a vulnerable gem in each MCP server built on it.
+      - name: Scan for known security vulnerabilities in gems used
+        run: bundle exec bundler-audit check --update
+
+  test:
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd="pg_isready"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
+
+    env:
+      RAILS_ENV: test
+      PGHOST: localhost
+      PGUSER: postgres
+      PGPASSWORD: postgres
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v7
+
+      - name: Install packages
+        run: sudo apt-get update && sudo apt-get install --no-install-recommends -y libpq-dev
+
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          bundler-cache: true
+
+      # The engine's specs run against the minimal dummy app in spec/dummy,
+      # migrated from the engine's own db/migrate (see README).
+      - name: Prepare the test database
+        working-directory: spec/dummy
+        run: bin/rails db:create db:migrate
+
+      - name: Run the test suite
+        run: bundle exec rspec

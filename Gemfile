@@ -7,4 +7,5 @@ group :development, :test do
   gem "pg", "~> 1.1"
   gem "puma"
   gem "debug", platforms: %i[ mri windows ], require: "debug/prelude"
+  gem "bundler-audit", require: false
 end

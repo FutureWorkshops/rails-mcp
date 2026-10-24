@@ -165,4 +165,4 @@ cd spec/dummy && bin/rails db:create db:migrate RAILS_ENV=test && cd ../..
 bundle exec rspec
 ```
 
-The host's CI doesn't run the engine specs today. Run them whenever you change engine code.
+GitHub Actions runs these specs and `bundler-audit` on every push to main and pull request (`.github/workflows/ci.yml`), and again every Friday night (`weekly-ci.yml`). Host apps' CI doesn't run them, so run them locally whenever you change engine code.

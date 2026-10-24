@@ -1,0 +1,13 @@
+name: Weekly CI
+
+# Full CI sweep every Friday night, so dependency or upstream drift (a new
+# advisory against a locked gem, a Rails or Doorkeeper change) is caught even
+# in weeks where nothing was pushed.
+on:
+  schedule:
+    - cron: "0 22 * * 5" # Fridays at 22:00 UTC
+  workflow_dispatch:
+
+jobs:
+  ci:
+    uses: ./.github/workflows/ci.yml
