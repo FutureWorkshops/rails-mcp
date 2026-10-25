@@ -33,29 +33,61 @@ module RailsMcp
     def self.state_session_key  = :rails_mcp_oauth_client_state
     def self.mirror_account_column = :groundwork_account_id
 
-    # IdP endpoint for the "is this user still active?" check (Groundwork:
-    # POST /oauth/user_status). nil disables the check.
+    # IdP endpoint for the standing check (Groundwork: POST
+    # /oauth/user_status). nil disables the check.
     def self.user_status_url = nil
 
-    # :active / :inactive per the IdP, or :unknown when the check isn't
-    # configured or the IdP can't be reached (callers let :unknown through).
+    # Timeouts for every call to the IdP, so a hung Groundwork can't pin a
+    # Puma thread for Net::HTTP's default minute.
+    def self.http_open_timeout = 3
+    def self.http_read_timeout = 5
+
+    # What the IdP says about this user now, as a RailsMcp::IdentityStanding,
+    # or nil when no user_status_url is configured (no check).
+    #
+    # Asks for the user's memberships too (`include=memberships`). A
+    # Groundwork that knows the parameter answers with `accounts` (id, name
+    # and role per account) and `home_account_id`, which lets the engine
+    # follow a demotion or a removal from one organisation; an older one
+    # ignores it and answers `active` alone, and only that is acted on.
+    #
+    # 200 is the answer. 404 means the IdP has no record of this user
+    # authorising this app (or no such user), so it is treated as inactive.
+    # Anything else, or no answer, is :unknown, which callers refuse on.
     def self.identity_status(user)
-      return :unknown if user_status_url.blank? || user.identity_id.blank?
+      return nil if user_status_url.blank?
+      return RailsMcp::IdentityStanding.new(:unknown, reason: "user has no identity id") if user.identity_id.blank?
 
       uri = URI(user_status_url)
       request = Net::HTTP::Post.new(uri)
       request.basic_auth(client_id, client_secret)
-      request.set_form_data(sub: user.identity_id)
+      request.set_form_data(sub: user.identity_id, include: "memberships")
       response = Net::HTTP.start(uri.hostname, uri.port, use_ssl: uri.scheme == "https",
-                                 open_timeout: 3, read_timeout: 5) { |http| http.request(request) }
+                                 open_timeout: http_open_timeout, read_timeout: http_read_timeout) { |http| http.request(request) }
 
-      return :unknown unless response.code == "200"
-
-      JSON.parse(response.body)["active"] == true ? :active : :inactive
+      case response.code
+      when "200" then standing_from(JSON.parse(response.body))
+      when "404" then RailsMcp::IdentityStanding.new(:inactive, reason: "HTTP 404")
+      else RailsMcp::IdentityStanding.new(:unknown, reason: "HTTP #{response.code}")
+      end
     rescue StandardError => e
-      Rails.logger.warn("[rails_mcp] identity status check failed: #{e.class}: #{e.message}")
-      :unknown
+      RailsMcp::IdentityStanding.new(:unknown, reason: e.class.name)
     end
+
+    def self.standing_from(body)
+      return RailsMcp::IdentityStanding.new(:unknown, reason: "unexpected response") unless body.is_a?(Hash)
+      return RailsMcp::IdentityStanding.new(:inactive, reason: "inactive") unless body["active"] == true
+
+      accounts = body["accounts"].is_a?(Array) ? body["accounts"].select { |a| a.is_a?(Hash) && a["id"].present? } : nil
+      RailsMcp::IdentityStanding.new(
+        :active,
+        accounts: accounts,
+        home_account_id: body["home_account_id"],
+        mirror_account_column: mirror_account_column
+      )
+    end
+
+    SIGN_IN_FAILED = "Sign-in failed. Please try again.".freeze
 
     # ---- Actions ----------------------------------------------------------
 
@@ -80,22 +112,37 @@ module RailsMcp
       end
 
       if params[:error].present?
-        return redirect_to root_path, alert: "Sign-in failed: #{params[:error]}"
+        Rails.logger.warn("#{self.class.name} sign-in refused by the identity provider: #{params[:error].to_s.first(100)}")
+        return redirect_to root_path, alert: SIGN_IN_FAILED
       end
 
       tokens   = exchange_code(params[:code])
       identity = fetch_userinfo(tokens.fetch(:access_token))
       user     = upsert_user(identity)
 
+      # Same standing check as the consent screen and every refresh, so
+      # somebody the IdP lets sign in but who belongs to no organisation (or
+      # whose role has changed since userinfo was cached) is handled the same
+      # way here. :unknown is let through: they authenticated at the IdP a
+      # moment ago, and authorize and refresh both fail closed on it.
+      outcome, standing = RailsMcp::IdentityCheck.check(user)
+      if outcome == :inactive
+        RailsMcp::IdentityCheck.deactivate!(user, reason: "sign-in#{" (#{standing.reason})" if standing&.reason}")
+        reset_session
+        return redirect_to root_path, alert: "Your account no longer gives you access to #{RailsMcp.config.display_name}."
+      end
+
       return_to = session[:return_to]
       reset_session
-      session[:user_id] = user.id
+      RailsMcp::Authentication.start_session(session, user)
 
       redirect_to safe_return_to(return_to) || after_sign_in_path,
                   notice: "Signed in as #{user.email}."
     rescue StandardError => e
+      # The detail (which can quote an upstream response body) goes to the
+      # log, never to the person signing in.
       Rails.logger.error("#{self.class.name} callback failed: #{e.class}: #{e.message}")
-      redirect_to root_path, alert: "Sign-in failed: #{e.message}"
+      redirect_to root_path, alert: SIGN_IN_FAILED
     end
 
     private
@@ -115,28 +162,34 @@ module RailsMcp
     end
 
     def exchange_code(code)
-      response = Net::HTTP.post_form(
-        URI(self.class.token_url),
+      uri = URI(self.class.token_url)
+      request = Net::HTTP::Post.new(uri)
+      request.set_form_data(
         grant_type:    "authorization_code",
         code:          code,
         redirect_uri:  self.class.redirect_uri,
         client_id:     self.class.client_id,
         client_secret: self.class.client_secret
       )
+      response = idp_request(uri, request)
+      raise "Token exchange failed: HTTP #{response.code}" if response.code != "200"
 
-      body = JSON.parse(response.body)
-      raise "Token exchange failed: #{body['error'] || response.code}" if response.code != "200"
-
-      { access_token: body.fetch("access_token") }
+      { access_token: JSON.parse(response.body).fetch("access_token") }
     end
 
     def fetch_userinfo(access_token)
       uri = URI(self.class.userinfo_url)
-      req = Net::HTTP::Get.new(uri, "Authorization" => "Bearer #{access_token}", "Accept" => "application/json")
-      response = Net::HTTP.start(uri.hostname, uri.port, use_ssl: uri.scheme == "https") { |h| h.request(req) }
+      request = Net::HTTP::Get.new(uri, "Authorization" => "Bearer #{access_token}", "Accept" => "application/json")
+      response = idp_request(uri, request)
       raise "Failed to fetch identity: HTTP #{response.code}" if response.code != "200"
 
       JSON.parse(response.body)
+    end
+
+    def idp_request(uri, request)
+      Net::HTTP.start(uri.hostname, uri.port, use_ssl: uri.scheme == "https",
+                      open_timeout: self.class.http_open_timeout,
+                      read_timeout: self.class.http_read_timeout) { |http| http.request(request) }
     end
 
     def upsert_user(identity)

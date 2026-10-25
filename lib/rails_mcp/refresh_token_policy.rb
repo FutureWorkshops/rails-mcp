@@ -5,16 +5,36 @@ module RailsMcp
     def type = :invalid_grant
   end
 
+  # Raised when the identity provider can't confirm the user's standing.
+  # Answered with 503 `temporarily_unavailable` rather than `invalid_grant`,
+  # and the refresh token is left as it was, so the client can retry once the
+  # IdP is back instead of the user having to reconnect.
+  class RefreshUnavailable < Doorkeeper::Errors::DoorkeeperError
+    class Response < Doorkeeper::OAuth::ErrorResponse
+      def status = :service_unavailable
+    end
+
+    def type = :temporarily_unavailable
+
+    def response
+      Response.new(name: type)
+    end
+  end
+
   # Policy applied to every refresh_token grant (prepended onto
   # Doorkeeper::OAuth::RefreshTokenRequest by the engine):
   #
   # - Idle expiry: a refresh token older than config.refresh_token_idle_days
   #   is refused. Each refresh issues a new token row, so a token's age is the
   #   time since the connection was last used.
-  # - Leavers: config.identity_status is asked whether the user is still
-  #   active at the identity provider (Groundwork). :inactive refuses the
-  #   refresh and revokes all of the user's tokens; :unknown (IdP unreachable,
-  #   not configured) lets it through so an IdP outage can't lock users out.
+  # - Standing: config.identity_status is asked about the user (see
+  #   RailsMcp::IdentityCheck). Inactive refuses the refresh, revokes all of
+  #   the user's tokens and runs on_user_deactivated. When the IdP sends
+  #   memberships, the local role and mirrored account are updated first, so
+  #   a demotion takes effect on this refresh. Unknown (IdP unreachable or
+  #   answering with an error) refuses the refresh without revoking, and is
+  #   logged and reported: failing open let every leaver keep refreshing for
+  #   as long as Groundwork was unreachable or the app's secret was wrong.
   # - Reuse detection: presenting a refresh token that has already been
   #   rotated away revokes every token that user holds for that client, the
   #   standard response to a possibly stolen refresh token.
@@ -27,16 +47,23 @@ module RailsMcp
         raise RefreshRefused, "refresh token idle for more than #{days} days"
       end
 
-      checker = RailsMcp.config.identity_status
-      return unless checker
+      return unless RailsMcp.config.identity_status
 
       user = RailsMcp::User.find_by(id: token.resource_owner_id)
-      status = user ? checker.call(user) : :inactive
-      return unless status == :inactive
+      unless user
+        revoke_all_for_owner!(token.resource_owner_id)
+        raise RefreshRefused, "user no longer exists"
+      end
 
-      revoke_all_for_owner!(token.resource_owner_id)
-      Rails.logger.warn("[rails_mcp] refresh refused: user #{token.resource_owner_id} is no longer active at the identity provider")
-      raise RefreshRefused, "user is no longer active"
+      outcome, standing = RailsMcp::IdentityCheck.check(user)
+      case outcome
+      when :inactive
+        RailsMcp::IdentityCheck.deactivate!(user, reason: "refresh#{" (#{standing.reason})" if standing&.reason}")
+        raise RefreshRefused, "user is no longer active"
+      when :unknown
+        RailsMcp::IdentityCheck.report_unknown(user, standing, where: "refresh")
+        raise RefreshUnavailable, "identity provider unavailable"
+      end
     end
 
     def revoke_family!(token)

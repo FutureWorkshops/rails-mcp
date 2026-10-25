@@ -251,4 +251,52 @@ RSpec.describe "MCP JSON-RPC dispatcher", type: :request do
       expect(response.body).not_to include("symbolize_keys")
     end
   end
+
+  describe "endpoint hardening (ENG-05, ENG-07)" do
+    let(:user) { make_user }
+    let(:token) { issue_access_token_for(user) }
+
+    it "refuses an access token in the query string, even a valid one" do
+      post "/mcp?access_token=#{token.plaintext_token}",
+           params: { jsonrpc: "2.0", id: 1, method: "initialize" }.to_json,
+           headers: { "CONTENT_TYPE" => "application/json" }
+
+      expect(response).to have_http_status(:bad_request)
+      expect(response.parsed_body.dig("error", "message")).to include("Authorization header")
+    end
+
+    it "does not take a token from a form body either" do
+      post "/mcp", params: { access_token: token.plaintext_token }
+      expect(response).to have_http_status(:unauthorized)
+    end
+
+    it "refuses a body over the limit with 413 before authenticating" do
+      RailsMcp.config.mcp_max_body_bytes = 1_000
+      post "/mcp", params: { jsonrpc: "2.0", id: 1, method: "initialize", pad: "x" * 2_000 }.to_json,
+                   headers: { "CONTENT_TYPE" => "application/json" }
+
+      expect(response).to have_http_status(:content_too_large)
+    end
+
+    it "accepts a body under the limit" do
+      RailsMcp.config.mcp_max_body_bytes = 1_000
+      mcp_call({ jsonrpc: "2.0", id: 1, method: "initialize" }, token: token)
+      expect(response).to have_http_status(:ok)
+    end
+
+    it "never parses the JSON body of an unauthenticated request into params" do
+      seen = nil
+      subscriber = ActiveSupport::Notifications.subscribe("start_processing.action_controller") do |*, payload|
+        seen = payload[:params] if payload[:controller] == "RailsMcp::McpController"
+      end
+
+      post "/mcp", params: { jsonrpc: "2.0", id: 1, method: "initialize", big: Array.new(1_000) { |i| { i => i } } }.to_json,
+                   headers: { "CONTENT_TYPE" => "application/json" }
+
+      expect(response).to have_http_status(:unauthorized)
+      expect(seen.keys).not_to include("jsonrpc", "big")
+    ensure
+      ActiveSupport::Notifications.unsubscribe(subscriber)
+    end
+  end
 end

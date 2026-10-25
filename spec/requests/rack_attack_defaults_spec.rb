@@ -20,13 +20,13 @@ RSpec.describe "Rack::Attack defaults", type: :request do
     it "throttles after the configured limit" do
       2.times do |i|
         post "/oauth/register",
-          params: { redirect_uris: [ "https://c#{i}.example.com/cb" ] }.to_json,
+          params: { redirect_uris: [ "http://127.0.0.1:#{4000 + i}/cb" ] }.to_json,
           headers: { "CONTENT_TYPE" => "application/json", "REMOTE_ADDR" => "1.2.3.4" }
         expect(response).to have_http_status(:created)
       end
 
       post "/oauth/register",
-        params: { redirect_uris: [ "https://c.example.com/cb" ] }.to_json,
+        params: { redirect_uris: [ "http://127.0.0.1:5000/cb" ] }.to_json,
         headers: { "CONTENT_TYPE" => "application/json", "REMOTE_ADDR" => "1.2.3.4" }
       expect(response).to have_http_status(:too_many_requests)
     end
@@ -34,13 +34,13 @@ RSpec.describe "Rack::Attack defaults", type: :request do
     it "isolates throttle buckets per IP" do
       2.times do |i|
         post "/oauth/register",
-          params: { redirect_uris: [ "https://c#{i}.example.com/cb" ] }.to_json,
+          params: { redirect_uris: [ "http://127.0.0.1:#{4000 + i}/cb" ] }.to_json,
           headers: { "CONTENT_TYPE" => "application/json", "REMOTE_ADDR" => "1.1.1.1" }
         expect(response).to have_http_status(:created)
       end
 
       post "/oauth/register",
-        params: { redirect_uris: [ "https://other.example.com/cb" ] }.to_json,
+        params: { redirect_uris: [ "http://127.0.0.1:5001/cb" ] }.to_json,
         headers: { "CONTENT_TYPE" => "application/json", "REMOTE_ADDR" => "9.9.9.9" }
       expect(response).to have_http_status(:created)
     end

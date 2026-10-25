@@ -1,6 +1,9 @@
 module RailsMcp
   class McpController < ApplicationController
     skip_before_action :verify_authenticity_token, raise: false
+    # Cheap refusals first: an oversized body, or a token in the query string.
+    before_action :refuse_oversized_body
+    before_action :refuse_token_outside_header
     # Require either read or write at the OAuth provider level; the per-tool
     # check inside handle_tool_call decides which of the two is actually needed.
     before_action -> { doorkeeper_authorize! :read, :write }
@@ -12,8 +15,22 @@ module RailsMcp
     # turn one throttled request into any number of upstream API calls.
     MAX_BATCH_SIZE = 20
 
+    # Rails never parses the JSON body into params here (ENG-05). Left to
+    # itself it did so for the "Parameters:" log line, before the bearer
+    # token was checked, so an unauthenticated POST of any size cost memory
+    # in proportion. The body is parsed by #handle alone, which only runs
+    # once the token and the size limit have passed. Clearing the request
+    # parameters also means a token in a form body is never seen.
+    def process_action(*)
+      request.request_parameters = {}
+      super
+    end
+
     def handle
-      body = JSON.parse(request.raw_post)
+      raw = request.raw_post
+      return render_too_large if raw.bytesize > RailsMcp.config.mcp_max_body_bytes
+
+      body = JSON.parse(raw)
 
       if body.is_a?(Array)
         return render(json: json_error(nil, -32600, "Invalid Request: empty batch"), status: :bad_request) if body.empty?
@@ -44,6 +61,25 @@ module RailsMcp
     end
 
     private
+
+    def refuse_oversized_body
+      render_too_large if request.content_length.to_i > RailsMcp.config.mcp_max_body_bytes
+    end
+
+    def render_too_large
+      render json: json_error(nil, -32600, "Request too large (max #{RailsMcp.config.mcp_max_body_bytes} bytes)"),
+             status: :content_too_large
+    end
+
+    # Doorkeeper accepts `?access_token=` and `?bearer_token=` unless the host
+    # narrows access_token_methods. A token in a URL ends up in router and
+    # proxy logs, so it is refused here whatever the host's config (ENG-07).
+    def refuse_token_outside_header
+      return unless (request.query_parameters.keys & %w[access_token bearer_token]).any?
+
+      render json: json_error(nil, -32001, "Send the access token in the Authorization header, not the URL"),
+             status: :bad_request
+    end
 
     def require_existing_user
       return if mcp_user

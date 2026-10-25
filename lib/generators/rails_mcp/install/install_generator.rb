@@ -4,7 +4,10 @@ module RailsMcp
   module Generators
     # Scaffolds a new MCP server host on top of the rails_mcp engine. Run from
     # the host's project root, after the engine has been added to the host's
-    # Gemfile:
+    # Gemfile pinned to a release tag (never a branch, see README ->
+    # Versioning):
+    #
+    #   gem "rails_mcp", git: "https://github.com/FutureWorkshops/rails-mcp.git", tag: "v1.0.0"
     #
     #   bin/rails generate rails_mcp:install <Provider>
     #
@@ -157,7 +160,10 @@ module RailsMcp
 
           # --- rails_mcp:install additions ---
 
-          config.assume_ssl = true
+          # No config.assume_ssl: Heroku's router sets X-Forwarded-Proto, so
+          # Rails already knows which requests arrived over https. assume_ssl
+          # tells Rails every request did, which turns force_ssl into a no-op
+          # and leaves the app serving plain http.
           config.force_ssl  = true
           config.ssl_options = {
             hsts: { expires: 2.years, subdomains: true, preload: true },
@@ -191,6 +197,10 @@ module RailsMcp
         say <<~NEXT
 
           Next steps the generator can't do for you:
+
+            0. Check the rails_mcp line in your Gemfile is pinned to a release
+               tag (tag: "vX.Y.Z"), not branch: "main". See the engine README
+               -> Versioning.
 
             1. Fill in OAuth URLs in app/controllers/#{provider_slug}_oauth_controller.rb
                (AUTHORIZE_URL, TOKEN_URL, USERINFO_URL, scope string).

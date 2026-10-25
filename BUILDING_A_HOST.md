@@ -12,7 +12,7 @@ That's it. The generator handles routes, controllers, models, the API client ske
 
 > **Copy-paste prompt for Claude Code**
 >
-> Read `engines/rails_mcp/BUILDING_A_HOST.md`, then build an MCP server for **`<service name>`** in this directory.
+> Read `BUILDING_A_HOST.md` in the rails_mcp engine (github.com/FutureWorkshops/rails-mcp), then build an MCP server for **`<service name>`** in this directory.
 >
 > - API base URL: `<…>`
 > - OAuth provider documentation: `<…>`
@@ -28,13 +28,14 @@ That's it. The generator handles routes, controllers, models, the API client ske
 - PostgreSQL.
 - Heroku CLI (`heroku login`).
 - A fresh Rails 8 app: `rails new <provider>-mcp-rails -d=postgresql --skip-jbuilder`.
-- The `rails_mcp` engine, available as a path or git gem.
+- The `rails_mcp` engine as a git gem pinned to a release tag (see the engine README, **Versioning**). Never `branch: "main"`: a host tracking a branch picks up whatever was last merged on its next `bundle update`.
 
 ## One-line install
 
 ```sh
-# In your fresh Rails app's Gemfile:
-gem "rails_mcp", path: "../basecamp-mcp-rails/engines/rails_mcp"   # or git:
+# In your fresh Rails app's Gemfile, pinned to the latest release tag
+# (https://github.com/FutureWorkshops/rails-mcp/releases):
+gem "rails_mcp", git: "https://github.com/FutureWorkshops/rails-mcp.git", tag: "v1.0.0"
 
 bundle install
 bin/rails generate rails_mcp:install Gmail
@@ -53,7 +54,7 @@ The argument is your provider's name. `Gmail`, `gmail`, `github_api`, `XeroPayro
 | MCP | `app/mcp/<provider>_tool.rb` (host tool base), `app/mcp/registry.rb` (empty `ALL_TOOLS`), `app/mcp/tools/.keep` |
 | Initializers | `rails_mcp.rb`, `doorkeeper.rb`, `rack_attack.rb`, `content_security_policy.rb`, `app_config.rb`, `zeitwerk.rb` (maps `app/mcp/*` → `Mcp::` namespace) |
 | Views | `layouts/application.html.erb`, `shared/_cowork_tokens.html.erb`, `_fw_logo.html.erb`, `_flash.html.erb`, `sessions/new`, `connections/index`, `tools/index`, `doorkeeper/authorizations/new` |
-| Patches | `config/application.rb` (Rack::Attack middleware), `config/environments/production.rb` (HSTS, `config.hosts`, mailer host) |
+| Patches | `config/application.rb` (Rack::Attack middleware), `config/environments/production.rb` (`force_ssl` without `assume_ssl`, HSTS, `config.hosts`, mailer host) |
 | Procfile | `release: bin/rails db:migrate`, `web: bin/rails server -p ${PORT}` |
 | Gemfile | adds `doorkeeper`, `faraday`, `faraday-retry`, `rspec-rails`, `webmock` |
 
@@ -252,11 +253,11 @@ After every code change, `bin/ci` must pass — rspec + rubocop + brakeman + bun
 
 ## Reference: host security responsibilities
 
-The engine ships defenses for: OAuth scopes per tool, dynamic-client-registration URI validation, RFC 9728 `WWW-Authenticate`, OAuth log redaction. The generator wires in: Faraday timeouts, `reset_session` at sign-in, `APP_HOST`-backed mailer host, CSP, DNS rebinding (`config.hosts`), HSTS preload, `force_ssl + assume_ssl`, and Rack::Attack throttles.
+The engine ships defenses for: OAuth scopes per tool, dynamic-client-registration URI validation, RFC 9728 `WWW-Authenticate`, OAuth log redaction. The generator wires in: Faraday timeouts, `reset_session` at sign-in, `APP_HOST`-backed mailer host, CSP, DNS rebinding (`config.hosts`), HSTS preload, `force_ssl` (deliberately without `assume_ssl`, which would make it a no-op behind Heroku's router), Doorkeeper's header-only tokens, the engine's session lifetime, the leaver hook (`on_user_deactivated`), and Rack::Attack throttles.
 
 What you still own: identity-provider OAuth state validation (already in the generated controller — just don't delete it), token refresh locking (`with_lock` — already in the client service), credentials-key hygiene (`config/master.key` + `config/credentials/*.key` must be `.gitignore`d — Rails generators do this by default), running `bin/ci` before each commit.
 
-See `engines/rails_mcp/README.md` → **Security responsibilities of the host** for the full table.
+See the engine `README.md` → **Security responsibilities of the host** for the full table.
 
 ---
 
@@ -277,6 +278,10 @@ Pick a name from a prefix; the engine sets the annotation hint that the MCP clie
 ---
 
 ## Appendix B — Common pitfalls
+
+- **Tracking the engine by branch** (`branch: "main"`, or a bare `git:` with no ref) → an unreviewed engine change reaches production on the next `bundle update`. Pin `tag: "vX.Y.Z"` and upgrade by reading the CHANGELOG and bumping the tag.
+- **`config.assume_ssl = true` behind Heroku** → Rails believes every request is https, so `force_ssl` never redirects and the app answers plain http. The generator no longer writes it; remove it from older hosts.
+- **Allowing another connector** → self-registered OAuth clients may only redirect to Claude's callbacks, loopback, and https hosts in `OAUTH_DCR_ALLOWED_REDIRECT_HOSTS`. Add the connector's host there (for example `grok.com`) rather than loosening anything in code.
 
 - **`use_doorkeeper` inside the engine mount** → every `POST /oauth/token` 500s with `uninitialized constant RailsMcp::Doorkeeper`. The generator places it at the host's top-level routes block; don't move it into the engine mount.
 - **Missing `reset_session` in the OAuth callback** → session fixation across the privilege boundary. The generated callback has it; don't delete it.

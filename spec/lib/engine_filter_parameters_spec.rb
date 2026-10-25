@@ -1,11 +1,14 @@
 require "rails_helper"
 
 RSpec.describe "RailsMcp::Engine filter_parameters" do
+  # Checked by behaviour, not by list membership: once a request has run,
+  # Rails precompiles the list into a single regexp in place, so a membership
+  # check failed whenever this spec ran after a request spec.
   it "auto-appends OAuth secrets to the host's filter_parameters list" do
-    filter = Rails.application.config.filter_parameters
+    filter = ActiveSupport::ParameterFilter.new(Rails.application.config.filter_parameters)
 
     RailsMcp::Engine::OAUTH_FILTER_PARAMETERS.each do |key|
-      expect(filter).to include(key), "expected #{key.inspect} to be in filter_parameters"
+      expect(filter.filter(key.to_s => "secret")[key.to_s]).to eq("[FILTERED]"), "expected #{key.inspect} to be filtered"
     end
   end
 

@@ -235,4 +235,70 @@ RSpec.describe RailsMcp::OauthClientController, type: :request do
       expect(response).to redirect_to("/connections")
     end
   end
+
+  describe "sign-in hardening (ENG-03, ENG-09)" do
+    def primed_state
+      get "/test_sso/connect"
+      Rack::Utils.parse_query(URI.parse(response.location).query).fetch("state")
+    end
+
+    def stub_identity(accounts: [ { "id" => "100", "name" => "Acme", "role" => "member" } ])
+      allow_any_instance_of(TestSsoController).to receive(:exchange_code).and_return(access_token: "at")
+      allow_any_instance_of(TestSsoController).to receive(:fetch_userinfo).and_return(
+        "sub" => "s-1", "email" => "s@example.com", "name" => "S", "accounts" => accounts
+      )
+    end
+
+    it "stamps the sign-in time the session lifetime is measured from" do
+      freeze_time do
+        stub_identity
+        get "/test_sso/callback", params: { code: "c", state: primed_state }
+        expect(session[:signed_in_at]).to eq(Time.current.to_i)
+        expect(session[:user_id]).to eq(RailsMcp::User.find_by!(identity_id: "s-1").id)
+      end
+    end
+
+    it "shows a fixed sentence, not the IdP's error parameter" do
+      get "/test_sso/callback", params: { state: primed_state, error: "<b>something internal</b>" }
+      expect(flash[:alert]).to eq("Sign-in failed. Please try again.")
+    end
+
+    it "logs an exception's detail but never shows it" do
+      allow_any_instance_of(TestSsoController).to receive(:exchange_code).and_raise(JSON::ParserError, "unexpected token at '<html>secret upstream page'")
+      expect(Rails.logger).to receive(:error).with(/secret upstream page/)
+
+      get "/test_sso/callback", params: { code: "c", state: primed_state }
+
+      expect(flash[:alert]).to eq("Sign-in failed. Please try again.")
+      expect(session[:user_id]).to be_nil
+    end
+
+    it "refuses somebody the identity provider says has left" do
+      stub_identity
+      RailsMcp.config.identity_status = ->(_u) { RailsMcp::IdentityStanding.new(:active, accounts: []) }
+
+      get "/test_sso/callback", params: { code: "c", state: primed_state }
+
+      expect(session[:user_id]).to be_nil
+      expect(flash[:alert]).to include("no longer gives you access")
+    end
+
+    it "lets the sign-in through when the identity provider can't be asked straight afterwards" do
+      stub_identity
+      RailsMcp.config.identity_status = ->(_u) { RailsMcp::IdentityStanding.new(:unknown) }
+
+      get "/test_sso/callback", params: { code: "c", state: primed_state }
+      expect(session[:user_id]).to be_present
+    end
+
+    it "calls the IdP with timeouts" do
+      options = []
+      response = Net::HTTPOK.new("1.1", "200", "")
+      allow(response).to receive(:body).and_return({ access_token: "at" }.to_json)
+      allow(Net::HTTP).to receive(:start) { |*, **opts, &block| options << opts; block.call(double(request: response)) }
+
+      expect(TestSsoController.new.send(:exchange_code, "c")).to eq(access_token: "at")
+      expect(options).to all(include(open_timeout: 3, read_timeout: 5))
+    end
+  end
 end
