@@ -2,7 +2,11 @@
 
 All notable changes to the `rails_mcp` engine. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the engine uses [Semantic Versioning](https://semver.org): see README, **Versioning**. Hosts pin a release tag (`tag: "vX.Y.Z"`), never `branch: "main"`.
 
-## [1.0.0] - Unreleased
+## [Unreleased]
+
+- Development Ruby moved to 4.0.8 (`.ruby-version`). The gem still requires Ruby 3.2 or later, so hosts need no change.
+
+## [1.0.0] - 2026-10-25
 
 The security release from the October 2026 engine audit (findings ENG-01 to ENG-10). Major because registrations, authorizations and refreshes that 0.2.0 accepted are now refused (see Upgrading).
 
