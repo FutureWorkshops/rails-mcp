@@ -72,6 +72,12 @@ module RailsMcp
         copy_file "Procfile", "Procfile"
       end
 
+      # Project instructions for Claude Code: the engine's conventions and
+      # the security code a session must not weaken.
+      def copy_claude_md
+        template "CLAUDE.md.tt", "CLAUDE.md"
+      end
+
       def copy_routes
         template "routes.rb.tt", "config/routes.rb", force: true
       end
@@ -224,9 +230,10 @@ module RailsMcp
 
             8. (Recommended) Wire up error monitoring. Add `gem "sentry-rails"`
                and configure it per the Sentry Rails docs — see
-               engines/rails_mcp/BUILDING_A_HOST.md → Error monitoring.
+               BUILDING_A_HOST.md in the engine repo → Error monitoring.
 
-            9. Heroku deploy — see engines/rails_mcp/BUILDING_A_HOST.md → Deploy.
+            9. Heroku deploy — see BUILDING_A_HOST.md in the engine repo →
+               Heroku deploy.
 
         NEXT
       end

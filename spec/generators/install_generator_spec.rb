@@ -57,6 +57,19 @@ RSpec.describe RailsMcp::Generators::InstallGenerator, type: :generator do
     expect_file "Procfile", "release: bin/rails db:migrate", "bin/rails server"
   end
 
+  it "creates CLAUDE.md with the engine's conventions for Claude Code" do
+    body = expect_file "CLAUDE.md",
+      "# Gmail MCP",
+      "app/mcp/tools/*_tool.rb",
+      "Mcp::GmailTool",
+      "app/services/gmail_client_service.rb",
+      "kebab-case, verb-first",
+      "Pin the engine by tag",
+      "config.assume_ssl",
+      "OAUTH_DCR_ALLOWED_REDIRECT_HOSTS"
+    expect(body).not_to include("<%=")
+  end
+
   it "creates routes.rb mounting the engine + use_doorkeeper outside the engine namespace" do
     body = expect_file "config/routes.rb",
       "mount RailsMcp::Engine",

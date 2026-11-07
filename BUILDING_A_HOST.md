@@ -22,6 +22,17 @@ That's it. The generator handles routes, controllers, models, the API client ske
 >
 > Before you start, ask me for the OAuth `client_id` / `client_secret`, the production `APP_HOST`, and confirmation of the tool list.
 
+## Quick start: one command
+
+```sh
+rails new <provider>-mcp-rails -d=postgresql --skip-jbuilder \
+  -m https://raw.githubusercontent.com/FutureWorkshops/rails-mcp/main/templates/new_host.rb
+```
+
+The application template (`templates/new_host.rb`) does the Gemfile pin and the generator run described below. It asks for the provider name, defaulting to the app name without `-mcp-rails`, and finishes by printing the Claude Code prompt above with the provider filled in. Set `PROVIDER=XeroPayroll` to skip the question, or `RAILS_MCP_TAG=vX.Y.Z` to pin a release other than the latest.
+
+The generated app includes a `CLAUDE.md`, so every Claude Code session in it starts with the engine's conventions: where tools live, kebab-case verb-first tool names, pinning by tag, and the security code it must not weaken.
+
 ## Prerequisites
 
 - Ruby `4.0.8` (`.ruby-version` in the engine repo).
@@ -56,6 +67,7 @@ The argument is your provider's name. `Gmail`, `gmail`, `github_api`, `XeroPayro
 | Views | `layouts/application.html.erb`, `shared/_cowork_tokens.html.erb`, `_fw_logo.html.erb`, `_flash.html.erb`, `sessions/new`, `connections/index`, `tools/index`, `doorkeeper/authorizations/new` |
 | Patches | `config/application.rb` (Rack::Attack middleware), `config/environments/production.rb` (`force_ssl` without `assume_ssl`, HSTS, `config.hosts`, mailer host) |
 | Procfile | `release: bin/rails db:migrate`, `web: bin/rails server -p ${PORT}` |
+| Claude Code | `CLAUDE.md`: layout, commands, tool conventions and the security rules for this host |
 | Gemfile | adds `doorkeeper`, `faraday`, `faraday-retry`, `rspec-rails`, `webmock` |
 
 Everything in there comes from a battle-tested basecamp-mcp-rails template. You do not need to edit any of these files except where a `# TODO` marker is present.
@@ -287,7 +299,7 @@ Pick a name from a prefix; the engine sets the annotation hint that the MCP clie
 - **Missing `reset_session` in the OAuth callback** → session fixation across the privilege boundary. The generated callback has it; don't delete it.
 - **Faraday without timeouts** → a hung upstream pins a Puma worker until Heroku H12 fires at 30s. The generated client service has `OPEN_TIMEOUT`/`READ_TIMEOUT`/`WRITE_TIMEOUT`; don't remove them.
 - **Mailer host left at `localhost`** → `production.rb` is patched to `ENV.fetch("APP_HOST")`; without `APP_HOST` set on Heroku, boot fails loudly. Set the env var before the first deploy.
-- **CSP `form-action` not updated** → the generated CSP has `policy.form_action :self, "https://TODO"`. Replace `"https://TODO"` with your provider's authorize URL host, or the OAuth redirect from the browser will be blocked.
+- **Narrowing CSP `form-action` to `:self`** → the generated CSP has `policy.form_action :self, :https` because approving or denying on the consent screen submits a form that redirects to the MCP client's https callback. Drop `:https` and the browser blocks that redirect, so no client can finish connecting.
 - **Solid Cache / Queue / Cable** on a single `DATABASE_URL` → if you use any of them, generate their schemas via `bin/rails solid_cache:install` (and `solid_queue`, `solid_cable`) then convert the generated schemas into migrations under `db/migrate/` so they land in the primary DB on `release`. See `basecamp-mcp-rails/db/migrate/20260523200001_create_solid_cache_tables.rb` for an example.
 - **Re-running the generator on an existing project** offers Thor's standard overwrite prompts. Always review the diff (`git diff`) before accepting overwrites of files you've customised — particularly the OAuth controller and registry.
 - **Deleting `config/initializers/zeitwerk.rb`** → every request that resolves the tool list 500s with `uninitialized constant Mcp`. The host's `app/mcp/*` files use the `Mcp::` namespace but live in a `app/<root>/*` autoload root by default; the generated initializer remaps the directory so Zeitwerk loads `Mcp::Registry` from `app/mcp/registry.rb` correctly. Keep it.
