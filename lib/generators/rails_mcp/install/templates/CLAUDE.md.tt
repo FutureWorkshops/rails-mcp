@@ -1,0 +1,54 @@
+# <%= provider_human %> MCP
+
+A Model Context Protocol (MCP) server that exposes <%= provider_human %> to Claude and other MCP clients. It is a Rails host app built on Future Workshops' `rails_mcp` engine (https://github.com/FutureWorkshops/rails-mcp).
+
+The engine owns the MCP endpoint (`POST /mcp`), the OAuth provider (Doorkeeper, dynamic client registration, discovery documents), users, accounts, connections, and sign-in via Cowork Hub / Groundwork. This app owns the <%= provider_human %> OAuth connection, the API client, and the tools.
+
+Before changing anything structural, read the engine's `BUILDING_A_HOST.md` and the README section **Security responsibilities of the host**. Both are in the engine repo, or locally at `$(bundle show rails_mcp)`.
+
+## Where things live
+
+| What | Where |
+|---|---|
+| Tools | `app/mcp/tools/*_tool.rb`, one class per file, each inheriting `Mcp::<%= provider_const %>Tool` |
+| Tool list | `app/mcp/registry.rb` (`Mcp::Registry::ALL_TOOLS`). A tool missing from this list is never exposed. |
+| Host tool base class | `app/mcp/<%= provider_slug %>_tool.rb` (API helpers, connection lookup, `<%= provider_const %>ApiError`) |
+| API client | `app/services/<%= provider_slug %>_client_service.rb` (Faraday, timeouts, token refresh under `with_lock`) |
+| <%= provider_human %> OAuth (connecting an account) | `app/controllers/<%= provider_slug %>_oauth_controller.rb` |
+| Sign-in (identity) | `app/controllers/cowork_hub_oauth_controller.rb`, a thin subclass of the engine's `RailsMcp::OauthClientController` |
+| Engine configuration | `config/initializers/rails_mcp.rb` |
+| Credentials accessors | `config/initializers/app_config.rb`, reading the `<%= provider_slug %>:` block from `bin/rails credentials:edit` |
+
+## Commands
+
+- `bin/rails server`, then sign in at `http://localhost:3000` and connect a <%= provider_human %> account. Point an MCP client at `http://localhost:3000/mcp`.
+- `bundle exec rspec` runs the tests.
+- `bin/ci` must pass before every commit: specs, rubocop, brakeman, bundler-audit.
+
+## Writing tools
+
+- Name tools **kebab-case, verb-first**: `list-items`, `get-item`, `search-items`, `create-item`, `update-item`, `delete-item`. The engine derives each tool's read-only / idempotent / destructive annotation and its OAuth scope from the leading verb. A name that doesn't start with a known verb is treated as a non-idempotent write and needs the `write` scope. The prefix table is in `BUILDING_A_HOST.md`, Appendix A.
+- Class name matches the tool name: `list-items` is `Mcp::Tools::ListItemsTool` in `app/mcp/tools/list_items_tool.rb`.
+- Every tool needs `self.tool_name`, `self.description`, `self.input_schema` (a JSON Schema object) and `call(**args)`. Accept `**` in `call` so unknown arguments don't raise.
+- Write descriptions for the model that will call the tool: say what it returns and when to use it rather than a sibling tool.
+- Get the API connection with `client` (or `client(external_id)` when the user has several connected accounts). Never build a Faraday connection inside a tool.
+- Return data through `format_result`. Keep responses small: page large lists and drop fields the model doesn't need.
+- Add every new tool to `ALL_TOOLS` and give it a spec, stubbing <%= provider_human %> with WebMock.
+
+## Rules
+
+- **Pin the engine by tag** in the Gemfile (`tag: "vX.Y.Z"`), never `branch: "main"`. To upgrade, read the engine's CHANGELOG between the two tags, follow any "Upgrading" steps, bump the tag and run `bundle update rails_mcp`.
+- **Don't weaken the generated security code.** Keep:
+  - the OAuth `state` check in the <%= provider_human %> OAuth controller
+  - `with_lock` around token refresh, and the Faraday timeouts in the client service
+  - `use_doorkeeper` in the top level of `config/routes.rb`, outside the engine mount
+  - `config/initializers/zeitwerk.rb`, which maps `app/mcp` to the `Mcp::` namespace
+  - `force_ssl`, HSTS and `config.hosts` in `production.rb`. Don't add `config.assume_ssl`: behind Heroku's router it makes `force_ssl` a no-op.
+- **Never log or return tokens.** Access and refresh tokens, client secrets and bearer headers stay out of logs, error messages and tool output.
+- **Allowing another MCP client** to register: add its redirect host to `OAUTH_DCR_ALLOWED_REDIRECT_HOSTS`. Don't loosen the redirect URI checks in code.
+- Secrets go in Rails credentials or environment variables, never in the repo. `config/master.key` stays gitignored.
+- When an engine behaviour looks wrong, fix it in the engine (FutureWorkshops/rails-mcp) and release a new tag, rather than monkey-patching it here.
+
+## Still to do after generation
+
+Search the project for `TODO`. The generator leaves markers for the <%= provider_human %> OAuth URLs and scopes (`app/controllers/<%= provider_slug %>_oauth_controller.rb`), the API base URL (`app/services/<%= provider_slug %>_client_service.rb`) and the scope descriptions shown on the consent screen (`config/initializers/rails_mcp.rb`). Delete this section once they're done.

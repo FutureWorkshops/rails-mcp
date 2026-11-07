@@ -4,6 +4,11 @@ All notable changes to the `rails_mcp` engine. The format follows [Keep a Change
 
 ## [Unreleased]
 
+### Added
+- `templates/new_host.rb`, a `rails new -m` application template that creates a host, pins the engine to the latest release tag and runs `rails_mcp:install`.
+- `rails_mcp:install` writes a `CLAUDE.md` into the host with the engine's conventions for Claude Code: where tools live, tool naming, pinning by tag, and the generated security code not to weaken.
+
+### Changed
 - Development Ruby moved to 4.0.8 (`.ruby-version`). The gem still requires Ruby 3.2 or later, so hosts need no change.
 
 ## [1.0.0] - 2026-10-25

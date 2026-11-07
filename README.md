@@ -6,7 +6,14 @@ This README is aimed at engineers wiring the engine into a new host app. The sin
 
 ## Building a new host
 
-If you're bootstrapping a brand-new MCP server on top of this engine (Gmail, GitHub, Microsoft Graph, …), use the install generator:
+If you're bootstrapping a brand-new MCP server on top of this engine (Gmail, GitHub, Microsoft Graph, …), the quickest start is the application template, which creates the app, pins the engine to the latest release tag and runs the install generator in one step:
+
+```sh
+rails new gmail-mcp-rails -d=postgresql --skip-jbuilder \
+  -m https://raw.githubusercontent.com/FutureWorkshops/rails-mcp/main/templates/new_host.rb
+```
+
+To add the engine to an app you've already created, use the install generator directly:
 
 ```sh
 # In a fresh Rails app, after adding the engine to the Gemfile pinned to a
@@ -16,7 +23,7 @@ bundle install
 bin/rails generate rails_mcp:install <Provider>
 ```
 
-The generator writes routes, controllers, models, the API client skeleton, the host tool base class, every security initializer, the views, the Procfile, and patches `application.rb` + `production.rb`. After it runs you fill in 4 `# TODO` markers (OAuth URLs + scopes + API base), add credentials, write your tools, and deploy.
+The generator writes routes, controllers, models, the API client skeleton, the host tool base class, every security initializer, the views, the Procfile and a `CLAUDE.md` for Claude Code, and patches `application.rb` + `production.rb`. After it runs you fill in 4 `# TODO` markers (OAuth URLs + scopes + API base), add credentials, write your tools, and deploy.
 
 The full walkthrough lives at [`BUILDING_A_HOST.md`](BUILDING_A_HOST.md). This README describes the engine's API surface and the security boundary; the build guide describes how to use the generator and what's left to do afterwards.
 
@@ -47,7 +54,7 @@ gem "rails_mcp", git: "https://github.com/FutureWorkshops/rails-mcp.git", tag: "
 
 `branch: "main"` (or no ref at all) means whatever was last merged reaches production on the host's next `bundle update`, unreviewed by the host and with no record of which engine a deploy ran. A tag makes each engine upgrade a deliberate, reviewable Gemfile change in the host. To upgrade, read the CHANGELOG entries between your tag and the new one, follow any "Upgrading" steps, bump the tag and run `bundle update rails_mcp`.
 
-Releasing: merge the release PR (it bumps `lib/rails_mcp/version.rb` and moves the CHANGELOG's Unreleased entries under the new version), then tag the merge commit `git tag -a vX.Y.Z -m "rails_mcp vX.Y.Z"`, push the tag, and create the GitHub release from the CHANGELOG entry.
+Releasing: merge the release PR (it bumps `lib/rails_mcp/version.rb` and `RAILS_MCP_TAG` in `templates/new_host.rb`, and moves the CHANGELOG's Unreleased entries under the new version), then tag the merge commit `git tag -a vX.Y.Z -m "rails_mcp vX.Y.Z"`, push the tag, and create the GitHub release from the CHANGELOG entry.
 
 ## Mounting the engine
 

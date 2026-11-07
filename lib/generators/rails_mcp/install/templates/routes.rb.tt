@@ -6,7 +6,7 @@ Rails.application.routes.draw do
 
   # Doorkeeper's OAuth-provider routes (/oauth/authorize, /oauth/token, etc.).
   # MUST be declared here at the top level, not inside the engine mount —
-  # see engines/rails_mcp/README.md → "Why use_doorkeeper isn't inside the engine".
+  # see the rails_mcp README → "Why use_doorkeeper isn't inside the engine".
   use_doorkeeper
 
   root "sessions#new"
