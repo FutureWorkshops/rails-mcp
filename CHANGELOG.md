@@ -2,7 +2,7 @@
 
 All notable changes to the `rails_mcp` engine. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the engine uses [Semantic Versioning](https://semver.org): see README, **Versioning**. Hosts pin a release tag (`tag: "vX.Y.Z"`), never `branch: "main"`.
 
-## [Unreleased]
+## [1.1.1] - 2026-11-07
 
 Fixes to `rails_mcp:install` and `templates/new_host.rb` found building trading212-mcp-rails. The engine itself is unchanged; existing hosts need no change.
 
@@ -106,6 +106,7 @@ Tagged after the fact at `c52c3d3`, the commit the FW MCP hosts ran in October 2
 
 First tagged version: the MCP JSON-RPC dispatcher at `POST /mcp`, the Doorkeeper OAuth provider with RFC 7591 dynamic client registration, RFC 8414 and RFC 9728 discovery documents, the `Account` / `User` / `Connection` identity model, `RailsMcp::BaseTool` and `Registry`, `RackAttackDefaults`, and the `rails_mcp:install` generator.
 
+[1.1.1]: https://github.com/FutureWorkshops/rails-mcp/compare/v1.1.0...v1.1.1
 [1.1.0]: https://github.com/FutureWorkshops/rails-mcp/compare/v1.0.0...v1.1.0
 [1.0.0]: https://github.com/FutureWorkshops/rails-mcp/compare/v0.2.0...v1.0.0
 [0.2.0]: https://github.com/FutureWorkshops/rails-mcp/compare/v0.1.0...v0.2.0
