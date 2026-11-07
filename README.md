@@ -18,7 +18,7 @@ To add the engine to an app you've already created, use the install generator di
 ```sh
 # In a fresh Rails app, after adding the engine to the Gemfile pinned to a
 # release tag (see Versioning):
-#   gem "rails_mcp", git: "https://github.com/FutureWorkshops/rails-mcp.git", tag: "v1.1.1"
+#   gem "rails_mcp", git: "https://github.com/FutureWorkshops/rails-mcp.git", tag: "v1.2.0"
 bundle install
 bin/rails generate rails_mcp:install <Provider>
 ```
@@ -49,7 +49,7 @@ Hosts pin the engine **by tag**, never by branch:
 
 ```ruby
 # Gemfile
-gem "rails_mcp", git: "https://github.com/FutureWorkshops/rails-mcp.git", tag: "v1.1.1"
+gem "rails_mcp", git: "https://github.com/FutureWorkshops/rails-mcp.git", tag: "v1.2.0"
 ```
 
 `branch: "main"` (or no ref at all) means whatever was last merged reaches production on the host's next `bundle update`, unreviewed by the host and with no record of which engine a deploy ran. A tag makes each engine upgrade a deliberate, reviewable Gemfile change in the host. To upgrade, read the CHANGELOG entries between your tag and the new one, follow any "Upgrading" steps, bump the tag and run `bundle update rails_mcp`.
@@ -60,7 +60,7 @@ Releasing: merge the release PR (it bumps `lib/rails_mcp/version.rb` and `RAILS_
 
 ```ruby
 # Gemfile (pin to a release tag, see Versioning)
-gem "rails_mcp", git: "https://github.com/FutureWorkshops/rails-mcp.git", tag: "v1.1.1"
+gem "rails_mcp", git: "https://github.com/FutureWorkshops/rails-mcp.git", tag: "v1.2.0"
 
 # config/routes.rb
 mount RailsMcp::Engine => "/"
@@ -139,6 +139,27 @@ Hosts that return a bare `:active` / `:inactive` / `:unknown` from their own `id
 **Refresh tokens.** Unused for `config.refresh_token_idle_days` (default 30; nil disables) they are refused. Replaying one that has already been rotated away revokes every token that user holds for that client.
 
 Manual offboarding: `bin/rails rails_mcp:revoke_user[email]` revokes the user's tokens and deletes their provider connections.
+
+### Usage analytics
+
+Every `tools/call` for a known tool is recorded in `mcp_tool_calls` (`RailsMcp::ToolCall`):
+
+- the user and their mirrored account;
+- the tool, and whether it is read-only;
+- the outcome: `ok`, `error` (with the exception class) or `denied` (missing scope);
+- how long it took;
+- the OAuth client's name.
+
+**Never the arguments or the result.** Unknown tool names aren't recorded, since they are whatever the client sent. A failed write is reported through `Rails.error` and never fails the call. `config.record_tool_calls = false` switches recording off.
+
+`RailsMcp::UsageReportJob` runs daily (schedule it in `config/recurring.yml`; the generator does). It does two things:
+
+- Sends Groundwork the counts for today and the three days before. These go to `POST /oauth/mcp_usage` with the client's credentials, the same as the standing check, through `config.usage_reporter = -> { GroundworkOauthController.report_usage }`.
+- Deletes rows older than `config.tool_call_retention` (90 days).
+
+People go as their Groundwork id and organisations as the mirrored Groundwork account id, never email. Groundwork replaces the days a report covers, so a resend never double counts and a missed run is caught up the next day. The figures appear on Groundwork's `/analytics/mcp`.
+
+`bin/rails rails_mcp:usage[7]` prints this host's counts. `bin/rails rails_mcp:push_usage` sends the report now.
 
 ### The MCP endpoint
 

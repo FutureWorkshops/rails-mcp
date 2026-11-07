@@ -13,4 +13,22 @@ namespace :rails_mcp do
 
     puts "Revoked #{tokens} token(s) and deleted #{connections} connection(s) for #{email}."
   end
+
+  desc "MCP tool calls on this host by tool and outcome. Usage: rails rails_mcp:usage[days] (default 7)"
+  task :usage, [ :days ] => :environment do |_task, args|
+    days = (args[:days].presence || 7).to_i
+    calls = RailsMcp::ToolCall.where(created_at: days.days.ago..)
+    puts "MCP tool calls, last #{days} days: #{calls.count} by #{calls.distinct.count(:user_id)} people"
+    calls.group(:tool_name, :outcome).count.sort_by { |(tool, outcome), n| [ -n, tool, outcome ] }.each do |(tool, outcome), n|
+      puts format("  %-40s %-7s %6d", tool, outcome, n)
+    end
+  end
+
+  desc "Send the usage report to Groundwork now, as the daily RailsMcp::UsageReportJob does"
+  task push_usage: :environment do
+    reporter = RailsMcp.config.usage_reporter
+    abort "No usage_reporter configured (see RailsMcp.config.usage_reporter)." unless reporter
+
+    puts reporter.call.inspect
+  end
 end

@@ -127,11 +127,18 @@ module RailsMcp
       json_success(id, { tools: RailsMcp.config.tool_classes(mcp_user).map(&:tool_definition) })
     end
 
+    # Every call to a known tool is recorded (RailsMcp::ToolCall) in the
+    # `ensure`, whatever happened: ok, error, or denied for want of a scope.
+    # An unknown tool name is not, since the name is whatever the client sent.
     def handle_tool_call(id, params)
       tool_class = RailsMcp.config.tool_classes(mcp_user).find { |t| t.tool_name == params["name"] }
       return json_error(id, -32601, "Unknown tool: #{params['name']}") unless tool_class
 
+      started = Process.clock_gettime(Process::CLOCK_MONOTONIC)
+      outcome = "error"
+
       unless authorized_for_tool?(tool_class)
+        outcome = "denied"
         return json_success(id, {
           content: [ { type: "text", text: insufficient_scope_message(tool_class) } ],
           isError: true
@@ -148,11 +155,34 @@ module RailsMcp
       end
 
       result = tool_class.new(current_user: mcp_user).call(**arguments)
+      outcome = "ok"
       json_success(id, { content: [ { type: "text", text: result.to_s } ], isError: false })
     rescue StandardError => e
+      failure = e
       text = host_error_text(e, tool_class) || default_error_text(e)
       Rails.logger.error("MCP tool call failed: #{e.class}: #{e.message}\n#{e.backtrace&.first(5)&.join("\n")}") unless host_error_text(e, tool_class)
       json_success(id, { content: [ { type: "text", text: text } ], isError: true })
+    ensure
+      record_tool_call(tool_class, outcome, failure, started) if started
+    end
+
+    # Usage analytics must never fail the call it describes, so a write that
+    # fails is reported and dropped.
+    def record_tool_call(tool_class, outcome, failure, started)
+      return unless RailsMcp.config.record_tool_calls
+
+      RailsMcp::ToolCall.create!(
+        user_id:     mcp_user.id,
+        account_id:  mcp_user.account_id,
+        tool_name:   tool_class.tool_name,
+        read_only:   tool_class.annotations[:readOnlyHint] == true,
+        outcome:     outcome,
+        error_class: failure&.class&.name,
+        duration_ms: ((Process.clock_gettime(Process::CLOCK_MONOTONIC) - started) * 1000).round,
+        client_name: doorkeeper_token.application&.name.to_s.first(100).presence
+      )
+    rescue StandardError => e
+      Rails.error.report(e, handled: true, context: { rails_mcp: "tool call not recorded" })
     end
 
     # Read-only tools require the `read` scope; everything else (create/update/

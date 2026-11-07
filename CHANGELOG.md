@@ -2,6 +2,20 @@
 
 All notable changes to the `rails_mcp` engine. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the engine uses [Semantic Versioning](https://semver.org): see README, **Versioning**. Hosts pin a release tag (`tag: "vX.Y.Z"`), never `branch: "main"`.
 
+## [1.2.0] - 2026-11-07
+
+### Upgrading
+
+Bump the tag and add two things:
+
+- In `config/initializers/rails_mcp.rb`: `c.usage_reporter = -> { GroundworkOauthController.report_usage }`.
+- Under `production:` in `config/recurring.yml`: `rails_mcp_usage_report: { class: RailsMcp::UsageReportJob, schedule: every day at 2:30am }`.
+
+The `mcp_tool_calls` migration runs from the gem. Without these two additions, calls are still recorded locally and purged, but never sent.
+
+### Added
+- **Usage analytics.** Every tool call is recorded in `mcp_tool_calls` (`RailsMcp::ToolCall`): user, account, tool, outcome, duration and client, never arguments or results. `RailsMcp::UsageReportJob` sends daily counts to Groundwork's `POST /oauth/mcp_usage` (`OauthClientController.report_usage`, `RailsMcp::UsageReport`) and purges rows past `config.tool_call_retention` (90 days). Also adds `config.record_tool_calls`, `config.usage_reporter` and the rake tasks `rails_mcp:usage` and `rails_mcp:push_usage`. The generator wires the reporter and schedules the job.
+
 ## [1.1.1] - 2026-11-07
 
 Fixes to `rails_mcp:install` and `templates/new_host.rb` found building trading212-mcp-rails. The engine itself is unchanged; existing hosts need no change.

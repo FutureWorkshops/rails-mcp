@@ -35,6 +35,12 @@ RailsMcp.configure do |c|
   # they connected, so nothing of theirs can be used again.
   c.on_user_deactivated = ->(user) { user.connections.destroy_all }
 
+  # Every tool call is recorded here (who, tool, outcome, time taken; never
+  # arguments) and RailsMcp::UsageReportJob, scheduled in
+  # config/recurring.yml, sends Groundwork the daily counts for
+  # /analytics/mcp.
+  c.usage_reporter = -> { GroundworkOauthController.report_usage }
+
   # Browser sessions last at most this long before the person signs in
   # through Groundwork again (the engine default is 12 hours).
   # c.session_lifetime = 12.hours
