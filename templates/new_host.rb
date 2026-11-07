@@ -18,6 +18,16 @@ unless tag.match?(/\Av\d+\.\d+\.\d+\z/)
   raise Thor::Error, "RAILS_MCP_TAG must be a release tag like v1.0.0, got #{tag.inspect}. Hosts never track a branch."
 end
 
+# Inside another project, the new app's bin/rails steps can load that
+# project's bundle instead (rubygems-bundler wraps `rails` in the nearest
+# Gemfile's bundle), so every install step fails on a missing gem.
+parent_gemfile = Pathname(destination_root).parent.ascend.map { |dir| dir.join("Gemfile") }.find(&:exist?)
+if parent_gemfile
+  say "#{parent_gemfile} is above the new app. Delete #{destination_root} and run rails new " \
+      "outside other Ruby projects, e.g. in ~/Development.", :red
+  raise Thor::Error, "refusing to create a host inside #{parent_gemfile.dirname}"
+end
+
 unless options[:database] == "postgresql"
   say "rails_mcp hosts deploy to Heroku Postgres: re-run with -d=postgresql.", :red
   raise Thor::Error, "unsupported database #{options[:database].inspect}"
