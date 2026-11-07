@@ -18,7 +18,7 @@ To add the engine to an app you've already created, use the install generator di
 ```sh
 # In a fresh Rails app, after adding the engine to the Gemfile pinned to a
 # release tag (see Versioning):
-#   gem "rails_mcp", git: "https://github.com/FutureWorkshops/rails-mcp.git", tag: "v1.0.0"
+#   gem "rails_mcp", git: "https://github.com/FutureWorkshops/rails-mcp.git", tag: "v1.1.0"
 bundle install
 bin/rails generate rails_mcp:install <Provider>
 ```
@@ -49,7 +49,7 @@ Hosts pin the engine **by tag**, never by branch:
 
 ```ruby
 # Gemfile
-gem "rails_mcp", git: "https://github.com/FutureWorkshops/rails-mcp.git", tag: "v1.0.0"
+gem "rails_mcp", git: "https://github.com/FutureWorkshops/rails-mcp.git", tag: "v1.1.0"
 ```
 
 `branch: "main"` (or no ref at all) means whatever was last merged reaches production on the host's next `bundle update`, unreviewed by the host and with no record of which engine a deploy ran. A tag makes each engine upgrade a deliberate, reviewable Gemfile change in the host. To upgrade, read the CHANGELOG entries between your tag and the new one, follow any "Upgrading" steps, bump the tag and run `bundle update rails_mcp`.
@@ -60,7 +60,7 @@ Releasing: merge the release PR (it bumps `lib/rails_mcp/version.rb` and `RAILS_
 
 ```ruby
 # Gemfile (pin to a release tag, see Versioning)
-gem "rails_mcp", git: "https://github.com/FutureWorkshops/rails-mcp.git", tag: "v1.0.0"
+gem "rails_mcp", git: "https://github.com/FutureWorkshops/rails-mcp.git", tag: "v1.1.0"
 
 # config/routes.rb
 mount RailsMcp::Engine => "/"

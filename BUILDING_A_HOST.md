@@ -46,7 +46,7 @@ The generated app includes a `CLAUDE.md`, so every Claude Code session in it sta
 ```sh
 # In your fresh Rails app's Gemfile, pinned to the latest release tag
 # (https://github.com/FutureWorkshops/rails-mcp/releases):
-gem "rails_mcp", git: "https://github.com/FutureWorkshops/rails-mcp.git", tag: "v1.0.0"
+gem "rails_mcp", git: "https://github.com/FutureWorkshops/rails-mcp.git", tag: "v1.1.0"
 
 bundle install
 bin/rails generate rails_mcp:install Gmail
