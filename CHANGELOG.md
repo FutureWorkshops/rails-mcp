@@ -2,6 +2,22 @@
 
 All notable changes to the `rails_mcp` engine. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the engine uses [Semantic Versioning](https://semver.org): see README, **Versioning**. Hosts pin a release tag (`tag: "vX.Y.Z"`), never `branch: "main"`.
 
+## [1.2.1] - 2026-11-07
+
+Backward compatible. Fixes how the 1.2.0 usage report gets scheduled on Heroku.
+
+### Upgrading
+
+`config/recurring.yml` only runs where Solid Queue does, and the FW hosts on Heroku run no worker, so on 1.2.0 the report was recorded but never sent. Each host needs a daily Heroku Scheduler job. The seven FW hosts were given one on 7 Nov 2026 running `bin/rails runner "RailsMcp::UsageReportJob.perform_now"`, which keeps working. After bumping to v1.2.1, you can switch the job's command to `bin/rails rails_mcp:daily` in the Scheduler dashboard (`heroku addons:open scheduler -a <app>`).
+
+### Added
+- `bin/rails rails_mcp:daily`, the engine's daily housekeeping for Heroku Scheduler. It runs `RailsMcp::UsageReportJob` and exits non-zero when the report fails, so Scheduler's logs show it. Later daily work joins this task, so the Scheduler job never has to change.
+- `script/heroku-schedule-daily <app> [--dry-run]` adds the Scheduler add-on if it's missing, then a daily 02:30 UTC job running `rails_mcp:daily`. It is safe to re-run. From a host: `"$(bundle show rails_mcp)/script/heroku-schedule-daily" <app>`.
+- `RailsMcp::UsageReportJob#perform` returns `:sent`, `:failed` or `:skipped`.
+
+### Changed
+- README (**Usage analytics**, **Deployment checklist**), BUILDING_A_HOST.md (**Schedule the daily housekeeping**), the generator's next steps, the `recurring.yml` entry and the host `CLAUDE.md` template now cover Heroku Scheduler.
+
 ## [1.2.0] - 2026-11-07
 
 ### Upgrading

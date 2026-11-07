@@ -46,7 +46,7 @@ The generated app includes a `CLAUDE.md`, so every Claude Code session in it sta
 ```sh
 # In your fresh Rails app's Gemfile, pinned to the latest release tag
 # (https://github.com/FutureWorkshops/rails-mcp/releases):
-gem "rails_mcp", git: "https://github.com/FutureWorkshops/rails-mcp.git", tag: "v1.2.0"
+gem "rails_mcp", git: "https://github.com/FutureWorkshops/rails-mcp.git", tag: "v1.2.1"
 
 bundle install
 bin/rails generate rails_mcp:install Gmail
@@ -244,6 +244,19 @@ git push heroku main
 
 `APP_HOST` is required — `production.rb` calls `ENV.fetch("APP_HOST")` and boot fails loudly without it. The Procfile's `release` phase runs the engine + host migrations on every deploy.
 
+### Schedule the daily housekeeping
+
+The engine records every tool call, and `bin/rails rails_mcp:daily` sends the daily counts to Groundwork (`/analytics/mcp`) and purges calls older than 90 days. Run it from Heroku Scheduler, because `config/recurring.yml` only runs where Solid Queue does:
+
+```sh
+"$(bundle show rails_mcp)/script/heroku-schedule-daily" <provider>-mcp-rails --dry-run
+"$(bundle show rails_mcp)/script/heroku-schedule-daily" <provider>-mcp-rails
+```
+
+That adds the `scheduler:standard` add-on if needed and a daily job at 02:30 UTC. By hand instead: `heroku addons:create scheduler:standard`, then `heroku addons:open scheduler` and add `bin/rails rails_mcp:daily`, every day at 2:30 AM UTC.
+
+Check it once the host has served a tool call: `heroku run -a <provider>-mcp-rails -- bin/rails rails_mcp:daily` prints "Usage report sent.", and the host appears on Groundwork's `/analytics/mcp`. A 401 there means the Groundwork client id or secret in the host's credentials is wrong.
+
 Register the production redirect URI with the upstream provider's app console: `https://<APP_HOST>/<provider>/callback`.
 
 ### Smoke test the deploy
@@ -273,7 +286,7 @@ After each phase, confirm:
 | OAuth | `GET /<provider>/connect` redirects to the provider's authorize URL with `state` set. |
 | Client | From a Rails console: `<Provider>ClientService.for_connection(user.connections.first)` returns a Faraday connection (no exception). |
 | Tools | `RailsMcp.config.tool_classes.size` matches your tool count; `tools/list` over MCP returns them. |
-| Deploy | All three smoke checks above pass against the deployed Heroku app. |
+| Deploy | All three smoke checks above pass against the deployed Heroku app, and the app has a daily Heroku Scheduler job running `bin/rails rails_mcp:daily`. |
 
 After every code change, `bin/ci` must pass — rspec + rubocop + brakeman + bundler-audit + importmap audit — before commit.
 

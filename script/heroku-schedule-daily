@@ -1,0 +1,56 @@
+#!/usr/bin/env bash
+# Schedules the engine's daily housekeeping on a host's Heroku app:
+# adds the Heroku Scheduler add-on if it's missing, then a daily job running
+# `bin/rails rails_mcp:daily` at 02:30 UTC. Safe to run again: an app that
+# already has a rails_mcp daily job (either command form) is left alone.
+#
+#   script/heroku-schedule-daily <app>
+#   script/heroku-schedule-daily <app> --dry-run
+#
+# From a host, the script is in the engine checkout:
+#   "$(bundle show rails_mcp)/script/heroku-schedule-daily" <app>
+#
+# Hosts still on rails_mcp v1.2.0, which has no rails_mcp:daily, need
+#   COMMAND='bin/rails runner "RailsMcp::UsageReportJob.perform_now"'
+#
+# Jobs are created through the API Heroku's own dashboard uses
+# (particleboard.heroku.com). Heroku doesn't document it; if it stops
+# working, create the job by hand: heroku addons:open scheduler -a <app>.
+set -euo pipefail
+
+app="${1:?usage: script/heroku-schedule-daily <app> [--dry-run]}"
+dry_run="${2:-}"
+command="${COMMAND:-bin/rails rails_mcp:daily}"
+at_minutes="${AT_MINUTES:-150}" # minutes after midnight UTC
+dyno_size="${DYNO_SIZE:-Basic}"
+
+if ! heroku addons -a "$app" --json | python3 -c 'import json,sys; sys.exit(0 if any(a["addon_service"]["name"] == "scheduler" for a in json.load(sys.stdin)) else 1)'; then
+  if [ "$dry_run" = "--dry-run" ]; then
+    echo "$app: would add the Heroku Scheduler add-on"
+  else
+    heroku addons:create scheduler:standard -a "$app"
+  fi
+fi
+
+app_id="$(heroku apps:info -a "$app" --json | python3 -c 'import json,sys; print(json.load(sys.stdin)["app"]["id"])')"
+token="$(heroku auth:token 2>/dev/null)"
+jobs_url="https://particleboard.heroku.com/apps/${app_id}/jobs"
+
+existing="$(curl -fsS -H "Authorization: Bearer ${token}" -H "Accept: application/vnd.api+json" "$jobs_url" 2>/dev/null || echo '{"data":[]}')"
+if echo "$existing" | python3 -c 'import json,sys; sys.exit(0 if any("rails_mcp:daily" in j["attributes"]["command"] or "UsageReportJob" in j["attributes"]["command"] for j in json.load(sys.stdin)["data"]) else 1)'; then
+  echo "$app: already has a rails_mcp daily job"
+  exit 0
+fi
+
+if [ "$dry_run" = "--dry-run" ]; then
+  echo "$app: would schedule \`$command\` daily at minute $at_minutes UTC on a $dyno_size dyno"
+  exit 0
+fi
+
+body="$(COMMAND="$command" AT="$at_minutes" SIZE="$dyno_size" python3 -c 'import json,os; print(json.dumps({"data": {"type": "job", "attributes": {"command": os.environ["COMMAND"], "dyno-size": os.environ["SIZE"], "every": 1440, "at": int(os.environ["AT"])}}}))')"
+curl -fsS -o /dev/null -X POST \
+  -H "Authorization: Bearer ${token}" \
+  -H "Accept: application/vnd.api+json" \
+  -H "Content-Type: application/vnd.api+json" \
+  -d "$body" "$jobs_url"
+echo "$app: scheduled \`$command\` daily at minute $at_minutes UTC"

@@ -7,11 +7,11 @@
 #
 # The provider defaults to the app name without "-mcp-rails" (gmail-mcp-rails
 # -> Gmail). Override without a prompt via PROVIDER=XeroPayroll, and the
-# engine tag via RAILS_MCP_TAG=v1.2.0. Engine developers can try an unreleased
+# engine tag via RAILS_MCP_TAG=v1.2.1. Engine developers can try an unreleased
 # engine with RAILS_MCP_PATH=~/Development/rails-mcp (never commit that).
 
 # Bumped by each release PR, alongside RailsMcp::VERSION.
-RAILS_MCP_TAG = "v1.2.0"
+RAILS_MCP_TAG = "v1.2.1"
 
 tag = ENV.fetch("RAILS_MCP_TAG", RAILS_MCP_TAG)
 unless tag.match?(/\Av\d+\.\d+\.\d+\z/)
