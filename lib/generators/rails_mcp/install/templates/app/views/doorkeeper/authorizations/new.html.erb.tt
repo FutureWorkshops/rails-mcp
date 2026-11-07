@@ -7,54 +7,53 @@
   signed_in_user = current_user
 %>
 
-<div class="cw-panel" style="padding: 28px; display: grid; gap: 24px;">
-  <div>
-    <h1 class="cw-page-title" style="font-size: 22px;">Authorize <%%= @pre_auth.client.name %></h1>
-    <p class="cw-page-lede">
-      <strong><%%= @pre_auth.client.name %></strong> is requesting access to your <%= provider_human %> MCP account.
-    </p>
-  </div>
-
-  <%% if signed_in_user %>
-    <div style="display: flex; align-items: center; gap: 12px; padding: 12px; background: var(--cw-paper); border: 1px solid var(--cw-line); border-radius: 8px;">
-      <div style="width: 36px; height: 36px; border-radius: 8px; background: var(--cw-ink); color: var(--cw-paper); display: flex; align-items: center; justify-content: center; font-weight: 600; font-size: 14px;">
-        <%%= (signed_in_user.name.presence || signed_in_user.email)[0, 1].upcase %>
-      </div>
-      <div>
-        <div style="font-size: 13px; font-weight: 600; color: var(--cw-ink);">Signed in as <%%= signed_in_user.name.presence || signed_in_user.email %></div>
-        <div style="font-size: 12px; color: var(--cw-muted);"><%%= signed_in_user.email %></div>
-      </div>
+<div class="cw-card-page">
+  <div class="cw-card cw-card--wide">
+    <h1>Authorize <%%= @pre_auth.client.name %></h1>
+    <div class="sub">
+      <strong style="color: var(--cw-ink);"><%%= @pre_auth.client.name %></strong> wants to use your connected <%= provider_human %> accounts. <em>Approve to continue.</em>
     </div>
-  <%% end %>
 
-  <%% redirect_host = RailsMcp::ClientTrust.redirect_host(@pre_auth.redirect_uri) %>
-  <%% trusted_client = RailsMcp::ClientTrust.trusted?(@pre_auth.redirect_uri) %>
-  <div style="padding: 12px 14px; margin-bottom: 20px; border: 1px solid <%%= trusted_client ? "var(--cw-line)" : "rgba(184,121,28,0.45)" %>; border-radius: 8px; font-size: 13px; line-height: 1.5; background: <%%= trusted_client ? "var(--cw-paper)" : "rgba(184,121,28,0.08)" %>;">
-    Access will be sent to <strong class="cw-mono" style="overflow-wrap: anywhere;"><%%= redirect_host.presence || "an unknown address" %></strong>.
-    <%% unless trusted_client %>
-      <div style="margin-top: 6px; color: var(--cw-amber); font-weight: 600;">Unverified app. Anyone can register an app with any name. Only continue if you started this connection yourself and recognise this address.</div>
+    <%% if signed_in_user %>
+      <div style="display: flex; align-items: center; gap: 12px; padding: 14px 16px; margin-bottom: 20px; background: var(--cw-panel); border: 1px solid var(--cw-line); border-radius: 10px;">
+        <div style="flex: 0 0 36px; height: 36px; border-radius: 8px; background: var(--cw-ink); color: var(--cw-paper); display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 14px;">
+          <%%= (signed_in_user.name.presence || signed_in_user.email)[0, 1].upcase %>
+        </div>
+        <div style="line-height: 1.4; font-size: 13px; min-width: 0;">
+          <div style="font-weight: 600; color: var(--cw-ink);">Signed in as <%%= signed_in_user.name.presence || signed_in_user.email %></div>
+          <div style="color: var(--cw-muted); overflow-wrap: anywhere;"><%%= signed_in_user.email %></div>
+        </div>
+      </div>
     <%% end %>
-  </div>
 
-  <div>
-    <h2 class="cw-label-mono" style="margin-bottom: 8px;">This connector will be able to</h2>
-    <ul style="list-style: none; padding: 0; margin: 0; display: grid; gap: 8px;">
-      <%% @pre_auth.scopes.each do |scope| %>
-        <%% copy = scope_copy[scope.to_s] || { title: scope.to_s, detail: nil } %>
-        <li style="display: flex; gap: 10px; padding: 12px; border: 1px solid var(--cw-line); border-radius: 8px; font-size: 13px;">
-          <span style="flex-shrink: 0; width: 20px; height: 20px; border-radius: 999px; background: var(--cw-accent); color: var(--cw-paper); display: inline-flex; align-items: center; justify-content: center; margin-top: 1px;">
-            <svg width="11" height="11" viewBox="0 0 16 16"><path d="M3 8l3 3 7-8" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
-          </span>
-          <div>
-            <div style="font-weight: 600; color: var(--cw-ink);"><%%= copy[:title] %></div>
-            <%% if copy[:detail] %><div style="color: var(--cw-muted); margin-top: 2px;"><%%= copy[:detail] %></div><%% end %>
-          </div>
-        </li>
+    <%% redirect_host = RailsMcp::ClientTrust.redirect_host(@pre_auth.redirect_uri) %>
+    <%% trusted_client = RailsMcp::ClientTrust.trusted?(@pre_auth.redirect_uri) %>
+    <div style="padding: 12px 14px; margin-bottom: 20px; border: 1px solid <%%= trusted_client ? "var(--cw-line)" : "rgba(184,121,28,0.45)" %>; border-radius: 8px; font-size: 13px; line-height: 1.5; background: <%%= trusted_client ? "var(--cw-paper)" : "rgba(184,121,28,0.08)" %>;">
+      Access will be sent to <strong class="cw-mono" style="overflow-wrap: anywhere;"><%%= redirect_host.presence || "an unknown address" %></strong>.
+      <%% unless trusted_client %>
+        <div style="margin-top: 6px; color: var(--cw-amber); font-weight: 600;">Unverified app. Anyone can register an app with any name. Only continue if you started this connection yourself and recognise this address.</div>
       <%% end %>
-    </ul>
-  </div>
+    </div>
 
-  <div style="display: grid; gap: 8px;">
+    <div style="margin: 8px 0 24px;">
+      <h2 class="cw-label-mono" style="margin: 0 0 10px;">This connector will be able to</h2>
+      <ul style="list-style: none; padding: 0; margin: 0; display: grid; gap: 8px;">
+        <%% @pre_auth.scopes.each do |scope| %>
+          <%% copy = scope_copy[scope.to_s] || { title: scope.to_s, detail: nil } %>
+          <li style="display: flex; align-items: flex-start; gap: 10px; padding: 12px 14px; border: 1px solid var(--cw-line); border-radius: 8px; font-size: 13px; line-height: 1.45;">
+            <span aria-hidden="true" style="flex: 0 0 18px; height: 18px; border-radius: 50%; background: var(--cw-accent); color: var(--cw-paper); display: flex; align-items: center; justify-content: center; margin-top: 1px;">
+              <svg width="10" height="10" viewBox="0 0 16 16"><path d="M3 8l3 3 7-8" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </span>
+            <div>
+              <strong style="display: block; color: var(--cw-ink);"><%%= copy[:title] %></strong>
+              <%% if copy[:detail] %><span style="color: var(--cw-muted);"><%%= copy[:detail] %></span><%% end %>
+            </div>
+          </li>
+        <%% end %>
+      </ul>
+    </div>
+
+    <div style="display: grid; gap: 10px;">
     <%%# Turbo can't follow OAuth's cross-origin 302 to the client's redirect_uri
         cleanly; disable it so the browser does a native submit. %>
     <%%= form_tag oauth_authorization_path, method: :post, data: { turbo: false } do %>
@@ -66,7 +65,7 @@
       <%%= hidden_field_tag :scope, @pre_auth.scope, id: nil %>
       <%%= hidden_field_tag :code_challenge, @pre_auth.code_challenge, id: nil %>
       <%%= hidden_field_tag :code_challenge_method, @pre_auth.code_challenge_method, id: nil %>
-      <button type="submit" class="cw-btn cw-btn-accent" style="width: 100%; justify-content: center;">Authorize <%%= @pre_auth.client.name %></button>
+      <button type="submit" class="cw-card-btn cw-card-btn-primary">Authorize <%%= @pre_auth.client.name %></button>
     <%% end %>
 
     <%%= form_tag oauth_authorization_path, method: :delete, data: { turbo: false } do %>
@@ -78,11 +77,12 @@
       <%%= hidden_field_tag :scope, @pre_auth.scope, id: nil %>
       <%%= hidden_field_tag :code_challenge, @pre_auth.code_challenge, id: nil %>
       <%%= hidden_field_tag :code_challenge_method, @pre_auth.code_challenge_method, id: nil %>
-      <button type="submit" class="cw-btn cw-btn-default" style="width: 100%; justify-content: center;">Cancel</button>
+      <button type="submit" class="cw-card-btn cw-card-btn-ghost">Cancel</button>
     <%% end %>
   </div>
 
-  <p class="cw-form-hint" style="text-align: center;">
-    You can revoke this connector at any time from the <%= provider_human %> MCP dashboard.
-  </p>
+    <div class="cw-card-note">
+      You can remove this connector at any time in Claude, or disconnect <%= provider_human %> accounts from the Setup page.
+    </div>
+  </div>
 </div>

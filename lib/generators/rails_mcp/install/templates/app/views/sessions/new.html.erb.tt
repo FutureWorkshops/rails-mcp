@@ -1,18 +1,16 @@
 <%% content_for :title, "Sign in" %>
 
-<div style="max-width: 420px; margin: 48px auto 0; text-align: center;">
-  <h1 class="cw-page-title" style="font-size: 32px;"><%= provider_human %> MCP</h1>
-  <p class="cw-page-lede" style="margin-top: 8px; font-size: 15px;">
-    Sign in with Groundwork to connect Claude Desktop to your account.
-  </p>
+<div class="cw-card-page">
+  <div class="cw-card">
+    <h1>Sign in</h1>
+    <div class="sub">Connect Claude to your <%= provider_human %> accounts. <em>Let's get to it.</em></div>
 
-  <div style="margin-top: 32px;">
+    <%%# Plain link, not Turbo: the SSO hop leaves this origin. %>
     <%%= link_to "Sign in with Groundwork", main_app.groundwork_connect_path,
-          class: "cw-btn cw-btn-accent",
-          style: "width: 100%; justify-content: center; padding: 12px 18px; font-size: 15px;" %>
-  </div>
+          class: "cw-card-btn cw-card-btn-primary", data: { turbo: false } %>
 
-  <p class="cw-form-hint" style="margin-top: 24px;">
-    You'll need a Groundwork account. <%= provider_human %> accounts get connected after signing in.
-  </p>
+    <div class="cw-card-note">
+      Use your Groundwork account. You'll connect your <%= provider_human %> accounts after signing in.
+    </div>
+  </div>
 </div>

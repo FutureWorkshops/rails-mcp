@@ -2,6 +2,15 @@
 
 All notable changes to the `rails_mcp` engine. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the engine uses [Semantic Versioning](https://semver.org): see README, **Versioning**. Hosts pin a release tag (`tag: "vX.Y.Z"`), never `branch: "main"`.
 
+## [1.2.1] - 2026-11-07
+
+Generator only: the engine itself is unchanged. Existing hosts can keep their views, or copy the new ones from `app/views` and `public` under `lib/generators/rails_mcp/install/templates`.
+
+### Changed
+- `rails_mcp:install` generates the Groundwork UI and branding used by xero-mcp-rails instead of the older Future Workshops styling: Groundwork design tokens and fonts in `shared/_cowork_tokens`, a "Groundwork" wordmark lockup with the product name (`shared/_lockup`, replacing `shared/_fw_logo`), a header and footer, centred sign-in and consent cards, and "Setup" as the connections nav label and page title.
+- The generator replaces the `rails new` favicons with the Groundwork ones (`icon.svg`, `icon.png`, `groundwork-icon-32.png`, `groundwork-apple-touch-icon.png`).
+- The generated Claude Desktop steps say "Customise → Custom Connectors", matching the current app.
+
 ## [1.2.0] - 2026-11-07
 
 ### Upgrading
@@ -120,6 +129,8 @@ Tagged after the fact at `c52c3d3`, the commit the FW MCP hosts ran in October 2
 
 First tagged version: the MCP JSON-RPC dispatcher at `POST /mcp`, the Doorkeeper OAuth provider with RFC 7591 dynamic client registration, RFC 8414 and RFC 9728 discovery documents, the `Account` / `User` / `Connection` identity model, `RailsMcp::BaseTool` and `Registry`, `RackAttackDefaults`, and the `rails_mcp:install` generator.
 
+[1.2.1]: https://github.com/FutureWorkshops/rails-mcp/compare/v1.2.0...v1.2.1
+[1.2.0]: https://github.com/FutureWorkshops/rails-mcp/compare/v1.1.1...v1.2.0
 [1.1.1]: https://github.com/FutureWorkshops/rails-mcp/compare/v1.1.0...v1.1.1
 [1.1.0]: https://github.com/FutureWorkshops/rails-mcp/compare/v1.0.0...v1.1.0
 [1.0.0]: https://github.com/FutureWorkshops/rails-mcp/compare/v0.2.0...v1.0.0
