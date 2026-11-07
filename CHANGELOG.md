@@ -2,14 +2,19 @@
 
 All notable changes to the `rails_mcp` engine. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the engine uses [Semantic Versioning](https://semver.org): see README, **Versioning**. Hosts pin a release tag (`tag: "vX.Y.Z"`), never `branch: "main"`.
 
-## [Unreleased]
+## [1.1.0] - 2026-11-07
+
+Backward compatible: hosts upgrade by bumping the tag, with no other changes.
 
 ### Added
-- `templates/new_host.rb`, a `rails new -m` application template that creates a host, pins the engine to the latest release tag and runs `rails_mcp:install`.
+- `templates/new_host.rb`, a `rails new -m` application template that creates a host, pins the engine to the latest release tag and runs `rails_mcp:install`. It refuses to create a host inside another Ruby project, where `rails` can run in that project's bundle and every install step fails.
 - `rails_mcp:install` writes a `CLAUDE.md` into the host with the engine's conventions for Claude Code: where tools live, tool naming, pinning by tag, and the generated security code not to weaken.
 
 ### Changed
 - Development Ruby moved to 4.0.8 (`.ruby-version`). The gem still requires Ruby 3.2 or later, so hosts need no change.
+
+### Security
+- The engine's development lockfile moves to Rails 8.1.4.1, loofah 2.25.3, nokogiri 1.19.7 and rails-html-sanitizer 1.7.2 for advisories published in November 2026, one rated Critical (Active Storage). Hosts resolve their own versions: run `bundle update rails loofah nokogiri rails-html-sanitizer --conservative` and check `bundle exec bundler-audit check` passes.
 
 ## [1.0.0] - 2026-10-25
 
@@ -83,6 +88,7 @@ Tagged after the fact at `c52c3d3`, the commit the FW MCP hosts ran in October 2
 
 First tagged version: the MCP JSON-RPC dispatcher at `POST /mcp`, the Doorkeeper OAuth provider with RFC 7591 dynamic client registration, RFC 8414 and RFC 9728 discovery documents, the `Account` / `User` / `Connection` identity model, `RailsMcp::BaseTool` and `Registry`, `RackAttackDefaults`, and the `rails_mcp:install` generator.
 
-[1.0.0]: https://github.com/FutureWorkshops/rails-mcp/compare/v0.2.0...HEAD
+[1.1.0]: https://github.com/FutureWorkshops/rails-mcp/compare/v1.0.0...v1.1.0
+[1.0.0]: https://github.com/FutureWorkshops/rails-mcp/compare/v0.2.0...v1.0.0
 [0.2.0]: https://github.com/FutureWorkshops/rails-mcp/compare/v0.1.0...v0.2.0
 [0.1.0]: https://github.com/FutureWorkshops/rails-mcp/releases/tag/v0.1.0

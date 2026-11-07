@@ -7,7 +7,7 @@ module RailsMcp
     # Gemfile pinned to a release tag (never a branch, see README ->
     # Versioning):
     #
-    #   gem "rails_mcp", git: "https://github.com/FutureWorkshops/rails-mcp.git", tag: "v1.0.0"
+    #   gem "rails_mcp", git: "https://github.com/FutureWorkshops/rails-mcp.git", tag: "v1.1.0"
     #
     #   bin/rails generate rails_mcp:install <Provider>
     #
