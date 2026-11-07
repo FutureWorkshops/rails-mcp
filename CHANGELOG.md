@@ -2,6 +2,16 @@
 
 All notable changes to the `rails_mcp` engine. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the engine uses [Semantic Versioning](https://semver.org): see README, **Versioning**. Hosts pin a release tag (`tag: "vX.Y.Z"`), never `branch: "main"`.
 
+## [1.3.0] - 2026-11-07
+
+Backward compatible: hosts upgrade by bumping the tag, with no other changes.
+
+### Added
+- Grok's MCP connector can register and connect with no configuration. Its callback, `https://grok.com/connectors-oauth-exchange-code/`, joins Claude's two in `RailsMcp::RedirectUris::CONNECTOR_CALLBACKS`, matched exactly (scheme, host, port and path, trailing slash included); nothing else on grok.com is allowed. The consent screen shows it as a known client. A host that set `OAUTH_DCR_ALLOWED_REDIRECT_HOSTS=grok.com` for Grok can remove it, which stops allowing the rest of grok.com.
+
+### Changed
+- `FIRST_PARTY_CALLBACKS` and `first_party_callback?` are renamed `CONNECTOR_CALLBACKS` and `connector_callback?`, since the list is no longer only Claude's. The old names still work.
+
 ## [1.2.2] - 2026-11-07
 
 Backward compatible. Fixes how the 1.2.0 usage report gets scheduled on Heroku.
@@ -144,6 +154,8 @@ Tagged after the fact at `c52c3d3`, the commit the FW MCP hosts ran in October 2
 
 First tagged version: the MCP JSON-RPC dispatcher at `POST /mcp`, the Doorkeeper OAuth provider with RFC 7591 dynamic client registration, RFC 8414 and RFC 9728 discovery documents, the `Account` / `User` / `Connection` identity model, `RailsMcp::BaseTool` and `Registry`, `RackAttackDefaults`, and the `rails_mcp:install` generator.
 
+[1.3.0]: https://github.com/FutureWorkshops/rails-mcp/compare/v1.2.2...v1.3.0
+[1.2.2]: https://github.com/FutureWorkshops/rails-mcp/compare/v1.2.1...v1.2.2
 [1.2.1]: https://github.com/FutureWorkshops/rails-mcp/compare/v1.2.0...v1.2.1
 [1.2.0]: https://github.com/FutureWorkshops/rails-mcp/compare/v1.1.1...v1.2.0
 [1.1.1]: https://github.com/FutureWorkshops/rails-mcp/compare/v1.1.0...v1.1.1

@@ -11,7 +11,7 @@
 # engine with RAILS_MCP_PATH=~/Development/rails-mcp (never commit that).
 
 # Bumped by each release PR, alongside RailsMcp::VERSION.
-RAILS_MCP_TAG = "v1.2.2"
+RAILS_MCP_TAG = "v1.3.0"
 
 tag = ENV.fetch("RAILS_MCP_TAG", RAILS_MCP_TAG)
 unless tag.match?(/\Av\d+\.\d+\.\d+\z/)

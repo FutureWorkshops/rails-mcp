@@ -45,10 +45,11 @@ RailsMcp.configure do |c|
   # through Groundwork again (the engine default is 12 hours).
   # c.session_lifetime = 12.hours
 
-  # Self-registered OAuth clients may only send codes to Claude's own
-  # callbacks, loopback, and https hosts listed here. Defaults to the
+  # Self-registered OAuth clients may only send codes to the known
+  # connectors' exact callbacks (Claude's and Grok's, no configuration
+  # needed), loopback, and https hosts listed here. Defaults to the
   # comma-separated OAUTH_DCR_ALLOWED_REDIRECT_HOSTS environment variable.
-  # c.allowed_redirect_hosts = %w[grok.com]
+  # c.allowed_redirect_hosts = %w[connector.example]
 
 
   # Optional: map per-tool exceptions to user-facing strings. Returning nil

@@ -18,7 +18,7 @@ To add the engine to an app you've already created, use the install generator di
 ```sh
 # In a fresh Rails app, after adding the engine to the Gemfile pinned to a
 # release tag (see Versioning):
-#   gem "rails_mcp", git: "https://github.com/FutureWorkshops/rails-mcp.git", tag: "v1.2.2"
+#   gem "rails_mcp", git: "https://github.com/FutureWorkshops/rails-mcp.git", tag: "v1.3.0"
 bundle install
 bin/rails generate rails_mcp:install <Provider>
 ```
@@ -49,7 +49,7 @@ Hosts pin the engine **by tag**, never by branch:
 
 ```ruby
 # Gemfile
-gem "rails_mcp", git: "https://github.com/FutureWorkshops/rails-mcp.git", tag: "v1.2.2"
+gem "rails_mcp", git: "https://github.com/FutureWorkshops/rails-mcp.git", tag: "v1.3.0"
 ```
 
 `branch: "main"` (or no ref at all) means whatever was last merged reaches production on the host's next `bundle update`, unreviewed by the host and with no record of which engine a deploy ran. A tag makes each engine upgrade a deliberate, reviewable Gemfile change in the host. To upgrade, read the CHANGELOG entries between your tag and the new one, follow any "Upgrading" steps, bump the tag and run `bundle update rails_mcp`.
@@ -60,7 +60,7 @@ Releasing: merge the release PR (it bumps `lib/rails_mcp/version.rb` and `RAILS_
 
 ```ruby
 # Gemfile (pin to a release tag, see Versioning)
-gem "rails_mcp", git: "https://github.com/FutureWorkshops/rails-mcp.git", tag: "v1.2.2"
+gem "rails_mcp", git: "https://github.com/FutureWorkshops/rails-mcp.git", tag: "v1.3.0"
 
 # config/routes.rb
 mount RailsMcp::Engine => "/"
@@ -99,19 +99,19 @@ On deploy, the generated `Procfile`'s `release: bin/rails db:migrate` applies an
 
 Dynamic client registration (`POST /oauth/register`) needs no authentication, so where a self-registered client may have its authorization codes sent is restricted (`RailsMcp::RedirectUris`, the same rules as Groundwork's `Oauth::RedirectUris`):
 
-- Claude's own connector callbacks, matched exactly: `https://claude.ai/api/mcp/auth_callback` and `https://claude.com/api/mcp/auth_callback`.
+- The callbacks of the MCP connectors the engine knows (`RedirectUris::CONNECTOR_CALLBACKS`), matched exactly (scheme, host, port and path, trailing slash included): Claude's `https://claude.ai/api/mcp/auth_callback` and `https://claude.com/api/mcp/auth_callback`, and Grok's `https://grok.com/connectors-oauth-exchange-code/`. Nothing else on those hosts is allowed.
 - Loopback over plain http on any port (`http://127.0.0.1`, `http://localhost`, `http://[::1]`), where Claude Code and other native clients listen. Allowed in production too.
 - Any https URL (port 443) on a host listed in `config.allowed_redirect_hosts`, which defaults to the comma-separated `OAUTH_DCR_ALLOWED_REDIRECT_HOSTS` environment variable. The operator vouches for the whole host, so this is never a default.
 
 Anything else is refused at registration with `invalid_redirect_uri`, and checked again at `/oauth/authorize` (`RailsMcp::OauthBaseController`) for every public client, so a client registered before the rule, or a host removed from the list, is stopped at once. That check answers with its own page and never redirects to the refused URI. Confidential (operator-created) clients are not held to the list. Registration also refuses a body that isn't a JSON object, more than 5 redirect URIs, or one longer than 2,048 characters.
 
-To allow another connector, for example Grok:
+Claude and Grok need no configuration. To allow a connector the engine doesn't know, add its callback host:
 
 ```sh
-heroku config:set -a <app> OAUTH_DCR_ALLOWED_REDIRECT_HOSTS=grok.com
+heroku config:set -a <app> OAUTH_DCR_ALLOWED_REDIRECT_HOSTS=connector.example
 ```
 
-or `c.allowed_redirect_hosts = %w[grok.com]` in `config/initializers/rails_mcp.rb` (which replaces the environment variable rather than adding to it).
+or `c.allowed_redirect_hosts = %w[connector.example]` in `config/initializers/rails_mcp.rb` (which replaces the environment variable rather than adding to it). That allows every https URL on the host, so for a connector everyone uses, prefer adding its exact callback to `CONNECTOR_CALLBACKS` in an engine release. If a host set `OAUTH_DCR_ALLOWED_REDIRECT_HOSTS=grok.com` for Grok, it can remove it from 1.3.0.
 
 ### Standing at the identity provider (leavers, demotions, sessions)
 

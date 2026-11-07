@@ -46,7 +46,7 @@ The generated app includes a `CLAUDE.md`, so every Claude Code session in it sta
 ```sh
 # In your fresh Rails app's Gemfile, pinned to the latest release tag
 # (https://github.com/FutureWorkshops/rails-mcp/releases):
-gem "rails_mcp", git: "https://github.com/FutureWorkshops/rails-mcp.git", tag: "v1.2.2"
+gem "rails_mcp", git: "https://github.com/FutureWorkshops/rails-mcp.git", tag: "v1.3.0"
 
 bundle install
 bin/rails generate rails_mcp:install Gmail
@@ -322,7 +322,7 @@ Pick a name from a prefix; the engine sets the annotation hint that the MCP clie
 
 - **Tracking the engine by branch** (`branch: "main"`, or a bare `git:` with no ref) → an unreviewed engine change reaches production on the next `bundle update`. Pin `tag: "vX.Y.Z"` and upgrade by reading the CHANGELOG and bumping the tag.
 - **`config.assume_ssl = true` behind Heroku** → Rails believes every request is https, so `force_ssl` never redirects and the app answers plain http. The generator no longer writes it; remove it from older hosts.
-- **Allowing another connector** → self-registered OAuth clients may only redirect to Claude's callbacks, loopback, and https hosts in `OAUTH_DCR_ALLOWED_REDIRECT_HOSTS`. Add the connector's host there (for example `grok.com`) rather than loosening anything in code.
+- **Allowing another connector** → self-registered OAuth clients may only redirect to the known connectors' exact callbacks (Claude's and Grok's), loopback, and https hosts in `OAUTH_DCR_ALLOWED_REDIRECT_HOSTS`. Claude and Grok need no configuration. For any other connector, add its callback host there rather than loosening anything in code.
 
 - **`use_doorkeeper` inside the engine mount** → every `POST /oauth/token` 500s with `uninitialized constant RailsMcp::Doorkeeper`. The generator places it at the host's top-level routes block; don't move it into the engine mount.
 - **Missing `reset_session` in the OAuth callback** → session fixation across the privilege boundary. The generated callback has it; don't delete it.

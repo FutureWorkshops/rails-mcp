@@ -11,13 +11,14 @@ module RailsMcp
   # and walk away with a read+write token after one click on the consent
   # screen. So a self-registered client may only send codes to:
   #
-  # - Claude's own connector callbacks (FIRST_PARTY_CALLBACKS), matched
-  #   exactly: scheme, host, port and path. A whole host would let any open
-  #   redirect on it become a way out.
+  # - The callbacks of the MCP connectors we know (CONNECTOR_CALLBACKS:
+  #   Claude's two and Grok's), matched exactly: scheme, host, port and path,
+  #   trailing slash included. A whole host would let any open redirect on it
+  #   become a way out.
   # - Any https URI (port 443) on a host listed in
   #   RailsMcp.config.allowed_redirect_hosts, which defaults to the
   #   comma-separated OAUTH_DCR_ALLOWED_REDIRECT_HOSTS environment variable,
-  #   so another connector (Grok, say) can be allowed without a deploy. The
+  #   so a connector not listed here can be allowed without a deploy. The
   #   operator vouches for the whole host, which is why it is never a default.
   # - A loopback address over plain http on any port (RFC 8252 section 7.3):
   #   native and CLI clients such as Claude Code listen on a random local
@@ -28,10 +29,14 @@ module RailsMcp
   module RedirectUris
     ENV_KEY = "OAUTH_DCR_ALLOWED_REDIRECT_HOSTS".freeze
 
-    FIRST_PARTY_CALLBACKS = %w[
+    CONNECTOR_CALLBACKS = %w[
       https://claude.ai/api/mcp/auth_callback
       https://claude.com/api/mcp/auth_callback
+      https://grok.com/connectors-oauth-exchange-code/
     ].freeze
+
+    # The name before Grok's callback joined Claude's (1.3.0).
+    FIRST_PARTY_CALLBACKS = CONNECTOR_CALLBACKS
 
     # URI#hostname strips the brackets from an IPv6 literal, so "[::1]" is
     # matched as "::1".
@@ -44,7 +49,7 @@ module RailsMcp
       uri = parse(uri_string)
       return false unless uri && uri.host.present? && uri.userinfo.nil? && uri.fragment.nil?
 
-      loopback?(uri) || first_party?(uri) || operator_allowed?(uri)
+      loopback?(uri) || connector?(uri) || operator_allowed?(uri)
     end
 
     # Every URI in Doorkeeper's newline-separated redirect_uri column passes.
@@ -53,10 +58,15 @@ module RailsMcp
       uris.any? && uris.all? { |uri| allowed?(uri) }
     end
 
-    # Exactly one of Claude's own callbacks.
-    def first_party_callback?(uri_string)
+    # Exactly one of the known connectors' callbacks.
+    def connector_callback?(uri_string)
       uri = parse(uri_string)
-      uri.present? && first_party?(uri)
+      uri.present? && connector?(uri)
+    end
+
+    # The name before Grok's callback joined Claude's (1.3.0).
+    def first_party_callback?(uri_string)
+      connector_callback?(uri_string)
     end
 
     # A plain http loopback address, where native clients listen.
@@ -89,8 +99,8 @@ module RailsMcp
       uri.scheme == "http" && loopback_host?(uri.hostname)
     end
 
-    def first_party?(uri)
-      FIRST_PARTY_CALLBACKS.include?(uri.to_s)
+    def connector?(uri)
+      CONNECTOR_CALLBACKS.include?(uri.to_s)
     end
 
     def operator_allowed?(uri)
@@ -98,6 +108,6 @@ module RailsMcp
         RailsMcp.config.allowed_redirect_hosts.include?(uri.hostname.to_s.downcase)
     end
 
-    private_class_method :parse, :loopback?, :first_party?, :operator_allowed?
+    private_class_method :parse, :loopback?, :connector?, :operator_allowed?
   end
 end
