@@ -7,7 +7,7 @@ module RailsMcp
     # Gemfile pinned to a release tag (never a branch, see README ->
     # Versioning):
     #
-    #   gem "rails_mcp", git: "https://github.com/FutureWorkshops/rails-mcp.git", tag: "v1.2.0"
+    #   gem "rails_mcp", git: "https://github.com/FutureWorkshops/rails-mcp.git", tag: "v1.2.1"
     #
     #   bin/rails generate rails_mcp:install <Provider>
     #
@@ -142,8 +142,8 @@ module RailsMcp
       def copy_views
         # Theme partials are verbatim copies (no ERB).
         copy_file "app/views/shared/_cowork_tokens.html.erb", "app/views/shared/_cowork_tokens.html.erb"
-        copy_file "app/views/shared/_fw_logo.html.erb",       "app/views/shared/_fw_logo.html.erb"
         copy_file "app/views/shared/_flash.html.erb",         "app/views/shared/_flash.html.erb"
+        template  "app/views/shared/_lockup.html.erb.tt",     "app/views/shared/_lockup.html.erb"
 
         template "app/views/layouts/application.html.erb.tt", "app/views/layouts/application.html.erb", force: true
         template "app/views/sessions/new.html.erb.tt",        "app/views/sessions/new.html.erb"
@@ -151,6 +151,13 @@ module RailsMcp
         template "app/views/tools/index.html.erb.tt",         "app/views/tools/index.html.erb"
         template "app/views/doorkeeper/authorizations/new.html.erb.tt",
                  "app/views/doorkeeper/authorizations/new.html.erb"
+      end
+
+      # Groundwork favicons, replacing the red-circle icons from `rails new`.
+      def copy_icons
+        %w[icon.svg icon.png groundwork-icon-32.png groundwork-apple-touch-icon.png].each do |icon|
+          copy_file "public/#{icon}", "public/#{icon}", force: true
+        end
       end
 
       def patch_application_rb

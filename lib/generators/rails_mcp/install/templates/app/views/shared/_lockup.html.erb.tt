@@ -1,0 +1,6 @@
+<%%# Groundwork lockup, copied from FW-AIHub-Rails shared/lockups/_groundwork:
+    the wordmark alone in the display face, followed by this product's name. %>
+<span style="display: inline-flex; align-items: baseline; gap: 10px;">
+  <span class="cw-serif" style="font-weight: 700; font-size: 19px; letter-spacing: -0.03em; line-height: 1;">Groundwork</span>
+  <span class="cw-label-mono cw-nav-product" style="color: var(--cw-accent);"><%= provider_human %> MCP</span>
+</span>
