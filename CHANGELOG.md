@@ -16,7 +16,9 @@ The `mcp_tool_calls` migration runs from the gem. Without these two additions, c
 ### Added
 - **Usage analytics.** Every tool call is recorded in `mcp_tool_calls` (`RailsMcp::ToolCall`): user, account, tool, outcome, duration and client, never arguments or results. `RailsMcp::UsageReportJob` sends daily counts to Groundwork's `POST /oauth/mcp_usage` (`OauthClientController.report_usage`, `RailsMcp::UsageReport`) and purges rows past `config.tool_call_retention` (90 days). Also adds `config.record_tool_calls`, `config.usage_reporter` and the rake tasks `rails_mcp:usage` and `rails_mcp:push_usage`. The generator wires the reporter and schedules the job.
 
-Also in this release, fixes to `rails_mcp:install` and `templates/new_host.rb` found building trading212-mcp-rails:
+## [1.1.1] - 2026-11-07
+
+Fixes to `rails_mcp:install` and `templates/new_host.rb` found building trading212-mcp-rails. The engine itself is unchanged; existing hosts need no change.
 
 ### Fixed
 - The generator scaffolded sign-in through "Cowork Hub" at `https://hub.cowork.com`. It now generates `GroundworkOauthController`, `/groundwork/connect` and `/groundwork/callback`, and `AppConfig.groundwork_*` reading a `groundwork:` credentials block that defaults to `https://groundwork.fws.io`, matching the deployed hosts.
@@ -118,6 +120,7 @@ Tagged after the fact at `c52c3d3`, the commit the FW MCP hosts ran in October 2
 
 First tagged version: the MCP JSON-RPC dispatcher at `POST /mcp`, the Doorkeeper OAuth provider with RFC 7591 dynamic client registration, RFC 8414 and RFC 9728 discovery documents, the `Account` / `User` / `Connection` identity model, `RailsMcp::BaseTool` and `Registry`, `RackAttackDefaults`, and the `rails_mcp:install` generator.
 
+[1.1.1]: https://github.com/FutureWorkshops/rails-mcp/compare/v1.1.0...v1.1.1
 [1.1.0]: https://github.com/FutureWorkshops/rails-mcp/compare/v1.0.0...v1.1.0
 [1.0.0]: https://github.com/FutureWorkshops/rails-mcp/compare/v0.2.0...v1.0.0
 [0.2.0]: https://github.com/FutureWorkshops/rails-mcp/compare/v0.1.0...v0.2.0
