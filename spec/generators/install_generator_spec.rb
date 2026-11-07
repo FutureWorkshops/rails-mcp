@@ -62,11 +62,23 @@ RSpec.describe RailsMcp::Generators::InstallGenerator, type: :generator do
     File.write(File.join(destination_root, ".github", "workflows", "ci.yml"), "name: CI\n\njobs:\n  lint:\n    runs-on: ubuntu-latest\n")
     FileUtils.mkdir_p(File.join(destination_root, "db"))
     File.write(File.join(destination_root, "db", "queue_schema.rb"), "# queue schema\n")
+    File.write(File.join(destination_root, "config", "recurring.yml"),
+               "production:\n  clear_solid_queue_finished_jobs:\n    command: \"SolidQueue::Job.clear_finished_in_batches\"\n    schedule: every hour at minute 12\n")
 
     run_generator [ "Gmail" ]
   end
 
   let(:dest) { destination_root }
+
+  it "schedules the daily usage report once, and wires the reporter" do
+    run_generator [ "Gmail" ]
+
+    recurring = File.read(File.join(dest, "config/recurring.yml"))
+    expect(recurring.scan("class: RailsMcp::UsageReportJob").size).to eq(1)
+    expect(YAML.safe_load(recurring).dig("production", "rails_mcp_usage_report", "schedule")).to eq("every day at 2:30am")
+    expect(File.read(File.join(dest, "config/initializers/rails_mcp.rb")))
+      .to include("c.usage_reporter = -> { GroundworkOauthController.report_usage }")
+  end
 
   def expect_file(rel_path, *contents)
     full = File.join(dest, rel_path)

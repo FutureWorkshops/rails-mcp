@@ -37,10 +37,37 @@ module RailsMcp
     # /oauth/user_status). nil disables the check.
     def self.user_status_url = nil
 
+    # IdP endpoint for the daily usage report (Groundwork: POST
+    # /oauth/mcp_usage). Defaults to user_status_url's neighbour, so a host
+    # that already does the standing check needs nothing new.
+    def self.usage_report_url
+      url = user_status_url
+      url.delete_suffix("/oauth/user_status") + "/oauth/mcp_usage" if url&.end_with?("/oauth/user_status")
+    end
+
     # Timeouts for every call to the IdP, so a hung Groundwork can't pin a
     # Puma thread for Net::HTTP's default minute.
     def self.http_open_timeout = 3
     def self.http_read_timeout = 5
+
+    # Sends RailsMcp::UsageReport (the last few days' tool-call counts) to
+    # the IdP with the client's credentials, the same as the standing check.
+    # Raises RailsMcp::UsageReport::Failed unless the IdP accepts it, so the
+    # job reports the failure; the next day's run resends the same days.
+    def self.report_usage(now: Time.current)
+      url = usage_report_url
+      raise RailsMcp::UsageReport::Failed, "no usage_report_url" if url.blank?
+
+      uri = URI(url)
+      request = Net::HTTP::Post.new(uri, "Content-Type" => "application/json")
+      request.basic_auth(client_id, client_secret)
+      request.body = RailsMcp::UsageReport.new(account_column: mirror_account_column, now: now).payload.to_json
+      response = Net::HTTP.start(uri.hostname, uri.port, use_ssl: uri.scheme == "https",
+                                 open_timeout: http_open_timeout, read_timeout: http_read_timeout) { |http| http.request(request) }
+      raise RailsMcp::UsageReport::Failed, "HTTP #{response.code}" unless response.is_a?(Net::HTTPSuccess)
+
+      JSON.parse(response.body)
+    end
 
     # What the IdP says about this user now, as a RailsMcp::IdentityStanding,
     # or nil when no user_status_url is configured (no check).

@@ -7,7 +7,7 @@ module RailsMcp
     # Gemfile pinned to a release tag (never a branch, see README ->
     # Versioning):
     #
-    #   gem "rails_mcp", git: "https://github.com/FutureWorkshops/rails-mcp.git", tag: "v1.1.0"
+    #   gem "rails_mcp", git: "https://github.com/FutureWorkshops/rails-mcp.git", tag: "v1.2.0"
     #
     #   bin/rails generate rails_mcp:install <Provider>
     #
@@ -201,6 +201,20 @@ module RailsMcp
         RUBY
 
         inject_into_file prod_path, block, after: "Rails.application.configure do\n"
+      end
+
+      # The daily usage report to Groundwork (RailsMcp::UsageReportJob).
+      # `rails new` writes config/recurring.yml with a production section.
+      def schedule_usage_report
+        recurring = "config/recurring.yml"
+        return unless destination_exist?(recurring)
+        return if File.read(File.join(destination_root, recurring)).include?("RailsMcp::UsageReportJob")
+
+        inject_into_file recurring, <<~YAML.indent(2), after: /^production:\n/
+          rails_mcp_usage_report:
+            class: RailsMcp::UsageReportJob
+            schedule: every day at 2:30am
+        YAML
       end
 
       # Hosts deploy to Heroku with one Postgres database (DATABASE_URL).

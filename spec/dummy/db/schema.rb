@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_10_04_100000) do
+ActiveRecord::Schema[8.1].define(version: 2026_11_07_100000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -39,6 +39,22 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_04_100000) do
     t.index ["user_id", "external_id"], name: "index_connections_on_user_id_and_external_id", unique: true
     t.index ["user_id", "type"], name: "index_connections_on_user_id_and_type"
     t.index ["user_id"], name: "index_connections_on_user_id"
+  end
+
+  create_table "mcp_tool_calls", force: :cascade do |t|
+    t.bigint "user_id", null: false
+    t.bigint "account_id"
+    t.string "tool_name", null: false
+    t.boolean "read_only", default: false, null: false
+    t.string "outcome", null: false
+    t.string "error_class"
+    t.integer "duration_ms"
+    t.string "client_name"
+    t.datetime "created_at", null: false
+    t.index ["account_id"], name: "index_mcp_tool_calls_on_account_id"
+    t.index ["created_at"], name: "index_mcp_tool_calls_on_created_at"
+    t.index ["user_id", "created_at"], name: "index_mcp_tool_calls_on_user_id_and_created_at"
+    t.index ["user_id"], name: "index_mcp_tool_calls_on_user_id"
   end
 
   create_table "oauth_access_grants", force: :cascade do |t|
@@ -99,6 +115,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_04_100000) do
   end
 
   add_foreign_key "connections", "users"
+  add_foreign_key "mcp_tool_calls", "accounts", on_delete: :nullify
+  add_foreign_key "mcp_tool_calls", "users", on_delete: :cascade
   add_foreign_key "oauth_access_grants", "oauth_applications", column: "application_id"
   add_foreign_key "oauth_access_tokens", "oauth_applications", column: "application_id"
   add_foreign_key "users", "accounts"

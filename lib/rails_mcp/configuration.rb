@@ -7,7 +7,26 @@ module RailsMcp
                 :mailer_from, :suggested_account_name, :sign_in_path,
                 :trusted_redirect_hosts, :refresh_token_idle_days, :identity_status,
                 :allowed_redirect_hosts, :session_lifetime, :on_user_deactivated,
-                :mcp_max_body_bytes
+                :mcp_max_body_bytes, :record_tool_calls, :usage_reporter, :tool_call_retention
+
+    # Record every MCP tool call (RailsMcp::ToolCall): who, which tool, the
+    # outcome and how long it took, never arguments or results.
+    def record_tool_calls
+      defined?(@record_tool_calls) ? @record_tool_calls : true
+    end
+
+    # Called with no arguments by RailsMcp::UsageReportJob to send the daily
+    # tool-call counts to Groundwork. Hosts point it at their SSO controller:
+    #   c.usage_reporter = -> { GroundworkOauthController.report_usage }
+    # nil keeps the counts on this host only.
+    def usage_reporter
+      @usage_reporter
+    end
+
+    # How long RailsMcp::ToolCall rows are kept.
+    def tool_call_retention
+      @tool_call_retention || 90.days
+    end
 
     def server_name
       @server_name || Rails.application.class.module_parent_name.underscore
