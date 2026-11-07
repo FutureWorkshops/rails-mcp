@@ -242,10 +242,16 @@ RSpec.describe RailsMcp::Generators::InstallGenerator, type: :generator do
     end
   end
 
+  it "replaces the rails new favicons with the Groundwork ones" do
+    %w[public/icon.svg public/icon.png public/groundwork-icon-32.png public/groundwork-apple-touch-icon.png]
+      .each { |path| expect(File).to exist(File.join(destination_root, path)) }
+    expect_file "public/icon.svg", "#1F4BD8"
+  end
+
   it "creates the views" do
     %w[
       app/views/shared/_cowork_tokens.html.erb
-      app/views/shared/_fw_logo.html.erb
+      app/views/shared/_lockup.html.erb
       app/views/shared/_flash.html.erb
       app/views/layouts/application.html.erb
       app/views/sessions/new.html.erb
@@ -254,14 +260,17 @@ RSpec.describe RailsMcp::Generators::InstallGenerator, type: :generator do
       app/views/doorkeeper/authorizations/new.html.erb
     ].each { |path| expect_file(path) }
 
-    expect_file "app/views/layouts/application.html.erb", "Gmail MCP"
+    expect_file "app/views/layouts/application.html.erb", "Groundwork Gmail MCP", 'render "shared/lockup"'
+    expect_file "app/views/shared/_lockup.html.erb",      "Groundwork", "Gmail MCP"
+    expect_file "app/views/shared/_cowork_tokens.html.erb", "--cw-accent: #1f4bd8"
+    expect(File).not_to exist(File.join(destination_root, "app/views/shared/_fw_logo.html.erb"))
     expect_file "app/views/sessions/new.html.erb",        "Sign in with Groundwork",
                                                           "main_app.groundwork_connect_path"
     expect_file "app/views/connections/index.html.erb",   "Gmail Account",
                                                           "main_app.gmail_connect_path"
     expect_file "app/views/doorkeeper/authorizations/new.html.erb",
                 "Authorize <%= @pre_auth.client.name %>",
-                "Gmail MCP account"
+                "your connected Gmail accounts"
   end
 
   it "patches config/application.rb to add Rack::Attack middleware" do

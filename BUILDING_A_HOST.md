@@ -46,7 +46,7 @@ The generated app includes a `CLAUDE.md`, so every Claude Code session in it sta
 ```sh
 # In your fresh Rails app's Gemfile, pinned to the latest release tag
 # (https://github.com/FutureWorkshops/rails-mcp/releases):
-gem "rails_mcp", git: "https://github.com/FutureWorkshops/rails-mcp.git", tag: "v1.2.1"
+gem "rails_mcp", git: "https://github.com/FutureWorkshops/rails-mcp.git", tag: "v1.2.2"
 
 bundle install
 bin/rails generate rails_mcp:install Gmail
@@ -64,7 +64,7 @@ The argument is your provider's name. `Gmail`, `gmail`, `github_api`, `XeroPayro
 | Services | `app/services/<provider>_client_service.rb` (Faraday with timeouts + token refresh under `with_lock` + permanent-error handling + `ReconnectRequired` exception) |
 | MCP | `app/mcp/<provider>_tool.rb` (host tool base), `app/mcp/<provider>_api_error.rb`, `app/mcp/registry.rb` (empty `ALL_TOOLS`), `app/mcp/tools/.keep` |
 | Initializers | `rails_mcp.rb`, `doorkeeper.rb`, `rack_attack.rb`, `content_security_policy.rb`, `app_config.rb`, `zeitwerk.rb` (maps `app/mcp/*` → `Mcp::` namespace) |
-| Views | `layouts/application.html.erb`, `shared/_cowork_tokens.html.erb`, `_fw_logo.html.erb`, `_flash.html.erb`, `sessions/new`, `connections/index`, `tools/index`, `doorkeeper/authorizations/new` |
+| Views | `layouts/application.html.erb`, `shared/_cowork_tokens.html.erb` (Groundwork design tokens), `_lockup.html.erb`, `_flash.html.erb`, `sessions/new`, `connections/index`, `tools/index`, `doorkeeper/authorizations/new` |
 | Patches | `config/application.rb` (Rack::Attack middleware), `config/environments/production.rb` (`force_ssl` without `assume_ssl`, HSTS, `config.hosts`, mailer host) |
 | Database | production on the single Heroku `DATABASE_URL`: `database.yml`, `cache.yml`, `cable.yml` and `production.rb` lose the separate cache/queue/cable databases, and the Solid Cache, Queue and Cable tables become migrations in `db/migrate/` |
 | Specs | `.rspec`, `spec/spec_helper.rb`, `spec/rails_helper.rb` (WebMock, `spec/support`, time helpers), an RSpec step in `config/ci.rb`, a Postgres `test` job in `.github/workflows/ci.yml`, and test-only encryption keys in `config/environments/test.rb` so CI needs no master key |
