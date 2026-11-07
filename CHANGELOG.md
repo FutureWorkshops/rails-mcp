@@ -2,6 +2,24 @@
 
 All notable changes to the `rails_mcp` engine. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the engine uses [Semantic Versioning](https://semver.org): see README, **Versioning**. Hosts pin a release tag (`tag: "vX.Y.Z"`), never `branch: "main"`.
 
+## [Unreleased]
+
+Fixes to `rails_mcp:install` and `templates/new_host.rb` found building trading212-mcp-rails. The engine itself is unchanged; existing hosts need no change.
+
+### Fixed
+- The generator scaffolded sign-in through "Cowork Hub" at `https://hub.cowork.com`. It now generates `GroundworkOauthController`, `/groundwork/connect` and `/groundwork/callback`, and `AppConfig.groundwork_*` reading a `groundwork:` credentials block that defaults to `https://groundwork.fws.io`, matching the deployed hosts.
+- `Mcp::<Provider>ApiError` was defined inside `app/mcp/<provider>_tool.rb`, so Zeitwerk couldn't load it when the tool error handler named it first. It now has its own file, `app/mcp/<provider>_api_error.rb`.
+- Running the generator a second time added `doorkeeper`, `faraday`, `faraday-retry` and the `rspec-rails`/`webmock` group to the Gemfile again.
+- Production pointed at separate cache, queue and cable databases that Heroku doesn't provide. The generator now sets production to `DATABASE_URL`, removes the extra databases from `production.rb`, `cache.yml` and `cable.yml`, and adds the Solid Cache, Queue and Cable tables as migrations.
+- `rspec-rails` and `webmock` were added but RSpec was never set up. The generator now writes `.rspec` and the spec helpers (WebMock on, `spec/support` loaded), adds RSpec to `bin/ci` and a Postgres test job to GitHub Actions, and gives the test environment fixed encryption keys so CI runs without the master key.
+- The Rack::Attack patch opened the `Application` class body with a blank line, failing rubocop on a new host.
+- `AppConfig` raised `NoMethodError` at boot when the provider's credentials block was missing; it now uses `credentials.dig`.
+- Heroku built new hosts with its default Ruby: the template now adds `ruby file: ".ruby-version"` to the Gemfile.
+
+### Added
+- The generator adds Active Record encryption keys to the host's credentials when the master key is present.
+- `BUILDING_A_HOST.md` covers Groundwork client registration and hosts whose provider uses API keys instead of OAuth.
+
 ## [1.1.0] - 2026-11-07
 
 Backward compatible: hosts upgrade by bumping the tag, with no other changes.

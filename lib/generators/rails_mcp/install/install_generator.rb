@@ -57,10 +57,14 @@ module RailsMcp
 
       # ---------- generator steps (Thor calls each in order) ----------
 
+      # Skips gems the Gemfile already lists, so running the generator again
+      # (e.g. after a failed first run) doesn't add every line twice.
       def add_gems
-        gem "doorkeeper",       "~> 5.8"
-        gem "faraday",          "~> 2.9"
-        gem "faraday-retry"
+        gem "doorkeeper",       "~> 5.8" unless gem_listed?("doorkeeper")
+        gem "faraday",          "~> 2.9" unless gem_listed?("faraday")
+        gem "faraday-retry"              unless gem_listed?("faraday-retry")
+
+        return if gem_listed?("rspec-rails")
 
         gem_group :development, :test do
           gem "rspec-rails", "~> 8.0"
@@ -99,9 +103,9 @@ module RailsMcp
                  "app/controllers/#{provider_slug}_oauth_controller.rb"
       end
 
-      def copy_cowork_hub_controller
-        template "app/controllers/cowork_hub_oauth_controller.rb.tt",
-                 "app/controllers/cowork_hub_oauth_controller.rb"
+      def copy_groundwork_controller
+        template "app/controllers/groundwork_oauth_controller.rb.tt",
+                 "app/controllers/groundwork_oauth_controller.rb"
       end
 
       def copy_models
@@ -117,6 +121,9 @@ module RailsMcp
       def copy_mcp_layer
         template "app/mcp/provider_tool.rb.tt", "app/mcp/#{provider_slug}_tool.rb"
         template "app/mcp/registry.rb.tt",      "app/mcp/registry.rb"
+        # One class per file: Zeitwerk can't autoload the error class from
+        # the tool base's file, and the tool error handler names it first.
+        template "app/mcp/provider_api_error.rb.tt", "app/mcp/#{provider_slug}_api_error.rb"
         create_file "app/mcp/tools/.keep", ""
       end
 
@@ -151,10 +158,10 @@ module RailsMcp
         return unless File.exist?(File.join(destination_root, application_path))
 
         inject_into_class application_path, "Application", <<~RUBY.indent(4)
-
           # Rate limiting via Rack::Attack (engine ships RailsMcp::RackAttackDefaults).
           require "rack/attack"
           config.middleware.use Rack::Attack
+
         RUBY
       end
 
@@ -163,7 +170,6 @@ module RailsMcp
         return unless File.exist?(File.join(destination_root, prod_path))
 
         block = <<~RUBY.indent(2)
-
           # --- rails_mcp:install additions ---
 
           # No config.assume_ssl: Heroku's router sets X-Forwarded-Proto, so
@@ -191,9 +197,90 @@ module RailsMcp
           config.host_authorization = { exclude: ->(request) { request.path == "/up" } }
 
           # --- end rails_mcp:install additions ---
+
         RUBY
 
         inject_into_file prod_path, block, after: "Rails.application.configure do\n"
+      end
+
+      # Hosts deploy to Heroku with one Postgres database (DATABASE_URL).
+      # `rails new` sets production up with separate cache, queue and cable
+      # databases, which Heroku doesn't provide, so point everything at the
+      # primary database and create the Solid tables there by migration.
+      def configure_single_database
+        database_yml = "config/database.yml"
+        if destination_exist?(database_yml)
+          gsub_file database_yml, /^production:.*\z/m, <<~YAML
+            production:
+              <<: *default
+              url: <%= ENV["DATABASE_URL"] %>
+          YAML
+        end
+
+        gsub_file_if_exists "config/environments/production.rb", /^\s*config\.solid_queue\.connects_to = .*\n/, ""
+        gsub_file_if_exists "config/cache.yml", /^  database: cache\n/, ""
+        gsub_file_if_exists "config/cable.yml", /^  connects_to:\n    database:\n      writing: cable\n/, ""
+
+        %w[cache queue cable].each { |name| remove_file "db/#{name}_schema.rb" }
+        %w[
+          20260523200001_create_solid_cache_tables.rb
+          20260523200002_create_solid_queue_tables.rb
+          20260523200003_create_solid_cable_tables.rb
+        ].each { |migration| copy_file "db/migrate/#{migration}", "db/migrate/#{migration}" }
+      end
+
+      # RSpec with WebMock and spec/support loaded, run by bin/ci and by
+      # GitHub Actions. Tools are tested against stubbed APIs, never live.
+      def set_up_specs
+        copy_file "rspec_options",          ".rspec",                skip: true
+        copy_file "spec/spec_helper.rb",    "spec/spec_helper.rb",   skip: true
+        copy_file "spec/rails_helper.rb",   "spec/rails_helper.rb",  skip: true
+        create_file "spec/support/.keep", "", skip: true
+
+        if destination_exist?("config/ci.rb") && !destination_read("config/ci.rb").include?("rspec")
+          inject_into_file "config/ci.rb", <<~RUBY.indent(2), before: /^  step "Security: Gem audit"/
+            step "Tests: RSpec", "bin/rails db:test:prepare && bundle exec rspec"
+
+          RUBY
+        end
+
+        workflow = ".github/workflows/ci.yml"
+        if destination_exist?(workflow) && !destination_read(workflow).match?(/^  test:$/)
+          append_to_file workflow, "\n" + File.read(File.join(self.class.source_root, "github/ci_test_job.yml"))
+        end
+
+        # Specs and CI run without the master key, so the test environment
+        # gets fixed, throwaway Active Record encryption keys.
+        test_rb = "config/environments/test.rb"
+        if destination_exist?(test_rb) && !destination_read(test_rb).include?("active_record.encryption")
+          inject_into_file test_rb, <<~RUBY.indent(2), after: "Rails.application.configure do\n"
+            # Fixed, test-only Active Record encryption keys, so specs and CI run
+            # without the master key. Real keys live in the credentials file.
+            config.active_record.encryption.primary_key = "test-primary-key-not-a-secret-0000"
+            config.active_record.encryption.deterministic_key = "test-deterministic-key-not-a-secret"
+            config.active_record.encryption.key_derivation_salt = "test-key-derivation-salt-not-a-secret"
+
+          RUBY
+        end
+      end
+
+      # The engine encrypts stored provider tokens, so production needs
+      # Active Record encryption keys. Adds fresh ones to the host's
+      # credentials (never printed) when the master key is present and the
+      # generator is running inside that host.
+      def add_encryption_keys
+        return unless defined?(Rails.application) && Rails.application
+        return unless File.expand_path(destination_root) == File.expand_path(Rails.root.to_s)
+
+        credentials = Rails.application.credentials
+        return say_status(:skip, "no master key: run bin/rails db:encryption:init and add the keys to credentials", :yellow) if credentials.key.nil?
+
+        content = credentials.read
+        return if content.include?("active_record_encryption:")
+
+        credentials.write(content.rstrip + "\n\nactive_record_encryption:\n" +
+          %w[primary_key deterministic_key key_derivation_salt].map { |k| "  #{k}: #{SecureRandom.alphanumeric(32)}\n" }.join)
+        say_status :credentials, "added active_record_encryption keys", :green
       end
 
       def show_next_steps
@@ -215,7 +302,9 @@ module RailsMcp
 
             3. bin/rails credentials:edit
                Add a `#{provider_slug}:` block with client_id / client_secret /
-               redirect_uri / contact_email.
+               redirect_uri / contact_email, and a `groundwork:` block with the
+               client_id / client_secret of this host's OAuth client in
+               Groundwork (redirect URI https://<APP_HOST>/groundwork/callback).
 
             4. Write your tools under app/mcp/tools/ and list them in
                app/mcp/registry.rb.
@@ -236,6 +325,25 @@ module RailsMcp
                Heroku deploy.
 
         NEXT
+      end
+
+      private
+
+      def gem_listed?(name)
+        gemfile = File.join(destination_root, "Gemfile")
+        File.exist?(gemfile) && File.read(gemfile).match?(/^\s*gem\s+["']#{Regexp.escape(name)}["']/)
+      end
+
+      def destination_exist?(path)
+        File.exist?(File.join(destination_root, path))
+      end
+
+      def destination_read(path)
+        File.read(File.join(destination_root, path))
+      end
+
+      def gsub_file_if_exists(path, pattern, replacement)
+        gsub_file(path, pattern, replacement) if destination_exist?(path)
       end
     end
   end

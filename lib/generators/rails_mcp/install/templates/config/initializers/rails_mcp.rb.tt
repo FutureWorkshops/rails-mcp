@@ -17,10 +17,10 @@ RailsMcp.configure do |c|
   # stale class references in the engine registry.
   c.tools = -> { Mcp::Registry::ALL_TOOLS }
 
-  # Unauthenticated visitors sign in via Cowork Hub (SSO). The provider's
+  # Unauthenticated visitors sign in via Groundwork (SSO). The provider's
   # OAuth controller is only used to attach per-user provider connections
   # once a user is signed in.
-  c.sign_in_path = ->(_request) { "/cowork_hub/connect" }
+  c.sign_in_path = ->(_request) { "/groundwork/connect" }
 
   # Refresh-token policy: tokens unused for 30 days are refused, and each
   # refresh (and each consent screen, and each sign-in) asks the identity
@@ -29,14 +29,14 @@ RailsMcp.configure do |c|
   # local role and account; if the identity provider can't be asked, the
   # request is refused for now and reported.
   c.refresh_token_idle_days = 30
-  c.identity_status = ->(user) { CoworkHubOauthController.identity_status(user) }
+  c.identity_status = ->(user) { GroundworkOauthController.identity_status(user) }
 
   # When a leaver is detected, delete the upstream <%= provider_human %> tokens
   # they connected, so nothing of theirs can be used again.
   c.on_user_deactivated = ->(user) { user.connections.destroy_all }
 
   # Browser sessions last at most this long before the person signs in
-  # through Cowork Hub again (the engine default is 12 hours).
+  # through Groundwork again (the engine default is 12 hours).
   # c.session_lifetime = 12.hours
 
   # Self-registered OAuth clients may only send codes to Claude's own

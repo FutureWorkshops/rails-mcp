@@ -38,6 +38,10 @@ provider = ENV["PROVIDER"].presence ||
   ask("Provider name (the API this server wraps)?", default: default_provider).presence ||
   default_provider
 
+# Heroku picks the Ruby version from the lockfile. Without a ruby line it
+# builds with its own default rather than the app's .ruby-version.
+inject_into_file "Gemfile", %(ruby file: ".ruby-version"\n), after: /\Asource .*\n/
+
 if ENV["RAILS_MCP_PATH"].present?
   engine = File.expand_path(ENV["RAILS_MCP_PATH"])
   gem "rails_mcp", path: engine

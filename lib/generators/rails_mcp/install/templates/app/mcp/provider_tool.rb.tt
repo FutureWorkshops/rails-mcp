@@ -63,25 +63,4 @@ module Mcp
       raise Mcp::<%= provider_const %>ApiError.new(response.status, response.body, path)
     end
   end
-
-  class <%= provider_const %>ApiError < StandardError
-    attr_reader :status, :body, :path
-
-    def initialize(status, body, path)
-      @status = status
-      @body   = body
-      @path   = path
-      super("<%= provider_human %> API error (HTTP #{status}) at #{path}: #{summarize(body)}")
-    end
-
-    private
-
-    def summarize(body)
-      case body
-      when Hash   then (body["error"] || body["message"] || body).to_s[0, 500]
-      when String then body[0, 500]
-      else body.inspect[0, 500]
-      end
-    end
-  end
 end

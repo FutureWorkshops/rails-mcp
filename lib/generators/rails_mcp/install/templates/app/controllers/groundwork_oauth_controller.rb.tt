@@ -1,0 +1,26 @@
+# Identity controller: signs visitors in by doing an OAuth-client
+# round-trip against Groundwork (groundwork.fws.io, the FW-AIHub-Rails app).
+# The whole MCP host family uses Groundwork as its SSO IdP; the heavy
+# lifting lives in RailsMcp::OauthClientController in the engine. This
+# subclass only needs to supply the upstream URLs + credentials accessors.
+#
+# Add a `groundwork:` block to credentials with `client_id`,
+# `client_secret`, and optionally `base_url` and `redirect_uri` before
+# trying to sign in.
+class GroundworkOauthController < RailsMcp::OauthClientController
+  def self.authorize_url = "#{AppConfig.groundwork_base_url}/oauth/authorize"
+  def self.token_url     = "#{AppConfig.groundwork_base_url}/oauth/token"
+  def self.userinfo_url  = "#{AppConfig.groundwork_base_url}/oauth/userinfo"
+
+  def self.client_id      = AppConfig.groundwork_client_id
+  def self.client_secret  = AppConfig.groundwork_client_secret
+  def self.redirect_uri   = AppConfig.groundwork_redirect_uri
+
+  def self.state_session_key = :groundwork_oauth_state
+
+  # Standing check (still active? which organisations, with which role?)
+  # used on every MCP token refresh, at the consent screen and at sign-in,
+  # so a leaver loses access, and a demotion takes effect, within the access
+  # token lifetime.
+  def self.user_status_url = "#{AppConfig.groundwork_base_url}/oauth/user_status"
+end
