@@ -3,23 +3,23 @@
 # the redirect URI in production.
 module AppConfig
   def self.<%= provider_slug %>_client_id
-    Rails.application.credentials.<%= provider_slug %>[:client_id]
+    Rails.application.credentials.dig(:<%= provider_slug %>, :client_id)
   end
 
   def self.<%= provider_slug %>_client_secret
-    Rails.application.credentials.<%= provider_slug %>[:client_secret]
+    Rails.application.credentials.dig(:<%= provider_slug %>, :client_secret)
   end
 
   def self.<%= provider_slug %>_redirect_uri
     if ENV["APP_HOST"].present?
       "https://#{ENV['APP_HOST']}<%= provider_callback_path %>"
     else
-      Rails.application.credentials.<%= provider_slug %>[:redirect_uri]
+      Rails.application.credentials.dig(:<%= provider_slug %>, :redirect_uri)
     end
   end
 
   def self.<%= provider_slug %>_user_agent
-    contact = Rails.application.credentials.<%= provider_slug %>[:contact_email].presence || "support@example.com"
+    contact = Rails.application.credentials.dig(:<%= provider_slug %>, :contact_email).presence || "support@example.com"
     "<%= provider_slug %>-mcp-rails (#{contact})"
   end
 
@@ -34,23 +34,23 @@ module AppConfig
     nil
   end
 
-  # ---- Cowork Hub (identity / SSO) -----------------------------------------
+  # ---- Groundwork (identity / SSO) -----------------------------------------
 
-  def self.cowork_hub_base_url
-    Rails.application.credentials.dig(:cowork_hub, :base_url).presence ||
-      "https://hub.cowork.com"
+  def self.groundwork_base_url
+    Rails.application.credentials.dig(:groundwork, :base_url).presence ||
+      "https://groundwork.fws.io"
   end
 
-  def self.cowork_hub_client_id
-    Rails.application.credentials.dig(:cowork_hub, :client_id)
+  def self.groundwork_client_id
+    Rails.application.credentials.dig(:groundwork, :client_id)
   end
 
-  def self.cowork_hub_client_secret
-    Rails.application.credentials.dig(:cowork_hub, :client_secret)
+  def self.groundwork_client_secret
+    Rails.application.credentials.dig(:groundwork, :client_secret)
   end
 
-  def self.cowork_hub_redirect_uri
-    Rails.application.credentials.dig(:cowork_hub, :redirect_uri).presence ||
-      ("https://#{app_host}/cowork_hub/callback" if app_host.present?)
+  def self.groundwork_redirect_uri
+    Rails.application.credentials.dig(:groundwork, :redirect_uri).presence ||
+      ("https://#{app_host}/groundwork/callback" if app_host.present?)
   end
 end

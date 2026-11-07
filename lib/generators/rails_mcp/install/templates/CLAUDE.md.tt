@@ -2,7 +2,7 @@
 
 A Model Context Protocol (MCP) server that exposes <%= provider_human %> to Claude and other MCP clients. It is a Rails host app built on Future Workshops' `rails_mcp` engine (https://github.com/FutureWorkshops/rails-mcp).
 
-The engine owns the MCP endpoint (`POST /mcp`), the OAuth provider (Doorkeeper, dynamic client registration, discovery documents), users, accounts, connections, and sign-in via Cowork Hub / Groundwork. This app owns the <%= provider_human %> OAuth connection, the API client, and the tools.
+The engine owns the MCP endpoint (`POST /mcp`), the OAuth provider (Doorkeeper, dynamic client registration, discovery documents), users, accounts, connections, and sign-in via Groundwork. This app owns the <%= provider_human %> OAuth connection, the API client, and the tools.
 
 Before changing anything structural, read the engine's `BUILDING_A_HOST.md` and the README section **Security responsibilities of the host**. Both are in the engine repo, or locally at `$(bundle show rails_mcp)`.
 
@@ -15,7 +15,7 @@ Before changing anything structural, read the engine's `BUILDING_A_HOST.md` and 
 | Host tool base class | `app/mcp/<%= provider_slug %>_tool.rb` (API helpers, connection lookup, `<%= provider_const %>ApiError`) |
 | API client | `app/services/<%= provider_slug %>_client_service.rb` (Faraday, timeouts, token refresh under `with_lock`) |
 | <%= provider_human %> OAuth (connecting an account) | `app/controllers/<%= provider_slug %>_oauth_controller.rb` |
-| Sign-in (identity) | `app/controllers/cowork_hub_oauth_controller.rb`, a thin subclass of the engine's `RailsMcp::OauthClientController` |
+| Sign-in (identity) | `app/controllers/groundwork_oauth_controller.rb`, a thin subclass of the engine's `RailsMcp::OauthClientController` |
 | Engine configuration | `config/initializers/rails_mcp.rb` |
 | Credentials accessors | `config/initializers/app_config.rb`, reading the `<%= provider_slug %>:` block from `bin/rails credentials:edit` |
 

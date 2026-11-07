@@ -30,9 +30,38 @@ RSpec.describe RailsMcp::Generators::InstallGenerator, type: :generator do
     File.write(File.join(destination_root, "config", "environments", "production.rb"), <<~RUBY)
       Rails.application.configure do
         config.cache_classes = true
+        config.active_job.queue_adapter = :solid_queue
+        config.solid_queue.connects_to = { database: { writing: :queue } }
       end
     RUBY
+    File.write(File.join(destination_root, "config", "environments", "test.rb"), "Rails.application.configure do\nend\n")
     File.write(File.join(destination_root, "Gemfile"), %(source "https://rubygems.org"\n))
+
+    # The multi-database production setup `rails new -d=postgresql` writes.
+    File.write(File.join(destination_root, "config", "database.yml"), <<~YAML)
+      default: &default
+        adapter: postgresql
+      development:
+        <<: *default
+        database: dummy_development
+      production:
+        primary: &primary_production
+          <<: *default
+          database: dummy_production
+        cache:
+          <<: *primary_production
+          database: dummy_production_cache
+          migrations_paths: db/cache_migrate
+    YAML
+    File.write(File.join(destination_root, "config", "cache.yml"), "default: &default\n  store_options: {}\n\nproduction:\n  database: cache\n  <<: *default\n")
+    File.write(File.join(destination_root, "config", "cable.yml"),
+               "production:\n  adapter: solid_cable\n  connects_to:\n    database:\n      writing: cable\n  polling_interval: 0.1.seconds\n")
+    File.write(File.join(destination_root, "config", "ci.rb"),
+               %(CI.run do\n  step "Style: Ruby", "bin/rubocop"\n\n  step "Security: Gem audit", "bin/bundler-audit"\nend\n))
+    FileUtils.mkdir_p(File.join(destination_root, ".github", "workflows"))
+    File.write(File.join(destination_root, ".github", "workflows", "ci.yml"), "name: CI\n\njobs:\n  lint:\n    runs-on: ubuntu-latest\n")
+    FileUtils.mkdir_p(File.join(destination_root, "db"))
+    File.write(File.join(destination_root, "db", "queue_schema.rb"), "# queue schema\n")
 
     run_generator [ "Gmail" ]
   end
@@ -76,8 +105,8 @@ RSpec.describe RailsMcp::Generators::InstallGenerator, type: :generator do
       "use_doorkeeper",
       'to: "gmail_oauth#connect"',
       'as: :gmail_connect',
-      'to: "cowork_hub_oauth#connect"',
-      'as: :cowork_hub_connect'
+      'to: "groundwork_oauth#connect"',
+      'as: :groundwork_connect'
     # Critical gotcha: use_doorkeeper must NOT be inside the engine mount.
     expect(body.index("use_doorkeeper")).to be > body.index("mount RailsMcp::Engine")
     expect_ruby_parses "config/routes.rb"
@@ -111,7 +140,7 @@ RSpec.describe RailsMcp::Generators::InstallGenerator, type: :generator do
       "USERINFO_URL",
       "upsert_connection",
       "session[:gmail_oauth_state]"
-    # Identity is owned by CoworkHubOauthController. The provider controller
+    # Identity is owned by GroundworkOauthController. The provider controller
     # must NOT create users or rotate sessions.
     expect(body).not_to include("reset_session")
     expect(body).not_to include("session[:user_id] = user.id")
@@ -119,15 +148,16 @@ RSpec.describe RailsMcp::Generators::InstallGenerator, type: :generator do
     expect_ruby_parses "app/controllers/gmail_oauth_controller.rb"
   end
 
-  it "creates the Cowork Hub SSO controller as a thin subclass of the engine base" do
-    body = expect_file "app/controllers/cowork_hub_oauth_controller.rb",
-      "class CoworkHubOauthController < RailsMcp::OauthClientController",
-      "AppConfig.cowork_hub_base_url",
-      "AppConfig.cowork_hub_client_id",
-      "AppConfig.cowork_hub_client_secret",
-      "AppConfig.cowork_hub_redirect_uri",
-      ":cowork_hub_oauth_state"
-    expect_ruby_parses "app/controllers/cowork_hub_oauth_controller.rb"
+  it "creates the Groundwork SSO controller as a thin subclass of the engine base" do
+    expect_file "app/controllers/groundwork_oauth_controller.rb",
+      "class GroundworkOauthController < RailsMcp::OauthClientController",
+      "AppConfig.groundwork_base_url",
+      "AppConfig.groundwork_client_id",
+      "AppConfig.groundwork_client_secret",
+      "AppConfig.groundwork_redirect_uri",
+      ":groundwork_oauth_state"
+    expect_ruby_parses "app/controllers/groundwork_oauth_controller.rb"
+    expect(File.exist?(File.join(dest, "app/controllers/cowork_hub_oauth_controller.rb"))).to be(false)
   end
 
   it "creates the connection STI subclass" do
@@ -150,11 +180,15 @@ RSpec.describe RailsMcp::Generators::InstallGenerator, type: :generator do
   end
 
   it "creates the host tool base class + registry + tools dir" do
-    expect_file "app/mcp/gmail_tool.rb",
+    tool = expect_file "app/mcp/gmail_tool.rb",
       "class GmailTool < RailsMcp::BaseTool",
-      "GmailApiError",
+      "Mcp::GmailApiError.new",
       "raise_for_status"
     expect_ruby_parses "app/mcp/gmail_tool.rb"
+    # Zeitwerk loads Mcp::GmailApiError from its own file, not the tool's.
+    expect(tool).not_to include("class GmailApiError")
+    expect_file "app/mcp/gmail_api_error.rb", "module Mcp", "class GmailApiError < StandardError"
+    expect_ruby_parses "app/mcp/gmail_api_error.rb"
 
     expect_file "app/mcp/registry.rb", "ALL_TOOLS"
     expect_ruby_parses "app/mcp/registry.rb"
@@ -166,8 +200,8 @@ RSpec.describe RailsMcp::Generators::InstallGenerator, type: :generator do
     {
       "config/initializers/rails_mcp.rb"               => [ "RailsMcp.configure", 'c.server_name    = "gmail-mcp-rails"',
                                                             'c.display_name   = "Gmail MCP"', "Mcp::Registry::ALL_TOOLS",
-                                                            'c.sign_in_path = ->(_request) { "/cowork_hub/connect" }',
-                                                            "c.identity_status = ->(user) { CoworkHubOauthController.identity_status(user) }",
+                                                            'c.sign_in_path = ->(_request) { "/groundwork/connect" }',
+                                                            "c.identity_status = ->(user) { GroundworkOauthController.identity_status(user) }",
                                                             "c.on_user_deactivated = ->(user) { user.connections.destroy_all }" ],
       "config/initializers/doorkeeper.rb"              => [ "Doorkeeper.configure",
                                                             "resource_owner_authenticator { RailsMcp::Authentication.resource_owner(self) }",
@@ -183,8 +217,10 @@ RSpec.describe RailsMcp::Generators::InstallGenerator, type: :generator do
       "config/initializers/app_config.rb"              => [ "module AppConfig",
                                                             "def self.gmail_client_id",
                                                             "def self.gmail_redirect_uri",
-                                                            "def self.cowork_hub_client_id",
-                                                            "def self.cowork_hub_redirect_uri" ],
+                                                            "credentials.dig(:gmail, :client_id)",
+                                                            "def self.groundwork_client_id",
+                                                            "def self.groundwork_redirect_uri",
+                                                            '"https://groundwork.fws.io"' ],
       "config/initializers/zeitwerk.rb"                => [ "module Mcp",
                                                             'mcp_dir = Rails.root.join("app/mcp")',
                                                             "Rails.autoloaders.main.push_dir(mcp_dir, namespace: Mcp)" ]
@@ -207,8 +243,8 @@ RSpec.describe RailsMcp::Generators::InstallGenerator, type: :generator do
     ].each { |path| expect_file(path) }
 
     expect_file "app/views/layouts/application.html.erb", "Gmail MCP"
-    expect_file "app/views/sessions/new.html.erb",        "Sign in with Cowork Hub",
-                                                          "main_app.cowork_hub_connect_path"
+    expect_file "app/views/sessions/new.html.erb",        "Sign in with Groundwork",
+                                                          "main_app.groundwork_connect_path"
     expect_file "app/views/connections/index.html.erb",   "Gmail Account",
                                                           "main_app.gmail_connect_path"
     expect_file "app/views/doorkeeper/authorizations/new.html.erb",
@@ -217,9 +253,48 @@ RSpec.describe RailsMcp::Generators::InstallGenerator, type: :generator do
   end
 
   it "patches config/application.rb to add Rack::Attack middleware" do
-    expect_file "config/application.rb",
+    body = expect_file "config/application.rb",
       'require "rack/attack"',
       "config.middleware.use Rack::Attack"
+    # No blank line opening the class body (rubocop's Layout/EmptyLinesAroundClassBody).
+    expect(body).not_to include("class Application < Rails::Application\n\n")
+  end
+
+  it "points production at the one Heroku database and creates the Solid tables by migration" do
+    database = expect_file "config/database.yml", "production:\n  <<: *default\n  url: <%= ENV[\"DATABASE_URL\"] %>"
+    expect(database).not_to include("dummy_production_cache")
+    expect(database).to include("dummy_development")
+    expect(File.read(File.join(dest, "config/environments/production.rb"))).not_to include("solid_queue.connects_to")
+    expect(File.read(File.join(dest, "config/cache.yml"))).not_to include("database: cache")
+    expect(File.read(File.join(dest, "config/cable.yml"))).not_to include("connects_to")
+    expect(File.exist?(File.join(dest, "db/queue_schema.rb"))).to be(false)
+    %w[cache queue cable].each_with_index do |name, i|
+      path = "db/migrate/2026052320000#{i + 1}_create_solid_#{name}_tables.rb"
+      expect_file path, "class CreateSolid#{name.capitalize}Tables"
+      expect_ruby_parses path
+    end
+  end
+
+  it "sets up RSpec with WebMock, run by bin/ci and GitHub Actions without the master key" do
+    expect_file ".rspec", "--require spec_helper"
+    expect_file "spec/rails_helper.rb", "require 'webmock/rspec'", "WebMock.disable_net_connect!",
+                "Rails.root.glob('spec/support/**/*.rb')", "ActiveSupport::Testing::TimeHelpers"
+    expect_file "config/ci.rb", %(step "Tests: RSpec", "bin/rails db:test:prepare && bundle exec rspec")
+    ci = File.read(File.join(dest, "config/ci.rb"))
+    expect(ci.index("Tests: RSpec")).to be < ci.index("Security: Gem audit")
+    expect_file ".github/workflows/ci.yml", "  test:", "image: postgres", "bundle exec rspec"
+    expect_file "config/environments/test.rb", "config.active_record.encryption.primary_key"
+  end
+
+  it "doesn't add gems twice when run again" do
+    run_generator [ "Gmail" ]
+
+    gemfile = File.read(File.join(dest, "Gemfile"))
+    %w[doorkeeper faraday faraday-retry rspec-rails webmock].each do |name|
+      expect(gemfile.scan(/^\s*gem "#{name}"/).size).to eq(1), "expected #{name} once in the Gemfile"
+    end
+    expect(File.read(File.join(dest, "config/ci.rb")).scan("Tests: RSpec").size).to eq(1)
+    expect(File.read(File.join(dest, ".github/workflows/ci.yml")).scan(/^  test:$/).size).to eq(1)
   end
 
   it "patches config/environments/production.rb with HSTS, hosts, mailer" do
@@ -230,6 +305,7 @@ RSpec.describe RailsMcp::Generators::InstallGenerator, type: :generator do
       'ENV.fetch("APP_HOST")',
       "config.host_authorization"
     expect(File.read(File.join(destination_root, "config/environments/production.rb"))).not_to include('/.*\\.herokuapp')
+    expect(File.read(File.join(destination_root, "config/environments/production.rb"))).not_to include("configure do\n\n")
     expect(File.read(File.join(destination_root, "config/initializers/doorkeeper.rb"))).not_to include("fallback: :plain")
   end
 

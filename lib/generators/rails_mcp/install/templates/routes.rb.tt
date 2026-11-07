@@ -19,9 +19,9 @@ Rails.application.routes.draw do
   get "connections", to: "connections#index", as: :connections
   get "tools",       to: "tools#index",       as: :tools
 
-  # Identity / SSO via Cowork Hub.
-  get "cowork_hub/connect",  to: "cowork_hub_oauth#connect",  as: :cowork_hub_connect
-  get "cowork_hub/callback", to: "cowork_hub_oauth#callback", as: :cowork_hub_callback
+  # Identity / SSO via Groundwork.
+  get "groundwork/connect",  to: "groundwork_oauth#connect",  as: :groundwork_connect
+  get "groundwork/callback", to: "groundwork_oauth#callback", as: :groundwork_callback
 
   # <%= provider_human %> OAuth (per-user provider connection — requires a signed-in session).
   get    "<%= provider_slug.tr('_', '-') %>/connect",                       to: "<%= provider_slug %>_oauth#connect",    as: :<%= provider_slug %>_connect

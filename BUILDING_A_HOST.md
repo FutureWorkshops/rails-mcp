@@ -59,13 +59,16 @@ The argument is your provider's name. `Gmail`, `gmail`, `github_api`, `XeroPayro
 | Layer | Files |
 |---|---|
 | Routes | `config/routes.rb` (mount engine + `use_doorkeeper` outside the engine namespace + identity-provider routes) |
-| Controllers | `application_controller.rb` (includes engine concerns), `sessions_controller.rb`, `connections_controller.rb`, `tools_controller.rb`, `<provider>_oauth_controller.rb` |
+| Controllers | `application_controller.rb` (includes engine concerns), `sessions_controller.rb`, `connections_controller.rb`, `tools_controller.rb`, `<provider>_oauth_controller.rb`, `groundwork_oauth_controller.rb` (sign-in) |
 | Models | `app/models/<provider>_connection.rb` (STI subclass of `RailsMcp::Connection`) |
 | Services | `app/services/<provider>_client_service.rb` (Faraday with timeouts + token refresh under `with_lock` + permanent-error handling + `ReconnectRequired` exception) |
-| MCP | `app/mcp/<provider>_tool.rb` (host tool base), `app/mcp/registry.rb` (empty `ALL_TOOLS`), `app/mcp/tools/.keep` |
+| MCP | `app/mcp/<provider>_tool.rb` (host tool base), `app/mcp/<provider>_api_error.rb`, `app/mcp/registry.rb` (empty `ALL_TOOLS`), `app/mcp/tools/.keep` |
 | Initializers | `rails_mcp.rb`, `doorkeeper.rb`, `rack_attack.rb`, `content_security_policy.rb`, `app_config.rb`, `zeitwerk.rb` (maps `app/mcp/*` → `Mcp::` namespace) |
 | Views | `layouts/application.html.erb`, `shared/_cowork_tokens.html.erb`, `_fw_logo.html.erb`, `_flash.html.erb`, `sessions/new`, `connections/index`, `tools/index`, `doorkeeper/authorizations/new` |
 | Patches | `config/application.rb` (Rack::Attack middleware), `config/environments/production.rb` (`force_ssl` without `assume_ssl`, HSTS, `config.hosts`, mailer host) |
+| Database | production on the single Heroku `DATABASE_URL`: `database.yml`, `cache.yml`, `cable.yml` and `production.rb` lose the separate cache/queue/cable databases, and the Solid Cache, Queue and Cable tables become migrations in `db/migrate/` |
+| Specs | `.rspec`, `spec/spec_helper.rb`, `spec/rails_helper.rb` (WebMock, `spec/support`, time helpers), an RSpec step in `config/ci.rb`, a Postgres `test` job in `.github/workflows/ci.yml`, and test-only encryption keys in `config/environments/test.rb` so CI needs no master key |
+| Credentials | Active Record encryption keys, added to the host's credentials when the master key is present |
 | Procfile | `release: bin/rails db:migrate`, `web: bin/rails server -p ${PORT}` |
 | Claude Code | `CLAUDE.md`: layout, commands, tool conventions and the security rules for this host |
 | Gemfile | adds `doorkeeper`, `faraday`, `faraday-retry`, `rspec-rails`, `webmock` |
@@ -126,6 +129,19 @@ Add a `<provider>:` block keyed by the provider's underscored name (matches what
 ```
 
 Production overrides the redirect URI to `https://$APP_HOST/<provider>/callback` automatically.
+
+Sign-in goes through Groundwork. Register an OAuth client for the host in Groundwork with the redirect URI `https://$APP_HOST/groundwork/callback`, then add it:
+
+```yaml
+groundwork:
+  client_id:     "..."
+  client_secret: "..."
+  # base_url defaults to https://groundwork.fws.io
+```
+
+#### Providers without OAuth
+
+Some APIs authenticate with a key the user pastes in rather than an OAuth grant (Unleashed: API ID + key; Trading 212: API key + secret). For those, delete `<provider>_oauth_controller.rb` and its routes, and add a small controller and form on the connections page that verifies the key against the API, then stores it encrypted (`encrypts :api_key`) on the `<Provider>Connection`, using columns you add to `connections`. Build the client from the stored key instead of refreshing a token. `trading212-mcp-rails` (per-user keys) and `unleashed-mcp-rails` (per-account keys with roles) are worked examples.
 
 ### 4. Tools
 
@@ -300,6 +316,7 @@ Pick a name from a prefix; the engine sets the annotation hint that the MCP clie
 - **Faraday without timeouts** → a hung upstream pins a Puma worker until Heroku H12 fires at 30s. The generated client service has `OPEN_TIMEOUT`/`READ_TIMEOUT`/`WRITE_TIMEOUT`; don't remove them.
 - **Mailer host left at `localhost`** → `production.rb` is patched to `ENV.fetch("APP_HOST")`; without `APP_HOST` set on Heroku, boot fails loudly. Set the env var before the first deploy.
 - **Narrowing CSP `form-action` to `:self`** → the generated CSP has `policy.form_action :self, :https` because approving or denying on the consent screen submits a form that redirects to the MCP client's https callback. Drop `:https` and the browser blocks that redirect, so no client can finish connecting.
-- **Solid Cache / Queue / Cable** on a single `DATABASE_URL` → if you use any of them, generate their schemas via `bin/rails solid_cache:install` (and `solid_queue`, `solid_cable`) then convert the generated schemas into migrations under `db/migrate/` so they land in the primary DB on `release`. See `basecamp-mcp-rails/db/migrate/20260523200001_create_solid_cache_tables.rb` for an example.
+- **Solid Cache / Queue / Cable** on a single `DATABASE_URL` → the generator moves them onto the primary database and adds their tables as migrations. If you install them yourself on an older host, convert `db/*_schema.rb` into migrations under `db/migrate/` so they land in the primary DB on `release`, and remove `config.solid_queue.connects_to` and the `database:`/`connects_to:` lines from `cache.yml`/`cable.yml`.
+- **Heroku building with the wrong Ruby** → Heroku reads the Ruby version from `Gemfile.lock`, which only records one when the Gemfile has a `ruby` line. The template adds `ruby file: ".ruby-version"`; add it to older hosts.
 - **Re-running the generator on an existing project** offers Thor's standard overwrite prompts. Always review the diff (`git diff`) before accepting overwrites of files you've customised — particularly the OAuth controller and registry.
 - **Deleting `config/initializers/zeitwerk.rb`** → every request that resolves the tool list 500s with `uninitialized constant Mcp`. The host's `app/mcp/*` files use the `Mcp::` namespace but live in a `app/<root>/*` autoload root by default; the generated initializer remaps the directory so Zeitwerk loads `Mcp::Registry` from `app/mcp/registry.rb` correctly. Keep it.

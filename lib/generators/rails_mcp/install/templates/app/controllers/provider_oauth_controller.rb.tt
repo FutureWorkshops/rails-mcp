@@ -1,6 +1,6 @@
 # Per-user provider connection: attaches a <%= provider_human %> account
 # to the currently-signed-in user. Identity / sign-in is owned by
-# CoworkHubOauthController; visitors without a session are bounced there
+# GroundworkOauthController; visitors without a session are bounced there
 # first by `require_sign_in`.
 class <%= provider_const %>OauthController < ApplicationController
   before_action :require_sign_in
@@ -14,7 +14,7 @@ class <%= provider_const %>OauthController < ApplicationController
   TOKEN_URL     = "https://TODO/token".freeze
   USERINFO_URL  = "https://TODO/userinfo".freeze
 
-  # TODO: Provider scopes only — the host gets identity from Cowork Hub, so
+  # TODO: Provider scopes only — the host gets identity from Groundwork, so
   # `openid`/`profile`/`email` are NOT needed here unless the provider's
   # API specifically requires them.
   SCOPES = "TODO".freeze
