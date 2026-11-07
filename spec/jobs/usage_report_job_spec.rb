@@ -13,7 +13,7 @@ RSpec.describe RailsMcp::UsageReportJob do
     old = call_at(91.days.ago)
     recent = call_at(1.hour.ago)
 
-    described_class.perform_now
+    expect(described_class.perform_now).to eq(:sent)
 
     expect(sent).to eq([ :report ])
     expect(RailsMcp::ToolCall.pluck(:id)).to eq([ recent.id ])
@@ -25,13 +25,13 @@ RSpec.describe RailsMcp::UsageReportJob do
     call_at(91.days.ago)
     expect(Rails.error).to receive(:report).with(an_instance_of(RailsMcp::UsageReport::Failed), hash_including(handled: true))
 
-    described_class.perform_now
+    expect(described_class.perform_now).to eq(:failed)
 
     expect(RailsMcp::ToolCall.count).to eq(0)
   end
 
   it "only purges when no reporter is configured" do
     call_at(91.days.ago)
-    expect { described_class.perform_now }.to change(RailsMcp::ToolCall, :count).from(1).to(0)
+    expect { expect(described_class.perform_now).to eq(:skipped) }.to change(RailsMcp::ToolCall, :count).from(1).to(0)
   end
 end

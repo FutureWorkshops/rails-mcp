@@ -24,6 +24,7 @@ Before changing anything structural, read the engine's `BUILDING_A_HOST.md` and 
 - `bin/rails server`, then sign in at `http://localhost:3000` and connect a <%= provider_human %> account. Point an MCP client at `http://localhost:3000/mcp`.
 - `bundle exec rspec` runs the tests.
 - `bin/ci` must pass before every commit: specs, rubocop, brakeman, bundler-audit.
+- `bin/rails rails_mcp:daily` is the engine's daily housekeeping (usage report to Groundwork, old tool-call purge). Heroku Scheduler runs it at 02:30 UTC; `"$(bundle show rails_mcp)/script/heroku-schedule-daily" <app>` sets that up. `bin/rails rails_mcp:usage[7]` shows this host's tool calls.
 
 ## Writing tools
 

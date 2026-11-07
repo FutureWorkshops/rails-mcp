@@ -24,6 +24,18 @@ namespace :rails_mcp do
     end
   end
 
+  # The one command Heroku Scheduler runs, so new daily work joins here
+  # without anyone editing the Scheduler job. Exits non-zero when the report
+  # fails, which Scheduler's logs show; the purge has still run.
+  desc "The engine's daily housekeeping, for Heroku Scheduler: send the usage report to Groundwork and purge old tool calls"
+  task daily: :environment do
+    case RailsMcp::UsageReportJob.perform_now
+    when :sent then puts "Usage report sent."
+    when :skipped then warn "No usage_reporter configured, so no usage report was sent (see RailsMcp.config.usage_reporter)."
+    when :failed then abort "The usage report failed; it is reported through Rails.error and will be resent tomorrow."
+    end
+  end
+
   desc "Send the usage report to Groundwork now, as the daily RailsMcp::UsageReportJob does"
   task push_usage: :environment do
     reporter = RailsMcp.config.usage_reporter

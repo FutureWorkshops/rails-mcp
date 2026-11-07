@@ -18,7 +18,7 @@ To add the engine to an app you've already created, use the install generator di
 ```sh
 # In a fresh Rails app, after adding the engine to the Gemfile pinned to a
 # release tag (see Versioning):
-#   gem "rails_mcp", git: "https://github.com/FutureWorkshops/rails-mcp.git", tag: "v1.2.1"
+#   gem "rails_mcp", git: "https://github.com/FutureWorkshops/rails-mcp.git", tag: "v1.2.2"
 bundle install
 bin/rails generate rails_mcp:install <Provider>
 ```
@@ -49,7 +49,7 @@ Hosts pin the engine **by tag**, never by branch:
 
 ```ruby
 # Gemfile
-gem "rails_mcp", git: "https://github.com/FutureWorkshops/rails-mcp.git", tag: "v1.2.1"
+gem "rails_mcp", git: "https://github.com/FutureWorkshops/rails-mcp.git", tag: "v1.2.2"
 ```
 
 `branch: "main"` (or no ref at all) means whatever was last merged reaches production on the host's next `bundle update`, unreviewed by the host and with no record of which engine a deploy ran. A tag makes each engine upgrade a deliberate, reviewable Gemfile change in the host. To upgrade, read the CHANGELOG entries between your tag and the new one, follow any "Upgrading" steps, bump the tag and run `bundle update rails_mcp`.
@@ -60,7 +60,7 @@ Releasing: merge the release PR (it bumps `lib/rails_mcp/version.rb` and `RAILS_
 
 ```ruby
 # Gemfile (pin to a release tag, see Versioning)
-gem "rails_mcp", git: "https://github.com/FutureWorkshops/rails-mcp.git", tag: "v1.2.1"
+gem "rails_mcp", git: "https://github.com/FutureWorkshops/rails-mcp.git", tag: "v1.2.2"
 
 # config/routes.rb
 mount RailsMcp::Engine => "/"
@@ -152,7 +152,7 @@ Every `tools/call` for a known tool is recorded in `mcp_tool_calls` (`RailsMcp::
 
 **Never the arguments or the result.** Unknown tool names aren't recorded, since they are whatever the client sent. A failed write is reported through `Rails.error` and never fails the call. `config.record_tool_calls = false` switches recording off.
 
-`RailsMcp::UsageReportJob` runs daily (schedule it in `config/recurring.yml`; the generator does). It does two things:
+`RailsMcp::UsageReportJob` runs daily. It does two things:
 
 - Sends Groundwork the counts for today and the three days before. These go to `POST /oauth/mcp_usage` with the client's credentials, the same as the standing check, through `config.usage_reporter = -> { GroundworkOauthController.report_usage }`.
 - Deletes rows older than `config.tool_call_retention` (90 days).
@@ -160,6 +160,15 @@ Every `tools/call` for a known tool is recorded in `mcp_tool_calls` (`RailsMcp::
 People go as their Groundwork id and organisations as the mirrored Groundwork account id, never email. Groundwork replaces the days a report covers, so a resend never double counts and a missed run is caught up the next day. The figures appear on Groundwork's `/analytics/mcp`.
 
 `bin/rails rails_mcp:usage[7]` prints this host's counts. `bin/rails rails_mcp:push_usage` sends the report now.
+
+**Scheduling it.** Heroku hosts usually run no Solid Queue worker (no worker dyno, `SOLID_QUEUE_IN_PUMA` unset), and then nothing in `config/recurring.yml` ever runs. Use Heroku Scheduler, daily, with `bin/rails rails_mcp:daily`:
+
+```sh
+"$(bundle show rails_mcp)/script/heroku-schedule-daily" <app> --dry-run
+"$(bundle show rails_mcp)/script/heroku-schedule-daily" <app>
+```
+
+The script adds the Scheduler add-on if it's missing and a job at 02:30 UTC on a Basic dyno, and leaves an app that already has one alone. `rails_mcp:daily` is the engine's daily housekeeping, so later daily work joins it without the Scheduler job changing; it exits non-zero when the report fails. Hosts running Solid Queue get the same from the `recurring.yml` entry the generator writes. Without either, calls are recorded and purged locally but never reach Groundwork, and its `/analytics/mcp` shows the host as not reporting.
 
 ### The MCP endpoint
 
@@ -234,6 +243,7 @@ Required environment variables for a host using this engine on Heroku:
 - `APP_HOST` — public hostname (required by mailer + DNS rebinding protection; the host's `production.rb` calls `ENV.fetch("APP_HOST")` and will fail boot if missing)
 - `DATABASE_URL` — provided by the Heroku Postgres add-on
 - `SOLID_QUEUE_IN_PUMA=true` — run jobs inside the web dyno (or split out a worker dyno)
+- **Heroku Scheduler** running `bin/rails rails_mcp:daily` daily (`script/heroku-schedule-daily <app>`). Needed unless Solid Queue runs, since `config/recurring.yml` does nothing without a worker. See **Usage analytics**.
 - `SENTRY_DSN` (recommended) — if you wire up Sentry for error monitoring
 
 ## Why `use_doorkeeper` isn't inside the engine
