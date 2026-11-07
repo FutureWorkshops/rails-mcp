@@ -4,8 +4,8 @@ module RailsMcp
   # Dynamic Client Registration lets anyone register a client with any name, so
   # the client name alone ("Claude") proves nothing. The consent screen shows
   # where the authorization code will be sent and flags anything that isn't
-  # one of Claude's own callbacks, a plain-http loopback address (a native
-  # client on this machine), or an https host in
+  # a known connector's callback (Claude's or Grok's), a plain-http loopback
+  # address (a native client on this machine), or an https host in
   # RailsMcp.config.trusted_redirect_hosts as unverified.
   #
   # https://localhost is deliberately not trusted: a native client listens
@@ -20,7 +20,7 @@ module RailsMcp
     end
 
     def trusted?(redirect_uri)
-      return true if RedirectUris.first_party_callback?(redirect_uri)
+      return true if RedirectUris.connector_callback?(redirect_uri)
       return true if RedirectUris.loopback_redirect?(redirect_uri)
 
       uri = URI.parse(redirect_uri.to_s)

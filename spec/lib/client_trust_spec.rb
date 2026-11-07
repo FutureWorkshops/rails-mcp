@@ -8,6 +8,11 @@ RSpec.describe RailsMcp::ClientTrust do
     expect(described_class.trusted?("http://localhost:3000/cb")).to be(true)
   end
 
+  it "trusts Grok's exact connector callback, but nothing else on grok.com" do
+    expect(described_class.trusted?("https://grok.com/connectors-oauth-exchange-code/")).to be(true)
+    expect(described_class.trusted?("https://grok.com/other-path")).to be(false)
+  end
+
   it "does not trust look-alike or unknown hosts" do
     expect(described_class.trusted?("https://evil.example/cb")).to be(false)
     expect(described_class.trusted?("https://notclaude.ai/cb")).to be(false)

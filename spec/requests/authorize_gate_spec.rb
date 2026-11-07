@@ -43,14 +43,22 @@ RSpec.describe "Authorization endpoint checks", type: :request do
       expect(Doorkeeper::AccessGrant.count).to eq(0)
     end
 
-    it "lets the client through once its host is allowed (Grok, say)" do
-      grok = Doorkeeper::Application.create!(name: "Grok", redirect_uri: "https://grok.com/oauth/callback", scopes: "read write", confidential: false)
+    it "lets the client through once its host is allowed" do
+      connector = Doorkeeper::Application.create!(name: "Connector", redirect_uri: "https://connector.example/oauth/callback", scopes: "read write", confidential: false)
       sign_in_as(user)
 
-      authorize(grok)
+      authorize(connector)
       expect(response).to have_http_status(:bad_request)
 
-      RailsMcp.config.allowed_redirect_hosts = %w[grok.com]
+      RailsMcp.config.allowed_redirect_hosts = %w[connector.example]
+      authorize(connector)
+      expect(response).to have_http_status(:ok)
+    end
+
+    it "lets Grok through at its connector callback, with no host allowed" do
+      grok = Doorkeeper::Application.create!(name: "Grok", redirect_uri: "https://grok.com/connectors-oauth-exchange-code/", scopes: "read write", confidential: false)
+      sign_in_as(user)
+
       authorize(grok)
       expect(response).to have_http_status(:ok)
     end

@@ -123,6 +123,24 @@ RSpec.describe "Dynamic client registration (RFC 7591)", type: :request do
       expect(response).to have_http_status(:created)
     end
 
+    it "accepts Grok's connector callback, exactly as Grok registers it" do
+      post_register(client_name: "Grok", redirect_uris: [ "https://grok.com/connectors-oauth-exchange-code/" ])
+      expect(response).to have_http_status(:created)
+    end
+
+    it "refuses anything else on grok.com, which is matched by callback, not by host" do
+      [
+        "https://grok.com/other-path",
+        "http://grok.com/connectors-oauth-exchange-code/",
+        "https://evil.grok.com/connectors-oauth-exchange-code/",
+        "https://grok.com/connectors-oauth-exchange-code",
+        "https://grok.com:8443/connectors-oauth-exchange-code/"
+      ].each do |uri|
+        post_register(client_name: "Grok", redirect_uris: [ uri ])
+        expect(response).to have_http_status(:bad_request), uri
+      end
+    end
+
     it "accepts loopback on any port, including IPv6" do
       post_register(redirect_uris: [ "http://127.0.0.1:6274/oauth/callback", "http://[::1]:8080/cb" ])
       expect(response).to have_http_status(:created)
@@ -157,21 +175,21 @@ RSpec.describe "Dynamic client registration (RFC 7591)", type: :request do
     end
 
     it "accepts an https host the operator lists in OAUTH_DCR_ALLOWED_REDIRECT_HOSTS" do
-      ENV["OAUTH_DCR_ALLOWED_REDIRECT_HOSTS"] = " grok.com , connector.example "
-      post_register(client_name: "Grok", redirect_uris: [ "https://grok.com/oauth/callback" ])
+      ENV["OAUTH_DCR_ALLOWED_REDIRECT_HOSTS"] = " connector.example , other.example "
+      post_register(client_name: "Connector", redirect_uris: [ "https://connector.example/oauth/callback" ])
       expect(response).to have_http_status(:created)
 
-      post_register(redirect_uris: [ "http://grok.com/oauth/callback" ])
+      post_register(redirect_uris: [ "http://connector.example/oauth/callback" ])
       expect(response).to have_http_status(:bad_request)
 
-      post_register(redirect_uris: [ "https://evil.grok.com/oauth/callback" ])
+      post_register(redirect_uris: [ "https://evil.connector.example/oauth/callback" ])
       expect(response).to have_http_status(:bad_request)
     end
 
     it "lets config.allowed_redirect_hosts take the place of the environment variable" do
       ENV["OAUTH_DCR_ALLOWED_REDIRECT_HOSTS"] = "other.example"
-      RailsMcp.config.allowed_redirect_hosts = %w[Grok.com]
-      post_register(redirect_uris: [ "https://grok.com/oauth/callback" ])
+      RailsMcp.config.allowed_redirect_hosts = %w[Connector.example]
+      post_register(redirect_uris: [ "https://connector.example/oauth/callback" ])
       expect(response).to have_http_status(:created)
 
       post_register(redirect_uris: [ "https://other.example/cb" ])
