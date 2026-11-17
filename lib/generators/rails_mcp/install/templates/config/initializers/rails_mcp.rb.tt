@@ -53,7 +53,10 @@ RailsMcp.configure do |c|
 
 
   # Optional: map per-tool exceptions to user-facing strings. Returning nil
-  # falls through to the engine's "Error: <message>" default.
+  # falls through to the engine's "Error: <message>" default, and the engine
+  # reports that error through Rails.error (except ArgumentError). Errors
+  # mapped here aren't reported, so call Rails.error.report yourself for any
+  # you want to see in Sentry.
   c.tool_error_handler = ->(error, **) {
     case error
     when <%= provider_const %>ClientService::ReconnectRequired

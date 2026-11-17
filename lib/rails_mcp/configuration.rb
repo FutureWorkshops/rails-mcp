@@ -7,7 +7,16 @@ module RailsMcp
                 :mailer_from, :suggested_account_name, :sign_in_path,
                 :trusted_redirect_hosts, :refresh_token_idle_days, :identity_status,
                 :allowed_redirect_hosts, :session_lifetime, :on_user_deactivated,
-                :mcp_max_body_bytes, :record_tool_calls, :usage_reporter, :tool_call_retention
+                :mcp_max_body_bytes, :record_tool_calls, :usage_reporter, :tool_call_retention,
+                :report_tool_errors
+
+    # Report tool failures that tool_error_handler doesn't map (and that
+    # aren't ArgumentError) through Rails.error, so they reach the host's
+    # error reporter. The exception's message is sent, so a tool whose
+    # exceptions carry sensitive data should map them in the handler.
+    def report_tool_errors
+      defined?(@report_tool_errors) ? @report_tool_errors : true
+    end
 
     # Record every MCP tool call (RailsMcp::ToolCall): who, which tool, the
     # outcome and how long it took, never arguments or results.

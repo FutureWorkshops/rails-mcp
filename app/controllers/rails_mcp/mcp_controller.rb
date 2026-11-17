@@ -159,9 +159,11 @@ module RailsMcp
       json_success(id, { content: [ { type: "text", text: result.to_s } ], isError: false })
     rescue StandardError => e
       failure = e
-      text = host_error_text(e, tool_class) || default_error_text(e)
-      Rails.logger.error("MCP tool call failed: #{e.class}: #{e.message}\n#{e.backtrace&.first(5)&.join("\n")}") unless host_error_text(e, tool_class)
-      json_success(id, { content: [ { type: "text", text: text } ], isError: true })
+      # Called once: a handler may report the error itself, and calling it
+      # twice reported every handled error twice.
+      host_text = host_error_text(e, tool_class)
+      report_unexpected_error(e, tool_class) unless host_text
+      json_success(id, { content: [ { type: "text", text: host_text || default_error_text(e) } ], isError: true })
     ensure
       record_tool_call(tool_class, outcome, failure, started) if started
     end
@@ -207,6 +209,18 @@ module RailsMcp
     # is an internal failure whose message can expose implementation details.
     def default_error_text(error)
       error.is_a?(ArgumentError) ? "Error: #{error.message}" : "Error: the tool failed unexpectedly."
+    end
+
+    # A failure the host's handler didn't recognise. The call still answers
+    # with isError and HTTP 200, so no error reporter would otherwise see it
+    # and tool bugs only reached the logs. ArgumentError is the caller's bad
+    # input, not a bug, so it is logged but not reported. Only the exception
+    # and the tool's name are sent, never the arguments or the result.
+    def report_unexpected_error(error, tool_class)
+      Rails.logger.error("MCP tool call failed: #{error.class}: #{error.message}\n#{error.backtrace&.first(5)&.join("\n")}")
+      return if error.is_a?(ArgumentError) || !RailsMcp.config.report_tool_errors
+
+      Rails.error.report(error, handled: false, context: { rails_mcp: "tool call failed", tool: tool_class.tool_name })
     end
 
     def host_error_text(error, tool_class)
