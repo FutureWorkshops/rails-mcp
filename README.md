@@ -18,7 +18,7 @@ To add the engine to an app you've already created, use the install generator di
 ```sh
 # In a fresh Rails app, after adding the engine to the Gemfile pinned to a
 # release tag (see Versioning):
-#   gem "rails_mcp", git: "https://github.com/FutureWorkshops/rails-mcp.git", tag: "v1.3.0"
+#   gem "rails_mcp", git: "https://github.com/FutureWorkshops/rails-mcp.git", tag: "v1.4.0"
 bundle install
 bin/rails generate rails_mcp:install <Provider>
 ```
@@ -49,7 +49,7 @@ Hosts pin the engine **by tag**, never by branch:
 
 ```ruby
 # Gemfile
-gem "rails_mcp", git: "https://github.com/FutureWorkshops/rails-mcp.git", tag: "v1.3.0"
+gem "rails_mcp", git: "https://github.com/FutureWorkshops/rails-mcp.git", tag: "v1.4.0"
 ```
 
 `branch: "main"` (or no ref at all) means whatever was last merged reaches production on the host's next `bundle update`, unreviewed by the host and with no record of which engine a deploy ran. A tag makes each engine upgrade a deliberate, reviewable Gemfile change in the host. To upgrade, read the CHANGELOG entries between your tag and the new one, follow any "Upgrading" steps, bump the tag and run `bundle update rails_mcp`.
@@ -60,7 +60,7 @@ Releasing: merge the release PR (it bumps `lib/rails_mcp/version.rb` and `RAILS_
 
 ```ruby
 # Gemfile (pin to a release tag, see Versioning)
-gem "rails_mcp", git: "https://github.com/FutureWorkshops/rails-mcp.git", tag: "v1.3.0"
+gem "rails_mcp", git: "https://github.com/FutureWorkshops/rails-mcp.git", tag: "v1.4.0"
 
 # config/routes.rb
 mount RailsMcp::Engine => "/"
@@ -212,6 +212,8 @@ Defaults (override by passing kwargs to `apply!`):
 - `POST /mcp` — 120/min per token + 300/min per IP (fallback)
 
 **Error monitoring:** the engine doesn't ship an error reporter. Wire one up in the host as part of project setup — [Sentry](https://docs.sentry.io/platforms/ruby/guides/rails/) is the recommended choice. Add `gem "sentry-rails"` to the host Gemfile and configure it in an initializer. Be mindful of what reaches the reporter: scrub bearer tokens and other secrets (Sentry's `config.before_send` / `send_default_pii = false`) so request data and breadcrumbs don't leak credentials.
+
+Tool failures reach the reporter through `Rails.error`: a tool that raises still answers the client with `isError: true` and HTTP 200, so the engine reports any failure that `tool_error_handler` doesn't map (returns nil for), with the tool's name and never its arguments or result. `ArgumentError`, which tools use for the caller's bad input, is only logged. Errors the handler maps aren't reported by the engine, so a handler that wants one in Sentry reports it itself, which is also how to keep a sensitive exception message out: report a scrubbed stand-in. `config.report_tool_errors = false` turns the engine's reporting off.
 
 ### Host-only — the engine can't do these for you
 

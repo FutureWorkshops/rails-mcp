@@ -2,6 +2,21 @@
 
 All notable changes to the `rails_mcp` engine. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the engine uses [Semantic Versioning](https://semver.org): see README, **Versioning**. Hosts pin a release tag (`tag: "vX.Y.Z"`), never `branch: "main"`.
 
+## [1.4.0] - 2026-11-17
+
+Backward compatible: hosts upgrade by bumping the tag. Hosts with an error reporter (Sentry) will start receiving tool failures they weren't seeing before.
+
+### Fixed
+- Tool failures now reach the host's error reporter. A tool that raised answered with `isError: true` and HTTP 200, so nothing was reported and the failure only reached the logs: in xero-mcp-rails a tool failed on every call for a week without an alert. Any failure `tool_error_handler` doesn't map (returns nil for) is now sent to `Rails.error.report` with `handled: false` and the tool's name. Arguments and results are never sent. `ArgumentError` is still only logged, since tools use it for the caller's bad input.
+- `tool_error_handler` is called once per failure. It was called twice, so a handler that reports errors itself (as xero-mcp-rails does for Xero API errors) reported each one twice.
+
+### Added
+- `config.report_tool_errors` (default `true`) switches the new reporting off.
+
+### Upgrading
+
+The exception's message is reported. If a tool's exceptions can carry sensitive data in their message (an API error that echoes a response body, for example), map them in `tool_error_handler`, reporting a scrubbed stand-in yourself if you want them in Sentry; mapped errors aren't reported by the engine.
+
 ## [1.3.0] - 2026-11-07
 
 Backward compatible: hosts upgrade by bumping the tag, with no other changes.

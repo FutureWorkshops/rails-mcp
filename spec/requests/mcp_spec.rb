@@ -100,6 +100,52 @@ RSpec.describe "MCP JSON-RPC dispatcher", type: :request do
       expect(content["text"]).to eq("Error: the tool failed unexpectedly.")
     end
 
+    describe "error reporting" do
+      def explode
+        mcp_call({ jsonrpc: "2.0", id: 8, method: "tools/call", params: { name: "explode" } }, token: token)
+      end
+
+      before { allow(Rails.error).to receive(:report) }
+
+      it "reports an unhandled tool failure through Rails.error with the tool name" do
+        explode
+
+        expect(Rails.error).to have_received(:report).once.with(
+          an_instance_of(ExplodingTool::CustomError),
+          handled: false, context: { rails_mcp: "tool call failed", tool: "explode" }
+        )
+        expect(response).to have_http_status(:ok)
+        expect(response.parsed_body["result"]["isError"]).to be true
+      end
+
+      it "doesn't report an error the host handler mapped, and calls the handler once" do
+        calls = 0
+        RailsMcp.config.tool_error_handler = ->(_error, **) { calls += 1; "handled" }
+
+        explode
+
+        expect(calls).to eq(1)
+        expect(Rails.error).not_to have_received(:report)
+      end
+
+      it "doesn't report ArgumentError, which is the caller's bad input" do
+        allow_any_instance_of(ExplodingTool).to receive(:call).and_raise(ArgumentError, "bad date")
+
+        explode
+
+        expect(Rails.error).not_to have_received(:report)
+        expect(response.parsed_body["result"]["content"].first["text"]).to eq("Error: bad date")
+      end
+
+      it "doesn't report when report_tool_errors is off" do
+        RailsMcp.config.report_tool_errors = false
+
+        explode
+
+        expect(Rails.error).not_to have_received(:report)
+      end
+    end
+
     it "dispatches a batched JSON-RPC array" do
       mcp_call([
         { jsonrpc: "2.0", id: 10, method: "initialize" },
